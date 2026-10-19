@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chargeback UAT Status</title>
+<meta name="robots" content="noindex, nofollow">
+<style>
+:root{
+  --bg:#f6f7f9;--panel:#fff;--ink:#1d2330;--muted:#5d6676;--line:#e3e6eb;--chip:#eef1f5;
+  --pass:#1f8a4c;--fail:#c43d3d;--block:#c27a12;--prog:#2f6fd6;--none:#8a93a3;--accent:#24356b;
+}
+@media (prefers-color-scheme: dark){
+  :root{--bg:#12151b;--panel:#1a1f27;--ink:#e6e9ef;--muted:#9aa3b2;--line:#2a313c;--chip:#232a35;
+  --pass:#3fb873;--fail:#e06464;--block:#e0a03a;--prog:#5d93ef;--none:#7d8696;--accent:#a9b8ec;}
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{padding:20px 16px 8px;max-width:1200px;margin:0 auto;display:flex;flex-wrap:wrap;gap:8px 24px;align-items:baseline;justify-content:space-between}
+h1{font-size:20px;margin:0;color:var(--accent);letter-spacing:.2px}
+.sub{color:var(--muted);font-size:13px}
+.live{display:inline-flex;align-items:center;gap:6px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--pass);box-shadow:0 0 0 0 var(--pass);animation:p 2s infinite}
+@keyframes p{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--pass) 60%,transparent)}100%{box-shadow:0 0 0 8px transparent}}
+main{max-width:1200px;margin:0 auto;padding:0 16px 40px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:12px 0 16px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.kpi b{display:block;font-size:24px;font-variant-numeric:tabular-nums}
+.kpi span{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.5px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:16px}
+.card h2{font-size:15px;margin:0 0 10px}
+.bars{display:grid;gap:7px}
+.bar{display:grid;grid-template-columns:minmax(120px,260px) 1fr 96px;gap:10px;align-items:center;font-size:13px}
+.track{display:flex;height:14px;border-radius:4px;overflow:hidden;background:var(--chip)}
+.track i{display:block;height:100%}
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:10px;font-size:12px;color:var(--muted)}
+.legend em{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.tabs{display:flex;gap:4px;margin-bottom:10px;flex-wrap:wrap}
+.tabs button{border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:7px 14px;border-radius:8px;cursor:pointer;font:inherit}
+.tabs button[aria-selected=true]{background:var(--accent);color:var(--panel);border-color:var(--accent)}
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.filters input,.filters select{font:inherit;padding:6px 9px;border-radius:7px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+.filters input{flex:1;min-width:180px}
+table{width:100%;border-collapse:collapse}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+tr.row{cursor:pointer}
+tr.row:hover td{background:var(--chip)}
+td.id{white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:600}
+.pill{display:inline-block;padding:1px 8px;border-radius:99px;font-size:12px;font-weight:600;white-space:nowrap;border:1px solid currentColor}
+.s-pass{color:var(--pass)}.s-fail{color:var(--fail)}.s-block{color:var(--block)}.s-prog{color:var(--prog)}.s-none{color:var(--none)}
+.detail td{background:var(--chip);font-size:13px}
+.detail h4{margin:8px 0 4px;font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)}
+.detail ol,.detail ul{margin:0 0 4px 18px;padding:0}
+.detail p{margin:0 0 6px;white-space:pre-wrap;overflow-wrap:anywhere}
+.muted{color:var(--muted)}
+.feed{list-style:none;margin:0;padding:0}
+.feed li{display:grid;grid-template-columns:120px 1fr;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+.feed time{color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums}
+.feed .t{font-weight:600}
+.feed .x{color:var(--muted);font-size:13px;overflow-wrap:anywhere}
+.scroll{overflow-x:auto}
+@media (max-width:640px){
+  .bar{grid-template-columns:1fr 60px}.bar .lbl{grid-column:1/-1}
+  .feed li{grid-template-columns:1fr}
+  .hide-s{display:none}
+}
+footer{max-width:1200px;margin:0 auto;padding:0 16px 30px;color:var(--muted);font-size:12px}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Rockefeller Chargeback · UAT status</h1>
+    <div class="sub">Helix DEV unit testing — test cases, results and defects</div>
+  </div>
+  <div class="sub live"><span class="dot" aria-hidden="true"></span><span id="stamp">Loading…</span></div>
+</header>
+<main>
+  <section class="kpis" id="kpis"></section>
+  <section class="card">
+    <h2>Progress by area</h2>
+    <div class="bars" id="bars"></div>
+    <div class="legend">
+      <span><em style="background:var(--pass)"></em>Passed</span><span><em style="background:var(--fail)"></em>Failed</span>
+      <span><em style="background:var(--block)"></em>Blocked</span><span><em style="background:var(--prog)"></em>In progress</span>
+      <span><em style="background:var(--none)"></em>Not run</span>
+    </div>
+  </section>
+  <div class="tabs" role="tablist">
+    <button role="tab" data-tab="cases" aria-selected="true">Test cases</button>
+    <button role="tab" data-tab="defects" aria-selected="false">Defects</button>
+    <button role="tab" data-tab="activity" aria-selected="false">Activity</button>
+  </div>
+  <section class="card" id="tab-cases">
+    <div class="filters">
+      <input id="q" type="search" placeholder="Search ID, title, result…">
+      <select id="fArea"><option value="">All areas</option></select>
+      <select id="fStatus"><option value="">All statuses</option></select>
+    </div>
+    <div class="scroll"><table><thead><tr><th>ID</th><th>Test case</th><th>Status</th><th class="hide-s">Defect</th><th class="hide-s">Updated</th></tr></thead><tbody id="cases"></tbody></table></div>
+  </section>
+  <section class="card" id="tab-defects" hidden>
+    <div class="filters">
+      <input id="dq" type="search" placeholder="Search defects…">
+      <select id="dOpen"><option value="open">Open / in progress</option><option value="">All</option><option value="closed">Closed</option></select>
+    </div>
+    <div class="scroll"><table><thead><tr><th>Ref</th><th>Title</th><th>Status</th><th class="hide-s">Severity</th><th class="hide-s">Owner</th></tr></thead><tbody id="defects"></tbody></table></div>
+  </section>
+  <section class="card" id="tab-activity" hidden>
+    <ul class="feed" id="feed"></ul>
+  </section>
+</main>
+<footer>Updates are published from the testing session as results change; this page checks for new data every minute.</footer>
+<script>
+const S={data:null,open:new Set(),tab:'cases'};
+const cls=s=>{s=(s||'').toLowerCase();if(s.startsWith('pass')||s==='closed'||s.includes('verified'))return's-pass';if(s.startsWith('fail'))return's-fail';if(s.startsWith('block')||s.includes('parked')||s.includes('decision'))return's-block';if(s.includes('progress')||s.includes('retest')||s.includes('built')||s.includes('fix'))return's-prog';return's-none'};
+const bucket=s=>{s=(s||'').toLowerCase();if(s.startsWith('pass'))return'Passed';if(s.startsWith('fail'))return'Failed';if(s.startsWith('block'))return'Blocked';if(s.includes('progress')||s.includes('retest'))return'In progress';return'Not run'};
+const esc=t=>String(t??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=ms=>ms?new Date(ms).toLocaleString([], {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'';
+const isClosed=d=>/^closed/i.test(d.status);
+function render(){
+  const d=S.data;if(!d)return;
+  document.getElementById('stamp').textContent='Data as of '+fmt(d.generated);
+  const B={Passed:0,Failed:0,Blocked:0,'In progress':0,'Not run':0};d.cases.forEach(c=>B[bucket(c.status)]++);
+  const openD=d.defects.filter(x=>!isClosed(x)).length,tot=d.cases.length;
+  document.getElementById('kpis').innerHTML=[['Test cases',tot],['Passed',B.Passed,'s-pass'],['Failed',B.Failed,'s-fail'],['Blocked',B.Blocked,'s-block'],['In progress',B['In progress'],'s-prog'],['Not run',B['Not run'],'s-none'],['Pass rate',Math.round(100*B.Passed/tot)+'%'],['Open defects',openD,'s-fail']]
+    .map(([l,v,c])=>`<div class="kpi"><b class="${c||''}">${v}</b><span>${l}</span></div>`).join('');
+  const col={Passed:'var(--pass)',Failed:'var(--fail)',Blocked:'var(--block)','In progress':'var(--prog)','Not run':'var(--none)'};
+  document.getElementById('bars').innerHTML=Object.entries(d.areas).sort().map(([a,n])=>{
+    const cs=d.cases.filter(c=>c.area===a);if(!cs.length)return'';const k={};cs.forEach(c=>{const b=bucket(c.status);k[b]=(k[b]||0)+1});
+    const seg=Object.keys(col).filter(b=>k[b]).map(b=>`<i title="${b}: ${k[b]}" style="width:${100*k[b]/cs.length}%;background:${col[b]}"></i>`).join('');
+    return `<div class="bar"><span class="lbl">${a}. ${esc(n)}</span><span class="track">${seg}</span><span class="muted">${k.Passed||0}/${cs.length} passed</span></div>`}).join('');
+  const fa=document.getElementById('fArea'),fs=document.getElementById('fStatus');
+  if(fa.options.length===1){Object.entries(d.areas).sort().forEach(([a,n])=>fa.add(new Option(a+'. '+n,a)));Object.keys(B).forEach(b=>fs.add(new Option(b,b)))}
+  const q=document.getElementById('q').value.toLowerCase(),A=fa.value,St=fs.value;
+  const rows=d.cases.filter(c=>(!A||c.area===A)&&(!St||bucket(c.status)===St)&&(!q||(c.id+' '+c.title+' '+c.actual+' '+c.defect).toLowerCase().includes(q)));
+  document.getElementById('cases').innerHTML=rows.map(c=>{
+    const o=S.open.has(c.id);
+    let h=`<tr class="row" data-k="${c.id}"><td class="id">${c.id}</td><td>${esc(c.title)}</td><td><span class="pill ${cls(c.status)}">${esc(c.status)}</span></td><td class="hide-s muted">${esc(c.defect)}</td><td class="hide-s muted">${fmt(c.updated)}</td></tr>`;
+    if(o)h+=`<tr class="detail"><td colspan="5">
+      <h4>Pre-conditions / data</h4><p>${esc(c.pre)}${c.data?'\n'+esc(c.data):''}</p>
+      <h4>Steps</h4><ol>${c.steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol>
+      <h4>Expected</h4><ul>${c.exp.map(s=>`<li>${esc(s)}</li>`).join('')}</ul>
+      <h4>Actual result</h4><p>${esc(c.actual)||'<span class="muted">Not run yet</span>'}</p>
+      ${c.evidence?`<h4>Evidence</h4><p>${esc(c.evidence)}</p>`:''}
+      <p class="muted">${esc(c.req||'')} · P${c.pri??''} · ${esc(c.type||'')}${c.date?' · tested '+esc(c.date):''}</p></td></tr>`;
+    return h}).join('')||'<tr><td colspan="5" class="muted">No matching test cases.</td></tr>';
+  const dq=document.getElementById('dq').value.toLowerCase(),dov=document.getElementById('dOpen').value;
+  const ds=d.defects.filter(x=>(!dov||(dov==='open'?!isClosed(x):isClosed(x)))&&(!dq||(x.ref+' '+x.title+' '+x.desc+' '+x.case).toLowerCase().includes(dq)));
+  document.getElementById('defects').innerHTML=ds.map(x=>{
+    let h=`<tr class="row" data-k="${x.ref}"><td class="id">${esc(x.ref)}</td><td>${esc(x.title)}<div class="muted">${esc(x.case)}</div></td><td><span class="pill ${cls(x.status)}">${esc(x.status)}</span></td><td class="hide-s">${esc(x.sev)}</td><td class="hide-s muted">${esc(x.owner)}</td></tr>`;
+    if(S.open.has(x.ref))h+=`<tr class="detail"><td colspan="5"><h4>Description</h4><p>${esc(x.desc)}</p><h4>Work / resolution</h4><p>${esc(x.work)}</p>${x.target?`<h4>Fix</h4><p>${esc(x.target)}</p>`:''}<p class="muted">Updated ${fmt(x.updated)}</p></td></tr>`;
+    return h}).join('')||'<tr><td colspan="5" class="muted">No matching defects.</td></tr>';
+  const ev=[...d.cases.filter(c=>c.updated).map(c=>({t:c.updated,h:`${c.id} · ${c.title}`,s:c.status,x:c.actual})),
+            ...d.defects.filter(x=>x.updated).map(x=>({t:x.updated,h:`${x.ref} · ${x.title}`,s:x.status,x:x.work||x.desc}))]
+            .sort((a,b)=>b.t-a.t).slice(0,80);
+  document.getElementById('feed').innerHTML=ev.map(e=>`<li><time>${fmt(e.t)}</time><div><div class="t">${esc(e.h)} <span class="pill ${cls(e.s)}">${esc(e.s)}</span></div><div class="x">${esc((e.x||'').slice(0,320))}${(e.x||'').length>320?'…':''}</div></div></li>`).join('');
+}
+async function load(){
+  try{const r=await fetch('data.json?t='+Date.now(),{cache:'no-store'});if(r.ok){S.data=await r.json();render()}}catch(e){document.getElementById('stamp').textContent='Offline — retrying'}
+}
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-tab]');if(t){S.tab=t.dataset.tab;document.querySelectorAll('[data-tab]').forEach(b=>b.setAttribute('aria-selected',b===t));['cases','defects','activity'].forEach(n=>document.getElementById('tab-'+n).hidden=n!==S.tab);return}
+  const r=e.target.closest('tr.row');if(r){const k=r.dataset.k;S.open.has(k)?S.open.delete(k):S.open.add(k);render()}
+});
+['q','fArea','fStatus','dq','dOpen'].forEach(id=>document.getElementById(id).addEventListener('input',render));
+load();setInterval(load,60000);
+</script>
+</body>
+</html>
