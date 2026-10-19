@@ -1,5 +1,5 @@
 {
-"generated": 1792434688099,
+"generated": 1792438106559,
 "areas": {
 "A": "Catalog items and ticket setup",
 "B": "PTAEO defaulting and validation",
@@ -3494,14 +3494,14 @@
 "ref": "DEF-047",
 "case": "UT-G-08",
 "sev": "Low",
-"owner": "N. Foy",
-"status": "Open - needs decision",
+"owner": "Claude",
+"status": "Fixed - retest",
 "title": "Export shows 'Batch generated' note even when the export is stopped",
 "desc": "When Generate is stopped by a ledger-pair error, the bar shows 'Batch OE1792280346 generated: 136 lines...' plus the stop error. Nothing is actually created (transaction rolled back), but the note is misleading. NN:CGB:OE:RUN_080_UpdateSummary sends the note at order 80 in phase 1; the pair check errors come later (phase 2 of the line writes).",
-"work": "Parked for N. Foy: options are (a) accept - the error wins and nothing is saved, (b) move the note to a later point / Active Link after save, (c) reword it to 'Generating batch...'. Tell Claude which and it will build the .def.",
-"target": "",
+"work": "Decision 10/19 (N. Foy): reword. RUN_080 note now: 'Generating batch ... If no error message follows, the batch is saved ...'. Retest UT-G-08: the stopped export no longer claims the batch was generated.",
+"target": "Rockefeller_CGB_DefectFixes_1_Filters_101926.def",
 "created": 1792281000000,
-"updated": 1792281000000
+"updated": 1792436500000
 },
 {
 "ref": "DEF-048",
@@ -3559,14 +3559,14 @@
 "ref": "DEF-052",
 "case": "UT-J-02",
 "sev": "Medium",
-"owner": "N. Foy",
-"status": "Open - needs decision",
+"owner": "Claude",
+"status": "Fixed - retest",
 "title": "AuditLog does not record old values per field",
 "desc": "Master-data changes write one AuditLog row with Field Changed = 'Record Modified', empty Old Value / New Value, and the changed fields with their new values only in Activity Description / Change Details (e.g. AUD000000001950). The test expects one row per changed field with field, old value and new value.",
-"work": "Parked for a decision: accept the summary format (update the test) or extend the audit filters to write per-field rows with DB.<field> as the old value. Claude can build the filters for Account, Department, Service, Subscription and VM Pricing once decided.",
-"target": "",
+"work": "Decision 10/19: per-field rows. 56 filters NN:CGB:AUD:<Form>_1nn_<Field>`! (Account 10, Department 10, Service 14, Subscription 14, VM Pricing 8) write one AuditLog row per changed field with Field Changed, Old Value (DB lookup), New Value; Subscription Status rows include the reason. The five 030 'Record Modified' summary filters are disabled (as the Ledger already is). Retest UT-J-02.",
+"target": "Rockefeller_CGB_DefectFixes_1_Filters_101926.def",
 "created": 1792284000000,
-"updated": 1792284000000
+"updated": 1792436500000
 },
 {
 "ref": "DEF-053",
@@ -3585,14 +3585,14 @@
 "ref": "DEF-054",
 "case": "UT-J-01",
 "sev": "High",
-"owner": "N. Foy",
-"status": "Open - needs decision",
+"owner": "Claude",
+"status": "Fixed - retest",
 "title": "Chargeback permission model does not match the roles",
 "desc": "Intended (N. Foy): Chargeback Master and Chargeback Config see and use the Admin Console. Found in the 10/14 export: (1) NN:CGB:AdminConsole is visible to 800003 Master and 800004 Config, but all 148 CGB:Admin:* active links (counters, warnings, module switching, Modify/View Details, buttons) are permitted to 800004 Config only, so a Master-only user would see a console that does nothing. (2) On the data forms, Master and Config have view only (\\1); change (\\2) goes to 800001 Chargeback User and/or 800002 Chargeback Approver, plus group 7 (Assignee Group, row level). Account: change only via group 7; Ledger: change only 800001 User; Service: 800001, 800002; BillingRun / OracleExport / Subscription / Department: 800001, 800002, 7. So a Master or Config user can't change data on the forms directly, and console Modify actions may fail for them, while a Chargeback User can edit ledger, export and billing-run records.",
-"work": "Parked for a decision on the role matrix (who views / changes each form and runs the console). Permissions are user-owned. If wanted, Claude can re-issue the 148 console active links with permission 800003 + 800004 (or 800201 Chargeback Access) as a .def.",
-"target": "",
+"work": "Decision 10/19: Master + Config. The 149 Admin Console active links permitted to 800004 only are re-issued with 800003 + 800004 (built from the 10/14 AdminConsole checkpoint plus later DEFs). Data-form permissions remain N. Foy's. Retest: a Master-only user can use the console buttons and module switching.",
+"target": "Rockefeller_CGB_DefectFixes_2_ActiveLinks_101926.def",
 "created": 1792289000000,
-"updated": 1792289000000
+"updated": 1792436500000
 },
 {
 "ref": "DEF-055",
@@ -3637,14 +3637,14 @@
 "ref": "DEF-058",
 "case": "UT-I-04",
 "sev": "Medium",
-"owner": "N. Foy",
-"status": "Open - needs decision",
+"owner": "Claude",
+"status": "Fixed - retest",
 "title": "Direct edit of a VM pricing rate re-prices VM subscriptions with the old rate",
 "desc": "Changing Base VM Current Rate 260 -> 250 directly (22:32) triggered NN:CGB:VMP:RateChange_100_RecalcVMSubscriptions, but the VM subscriptions were priced from 260 (SUB000000000207 = 260.00). The recalculation is pushed from inside the component save and reads the component's stored (old) rate.",
-"work": "Promotions are covered by DEF-057 v2 (Staging_115). For direct edits: decide whether direct rate edits are allowed at all (rates should change through the FY rate file), or Claude reworks the VM rate filters to take the new rate from the triggering save.",
-"target": "",
+"work": "Decision 10/19: rework to use the new rate. Filter NN:CGB:VMP:RateChange_100 disabled (it pushed inside the component save, so subscriptions read the old rate). New active link NN:CGB:VMP:AL_100_RecalcVMSubsAfterEdit (After Modify) re-prices all VM Hosting subscriptions after the save is committed, like the promotion fix (DEF-057 v3). Note: rate changes made outside the UI (API/import) no longer re-price automatically. Retest UT-I-04 direct edit.",
+"target": "Rockefeller_CGB_DefectFixes_1_Filters + 2_ActiveLinks_101926.def",
 "created": 1792299000000,
-"updated": 1792299000000
+"updated": 1792436500000
 },
 {
 "ref": "DEF-059",
@@ -3677,13 +3677,13 @@
 "case": "UT-K-04",
 "sev": "High",
 "owner": "Claude",
-"status": "Redesign built - import pending",
+"status": "In test",
 "title": "Chargeback imports: move from RequestBridge to new NN:CGB:ChargebackStaging_Interface",
 "desc": "Found 10/19. Each import button (CGB:Admin:IMP_PAO/RStuff/RUFS/VMware/Wireless_*) counts waiting staging rows, pushes z1D_Action to process them, shows a Note-type message, then opens NN:RequestBridge_Interface. Problems: (1) the open-window step has no qualification and a nonexistent view ('Admin View'; the form's view is 'Default Administrator View'), so it opens in empty Search mode. (2) The 970 loaded VMware rows have Application Type 'VMWare Import' but the workflow looks for 'VM Import', so the count is 0 and nothing is processed. (3) The Atrium Integrator column layouts don't match the workflow. VMware row: F01=06/25/2026, F02=AAARAD, F03=VirtualMachine-vm-814487, F04=TRUE, F05=2, F10=4, F11=100, F12=250; the workflow expects F01=VM Name, F02=CPU, F03=RAM, F04=Storage, F05=Backup, F10=OS, F11=Legacy ID. Wireless row: F01=phone, F02=123.65, F03=att, F04=file path; the workflow expects F03=Amount and F04=period YYYY-MM, so pressing Wireless would charge 'att' as the amount. (4) The count/result messages are Notes (status bar only). PAO: only 3 rows, all already Completed/Error. RUFS: no rows loaded.",
-"work": "10/19 N. Foy: RequestBridge is shared and purges after a few days, so build a Chargeback staging form. Decisions: escalation sweep; named columns; Validate + Post per import; all 5 imports. Built: new form (74 fields, Status New/Validated/Posted/Error/Cancelled); 5 sweep escalations (every 15 min) that copy RB rows and mark them Completed; 105 filters (the IMP logic ported and split into VALIDATE and POST, plus guards); console ALs (each import button validates, shows counts, opens the list; Step 4 posts RUFS/VM; staging buttons Validate/Post); old RB console ALs and PAO/RUFS RunPromote escalations disabled. Static checks pass (125 quals, 237 inner quals, all field references). An independent review found 10 issues, all fixed (empty actions, RUFS duplicate re-check on post, PAO account re-lookup, re-post guard, Wireless CI link on validate, error handlers, PAO Target ID, sweep DL_Status). Guide: project doc claude/Chargeback_Import_Staging_Guide_101926.md. PAO/RS/RUFS column layout is assumed equal to the existing filters (no Atrium Integrator rows to confirm).",
+"work": "Imported 10/19. Test 14:00-14:05 as uat_billadmin. UT-L-01 form OK. UT-L-02 old path off: console Wireless button runs the staging chain and leaves RequestBridge untouched. UT-L-03 sweep OK: 160 Wireless and 243 VMware rows staged (the other 727 VMware rows move on the next runs); source RB rows Completed/Promoted with 'Moved to ... STG...'; Received date copies the RB Create Date (1/29/1970, set that way by Atrium Integrator). UT-L-05 mapping OK (Wireless phone/amount/carrier; VMware AAARAD 2/4/100/TRUE/Machine ID). UT-L-06 validate OK: 160 Wireless rows Error 'The wireless CI has no PTAEO; add it on its CI billing record (Steps 2-3)' - CI found by CMDB name, IT PTAEO and period 2026-10 set; genuine data gap. Bug: the console 'open staging rows' step (winmod Modify) opens an empty Search - fix Rockefeller_CGB_OpenWindow_Display_Fix_101926.def (Display mode; also Refund Requests). Next: give the wireless CIs PTAEOs (Steps 2-3), re-validate, then post one batch with N. Foy's OK.",
 "target": "Rockefeller_CGB_Staging_1_Form / 2_Filters / 3_ActiveLinks / 4_Sweep_101926.def (supersedes Rockefeller_CGB_Import_1/2/3_101926.def)",
 "created": 1792435300000,
-"updated": 1792437400000
+"updated": 1792437000000
 },
 {
 "ref": "OQ-01",
