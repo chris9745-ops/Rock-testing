@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Test Site — Placeholder</title>
+  <style>
+    :root {
+      --bg: #f5f7fa;
+      --card: #ffffff;
+      --ink: #1a1f26;
+      --muted: #54606c;
+      --accent: #1675b6;
+      --line: #e2e6eb;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #05070a;
+        --card: #0c1218;
+        --ink: #eef2f6;
+        --muted: #8b96a3;
+        --accent: #2590c2;
+        --line: #1c2630;
+      }
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+      line-height: 1.5;
+    }
+    .card {
+      width: 100%;
+      max-width: 520px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 36px 32px;
+      text-align: center;
+    }
+    .dot {
+      width: 12px; height: 12px; border-radius: 50%;
+      background: var(--accent);
+      margin: 0 auto 20px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
+    h1 { font-size: 24px; font-weight: 700; margin-bottom: 10px; }
+    p  { color: var(--muted); font-size: 16px; }
+    .meta {
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
+      font-size: 13px;
+      color: var(--muted);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="dot"></div>
+    <h1>Test site is live</h1>
+    <p>This is a placeholder. Real content will replace this page on the next deploy.</p>
+    <div class="meta">Placeholder · index.html</div>
+  </main>
+</body>
+</html>
