@@ -1,5 +1,5 @@
 {
-"generated": 1792438106559,
+"generated": 1792442289210,
 "areas": {
 "A": "Catalog items and ticket setup",
 "B": "PTAEO defaulting and validation",
@@ -2700,12 +2700,12 @@
 "exp": [
 "One AuditLog row per change with form, record, field, old value, new value, user, date."
 ],
-"status": "Failed",
-"actual": "Checked existing AuditLog rows instead of making new changes. Department change (DEPT00000000015 Dept PTAEO, 10/17 6:12 PM) -> AUD000000001950: Field Changed = 'Record Modified', Old Value and New Value empty, Activity Description / Change Details 'Dept PTAEO Account: 1000028-F271110510-110510;', Changed By uat_technician, date OK. Expected one row per changed field with field, old value and new value - the old value is not recorded and the field is only in the description. Subscription / Service / CIBilling changes show the same 'Record Modified' pattern.",
-"defect": "DEF-052",
+"status": "Passed",
+"actual": "Retest 10/19 after DEF-052 fix: changing VM Pricing component 000000000000006 Current Rate 260 -> 261 -> 260 wrote one AuditLog row per change with Field Changed = Current Rate, Old Value and New Value (260/261 and 261/260), Activity 'VM Pricing field changed: Current Rate'. Per-field audit filters are in place for Account, Department, Service, Subscription and VM Pricing.",
+"defect": "DEF-052 (fixed)",
 "evidence": "AuditLog AUD000000001950",
-"date": "2026-10-17",
-"updated": 1792284000000
+"date": "2026-10-19",
+"updated": 1792442300000
 },
 {
 "id": "UT-J-03",
@@ -3560,13 +3560,13 @@
 "case": "UT-J-02",
 "sev": "Medium",
 "owner": "Claude",
-"status": "Fixed - retest",
+"status": "Closed",
 "title": "AuditLog does not record old values per field",
 "desc": "Master-data changes write one AuditLog row with Field Changed = 'Record Modified', empty Old Value / New Value, and the changed fields with their new values only in Activity Description / Change Details (e.g. AUD000000001950). The test expects one row per changed field with field, old value and new value.",
-"work": "Decision 10/19: per-field rows. 56 filters NN:CGB:AUD:<Form>_1nn_<Field>`! (Account 10, Department 10, Service 14, Subscription 14, VM Pricing 8) write one AuditLog row per changed field with Field Changed, Old Value (DB lookup), New Value; Subscription Status rows include the reason. The five 030 'Record Modified' summary filters are disabled (as the Ledger already is). Retest UT-J-02.",
+"work": "Verified 10/19 15:37 as uat_billadmin: VM Pricing component 000000000000006 Current Rate 260 -> 261 -> 260 wrote two AuditLog rows, each Field Changed 'Current Rate' with Old/New Value (260/261, 261/260) and 'VM Pricing field changed: Current Rate'; no 'Record Modified' summary row. Same filters on Account, Department, Service and Subscription.",
 "target": "Rockefeller_CGB_DefectFixes_1_Filters_101926.def",
 "created": 1792284000000,
-"updated": 1792436500000
+"updated": 1792442300000
 },
 {
 "ref": "DEF-053",
@@ -3638,13 +3638,13 @@
 "case": "UT-I-04",
 "sev": "Medium",
 "owner": "Claude",
-"status": "Fixed - retest",
+"status": "Closed",
 "title": "Direct edit of a VM pricing rate re-prices VM subscriptions with the old rate",
 "desc": "Changing Base VM Current Rate 260 -> 250 directly (22:32) triggered NN:CGB:VMP:RateChange_100_RecalcVMSubscriptions, but the VM subscriptions were priced from 260 (SUB000000000207 = 260.00). The recalculation is pushed from inside the component save and reads the component's stored (old) rate.",
-"work": "Decision 10/19: rework to use the new rate. Filter NN:CGB:VMP:RateChange_100 disabled (it pushed inside the component save, so subscriptions read the old rate). New active link NN:CGB:VMP:AL_100_RecalcVMSubsAfterEdit (After Modify) re-prices all VM Hosting subscriptions after the save is committed, like the promotion fix (DEF-057 v3). Note: rate changes made outside the UI (API/import) no longer re-price automatically. Retest UT-I-04 direct edit.",
+"work": "Verified 10/19 15:36: direct edit of Base VM Current Rate 260 -> 261 showed 'VM Hosting subscriptions have been recalculated with the saved VM pricing rates' and SUB000000000208 went 288.00 -> 289.00 (log 'VM rate recalculated from 288.00 to 289.00'). Reverted to 260 (subscriptions re-priced back). Note: rate edits outside the UI no longer re-price automatically.",
 "target": "Rockefeller_CGB_DefectFixes_1_Filters + 2_ActiveLinks_101926.def",
 "created": 1792299000000,
-"updated": 1792436500000
+"updated": 1792442300000
 },
 {
 "ref": "DEF-059",
