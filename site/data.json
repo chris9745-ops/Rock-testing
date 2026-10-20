@@ -1,5 +1,5 @@
 {
-"generated": 1792442862797,
+"generated": 1792461620636,
 "areas": {
 "A": "Catalog items and ticket setup",
 "B": "PTAEO defaulting and validation",
@@ -2922,14 +2922,14 @@
 "ref": "DEF-001",
 "case": "UT-A-01",
 "sev": "Medium",
-"owner": "",
-"status": "Open",
+"owner": "Claude",
+"status": "Fixed - retest",
 "title": "Picking a Service SKU from the menu does not fill the billing fields",
 "desc": "Incident (Best Practice View), chargeback panel. Selecting UAT-901 from the Service SKU menu (Hourly Support > UAT-901) leaves SKU, Billing Type, Billable Rate and Expenditure Debit/Credit empty. Pressing Enter in the Service SKU field fills them. Active link NN:WO:RF_SetServiceDetails (focus field 546872002, Menu Choice + Return) - the Menu Choice trigger does not fire in mid-tier. Values are correct after save (INC000000167320). Also seen: chargeback panel draws over the form header in Best Practice View (cosmetic).",
-"work": "Press Enter in Service SKU after picking from the menu; save-time workflow also fills the fields.",
-"target": "",
+"work": "Workaround: press Enter in Service SKU after picking from the menu; save-time workflow also fills the fields. Fix 10/19: NN:WO:RF_SetServiceDetails execute-on changed from Return + Menu Choice (mask 130) to Return + Menu Choice + Lose Focus (mask 386, the same combination the product's own field active links use). Picking from the menu and then tabbing or clicking out of Service SKU now fills SKU, Billing Type, Billable Rate and Expenditure Debit/Credit. Actions unchanged; applies to Incident and Work Order. Retest: new Incident, pick Hourly Support > UAT-901, click into another field, check the four fields fill before save.",
+"target": "Rockefeller_CGB_DEF001_ServiceSKU_LoseFocus_101926.def",
 "created": 1792105300000,
-"updated": null
+"updated": 1792461600000
 },
 {
 "ref": "DEF-002",
