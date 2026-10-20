@@ -1,5 +1,5 @@
 {
-"generated": 1792469627725,
+"generated": 1792509926447,
 "areas": {
 "A": "Catalog items and ticket setup",
 "B": "PTAEO defaulting and validation",
@@ -3710,6 +3710,19 @@
 "target": "",
 "created": 1792467300000,
 "updated": 1792467300000
+},
+{
+"ref": "DEF-064",
+"case": "",
+"sev": "Medium",
+"owner": "N. Foy",
+"status": "Open",
+"title": "Incident from DWP has no Service SKU, so Time Worked never produces a Charge Amount",
+"desc": "Found 10/20 by N. Foy in Smart IT / PV: Self Service incident (reported 10/17/2026 12:40:48 AM, Device Issue, description 'SKU (will be hidden): 13279') with Time Worked 0.5 shows no Charge Amount. The Service SKU field on the incident is empty, so Billing Type and Billable Rate are never set and NN:HPD:CGB_Incident_CalculateHourlyCharge (needs Billing Type = Hourly and a rate) does not run. The DWP request puts the SKU only into the description; it is not mapped to the incident's Service SKU field (546872002). Also: SKU 13279 (SVC000000000097, Device Support / Device Issue) has Billable Rate 0.00 and no Billing Type, so even when mapped it would charge 0.00.",
+"work": "Decide: (a) map the DWP SKU answer to the incident's Service SKU in the DWP service / process (yours or Chris), or (b) Claude adds a Chargeback filter on Incident submit that copies the SKU from the description line 'SKU (will be hidden): nnnnn' into Service SKU and looks up Billing Type and rate. And confirm whether 13279 should be Hourly with a rate. Workaround for testing: pick an Hourly SKU (e.g. Hourly Support > UAT-901, rate 85.00) in Service SKU, then save Time Worked.",
+"target": "",
+"created": 1792509900000,
+"updated": 1792509900000
 },
 {
 "ref": "OQ-01",
