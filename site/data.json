@@ -1,5 +1,5 @@
 {
-"generated": 1792467337489,
+"generated": 1792469627725,
 "areas": {
 "A": "Catalog items and ticket setup",
 "B": "PTAEO defaulting and validation",
@@ -3381,10 +3381,10 @@
 "status": "Open",
 "title": "Work order subscription actions cannot be run by technicians: Smart IT has no Subscription fields and classic redirects",
 "desc": "Smart IT Edit Work Order shows Billing Type, Quantity, Rate, Charge and PTAEO but not Subscription ID, Subscription Action, Subscription Billing Type or VM Name. The classic WOI:WorkOrder form has them, but for uat_technician any search that loads a record jumps to SHR:LandingConsole, and New mode needs the person-search popup. Blocks UT-E-08, 09, 10, 11, 14, 17. WO0000000114386 was created for UT-E-08 (no subscription fields set).",
-"work": "Yours: add Subscription ID, Subscription Action, Subscription Billing Type and VM Name to the Smart IT work order view, or allow classic WO for the UAT technician.",
+"work": "Yours (or Chris): add Subscription ID, Subscription Action, Subscription Billing Type and VM Name to the Smart IT work order view, or allow classic WO for the UAT technician. Recheck 10/19 23:00 (Claude): classic WOI:WorkOrder still redirects to SHR:LandingConsole when a record loads, now also for uat_billadmin. But the work-order subscription actions themselves run: WO0000000114394 (uat_technician, 10/19 8:14 AM) changed the PTAEO on SUB000000000203, and WO0000000114393 (uat_technician, 10/19 10:04 AM) requested termination of SUB000000000210. Open question for N. Foy: how were those two set (Smart IT with new fields, or another route)? If Smart IT now shows the fields, log the pane in as uat_technician and Claude retests UT-E-08, 09, 10, 11, 14, 17.",
 "target": "",
 "created": 1792255200000,
-"updated": 1792255200000
+"updated": 1792469600000
 },
 {
 "ref": "DEF-039",
