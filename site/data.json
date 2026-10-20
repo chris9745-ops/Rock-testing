@@ -1,5 +1,5 @@
 {
-"generated": 1792463294375,
+"generated": 1792463529185,
 "areas": {
 "A": "Catalog items and ticket setup",
 "B": "PTAEO defaulting and validation",
@@ -1357,12 +1357,12 @@
 "The subscription is still billed for the current period.",
 "Afterwards Status = Terminated with a log line; it is not billed next period."
 ],
-"status": "Blocked",
-"actual": "Terminate opens NN:CGB:SubStatusChange, but its Confirm/Cancel buttons have no permissions (DEF-034), so the termination cannot be confirmed from the console. Period-end (15th) escalation part not run.",
-"defect": "DEF-034",
-"evidence": "",
-"date": "2026-10-17",
-"updated": 1792254900000
+"status": "In Progress",
+"actual": "Step 1 PASSED 10/19 as uat_billadmin (console Admin View v2; window clicks by N. Foy, checks by Claude). SUB000000000203 (UAT-906, $27.00, Active, Last Billed 2026-10) > Terminate Subscription > Customer request, 'UT-E-07 test' > Confirm. Status = Pending Termination; Termination Effective Date = 10/15/2026 (date field; 15th of current period 2026-10, which was already billed on 10/15 - matches FR-SUB-007 'stop at end of current period'); log '10/19/2026 9:30:57 PM uat_billadmin Terminate - Customer request: UT-E-07 test'. The Billing Impact text did not appear in the reason window (DEF-062: window fields not filled before Confirm). Steps 2-3 wait for the termination escalation / next monthly cycle: expect Terminated with a log line and no November charge. SUB000000000210 (Pending Termination since WO0000000114393, effective 10/15) can be checked at the same time.",
+"defect": "DEF-034 (closed), DEF-062",
+"evidence": "SUB000000000203 Status Change Log 10/19/2026 9:30:57 PM (uat_billadmin)",
+"date": "2026-10-19",
+"updated": 1792463500000
 },
 {
 "id": "UT-E-08",
@@ -3692,11 +3692,11 @@
 "owner": "Claude",
 "status": "Open",
 "title": "Subscription status reason window shows blank Subscription ID, Subscriber, SKU and Current Status",
-"desc": "Found 10/19 in UT-E-05. Opening NN:CGB:SubStatusChange from the console (Place On Hold / Release Hold / Terminate) shows Action filled but Subscription ID, Subscriber Name, Service SKU and Current Status blank. The selected subscription is passed correctly (hidden Subscription Request ID) and Confirm acts on the right record; Current Status only fills when Confirm runs its recheck. CGB:SSC:011_ShowSubscriptionID runs on Window Loaded, apparently before mid-tier applies the open-window input values, and it is limited to Chargeback Config (800004). Users cannot see which subscription they are changing before confirming.",
+"desc": "Found 10/19 in UT-E-05/UT-E-07. Opening NN:CGB:SubStatusChange from the console (Place On Hold / Release Hold / Terminate) shows Action filled but Subscription ID, Subscriber Name, Service SKU, Current Status and Billing Impact blank (Terminate shows no 'billing continues through the 15th' text). The selected subscription is passed correctly (hidden Subscription Request ID) and Confirm acts on the right record; Current Status only fills when Confirm runs its recheck. CGB:SSC:011_ShowSubscriptionID runs on Window Loaded, apparently before mid-tier applies the open-window input values, and it is limited to Chargeback Config (800004); the Billing Impact text depends on Current Status/Current Period, which are never loaded. Users cannot see which subscription they are changing, or the billing impact, before confirming.",
 "work": "Planned fix (Chargeback workflow): fill Subscription ID, Subscriber Name, Service SKU, Current Status and Current Period from NN:CGB:Subscription on Window Loaded AND on Display/Set Default, for Master and Config; or pass them from the console in the open-window input.",
 "target": "",
 "created": 1792463300000,
-"updated": 1792463300000
+"updated": 1792463500000
 },
 {
 "ref": "OQ-01",
