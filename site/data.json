@@ -1,5 +1,5 @@
 {
-"generated": 1792463529185,
+"generated": 1792463719606,
 "areas": {
 "A": "Catalog items and ticket setup",
 "B": "PTAEO defaulting and validation",
@@ -3690,13 +3690,13 @@
 "case": "UT-E-05",
 "sev": "Low",
 "owner": "Claude",
-"status": "Open",
+"status": "Fixed - retest",
 "title": "Subscription status reason window shows blank Subscription ID, Subscriber, SKU and Current Status",
 "desc": "Found 10/19 in UT-E-05/UT-E-07. Opening NN:CGB:SubStatusChange from the console (Place On Hold / Release Hold / Terminate) shows Action filled but Subscription ID, Subscriber Name, Service SKU, Current Status and Billing Impact blank (Terminate shows no 'billing continues through the 15th' text). The selected subscription is passed correctly (hidden Subscription Request ID) and Confirm acts on the right record; Current Status only fills when Confirm runs its recheck. CGB:SSC:011_ShowSubscriptionID runs on Window Loaded, apparently before mid-tier applies the open-window input values, and it is limited to Chargeback Config (800004); the Billing Impact text depends on Current Status/Current Period, which are never loaded. Users cannot see which subscription they are changing, or the billing impact, before confirming.",
-"work": "Planned fix (Chargeback workflow): fill Subscription ID, Subscriber Name, Service SKU, Current Status and Current Period from NN:CGB:Subscription on Window Loaded AND on Display/Set Default, for Master and Config; or pass them from the console in the open-window input.",
-"target": "",
+"work": "Cause (from mid-tier form.js): the window's Window Loaded chain (CGB:SSC:010_Init, 011, 020-023) loads the subscription and the Billing Impact text from the passed Subscription Request ID, but it runs before mid-tier copies the console's values in (even the Hold text, which only needs Action, stayed blank). Fix 10/19, 5 NEW active links, nothing replaced: CGB:SSC:030_LoadOnFocus (Reason Category gain/lose focus, Subscription ID still blank: loads Subscription ID, Subscriber, SKU, Current Status, Current Period) and CGB:SSC:031-034 (Billing Impact text for Hold / Release / Terminate / Terminate from hold), for Master and Config. 010_Init already moves focus to Reason Category, so they should fire as the window opens, and at the latest when a reason is picked. Retest: Place On Hold, Release Hold and Terminate on a test subscription - fields and Billing Impact filled before Confirm.",
+"target": "Rockefeller_CGB_DEF062_ReasonWindowLoad_101926.def",
 "created": 1792463300000,
-"updated": 1792463500000
+"updated": 1792463800000
 },
 {
 "ref": "OQ-01",
