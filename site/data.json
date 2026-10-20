@@ -1,5 +1,5 @@
 {
-"generated": 1792533457102,
+"generated": 1792534878245,
 "areas": {
 "A": "Catalog items and ticket setup",
 "B": "PTAEO defaulting and validation",
@@ -3729,13 +3729,13 @@
 "case": "UT-J-04",
 "sev": "Medium",
 "owner": "Claude",
-"status": "Fix built - import",
+"status": "Fixed - retest",
 "title": "Work Order (Best Practice View) shows the chargeback fields to another tenant",
 "desc": "Found 10/20 in UT-J-04 as nfoy_sen (company Sentinel). New Work Order in classic WOI:WorkOrder Best Practice View: the chargeback block at the top of the form is visible - Billable Rate, Charge Amount, Billable Rate For Next FY, Task, SKU, Owner Name, Expenditure Debit/Credit, z1D_BillingType, CI Reconciliation ID, Org Number, Department, Category, Expenditure Code, Subcategory; also PTAEO Account (537888105), 537888121, Billing Type, Time Worked, Subscription Billing Type report visible. It stays visible after the customer (Sentinel) is chosen and on the next New form. The Incident form hides the same fields for Sentinel. NN:WO:RF:HideChargeback_NonRF_OnLoad (run-if 536880971 != Rockefeller) only hides 536870963, 537888105, 537888121, 546872002, 546870786, 304461471, and 536880971 is empty in this view, so the block is never hidden. Server side is fine: saved WO0000000114419 has no chargeback values.",
-"work": "Built 10/20 from Rockefeller_CGB_Checkpoint_INCWO_102026.def, mirroring Incident (login user's company). Found in the export: WOI has no Best Practice View - the classic URL falls back to Default User View; NN:WO:SetLoginUserCompany / _AllViews only fill 536880971 on SV views, so on the classic view it is empty; NN:WO:RF:CBSection_100-130 (vphanindra, enabled) show/hide only Section Panel13 on SV_* views by record company; NN:WO:RF:HideChargeback_NonRF_OnLoad is disabled. Fix = 2 NEW active links: NN:WO:RF:CBK_010_SetLoginUserCompany_AllViews (fills 536880971 from CTM:People by $USER$ on every view when empty) and NN:WO:RF:CBK_020_HideChargebackNonRF_AllViews (login company != The Rockefeller University: hides 59 chargeback fields - block, panels 536870962/963, button, Service SKU, PTAEO, Billing Type, Time Worked, rates, charges, codes, subscription and VM fields - on window open/loaded/display, all views). Retest: as nfoy_sen new WO (classic and Smart IT) shows no chargeback fields; as uat_billadmin / uat_technician they still show.",
-"target": "Rockefeller_CGB_DEF065_WO_HideChargebackNonRF_102026.def",
+"work": "Built 10/20 from Rockefeller_CGB_Checkpoint_INCWO_102026.def, mirroring Incident (login user's company). WOI has no Best Practice View; its default view is Simplified User View. NN:WO:SetLoginUserCompany/_AllViews only fill 536880971 on SV views; NN:WO:RF:CBSection_100-130 only show/hide Section Panel13 on SV_*; NN:WO:RF:HideChargeback_NonRF_OnLoad is disabled. Fix: NN:WO:RF:CBK_010_SetLoginUserCompany_AllViews + CBK_020/021/022_HideChargebackNonRF_AllViews_1..3 (max 20 actions each; v1 single link failed ARERR 182) hiding 59 chargeback fields + the new Chargeback tab when the login company is not The Rockefeller University, all views. CR N. Foy 10/20: Chargeback tab (537890501) on Default User View (+11 locales) and English Simplified User View; Simplified locales not used (decision 17:20); SV_* views untouched. Full all-locale Simplified file failed ARERR 8790, English-only imported fine. Retest 10/20 17:19 as nfoy_sen (Sentinel), Simplified User View and Default User View: login company Sentinel, hide links loaded, Chargeback tab and all chargeback fields hidden, no floating block - PASSED for the other tenant. Still to check: as a Rockefeller user the tab shows and Service SKU fills the billing fields; Smart IT work order for nfoy_sen.",
+"target": "Rockefeller_CGB_WO_ChargebackTab_2_DEF065_ActiveLinks_v3_102026.def + _1_Form_v3b_test_102026.def (imported 10/20)",
 "created": 1792533200000,
-"updated": 1792533500000
+"updated": 1792534900000
 },
 {
 "ref": "OQ-01",
