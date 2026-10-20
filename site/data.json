@@ -1,5 +1,5 @@
 {
-"generated": 1792464585266,
+"generated": 1792467337489,
 "areas": {
 "A": "Catalog items and ticket setup",
 "B": "PTAEO defaulting and validation",
@@ -1549,12 +1549,12 @@
 "Billable Rate = 398.00 (250 + 30 CPU + 20 RAM + 30 storage + 28 backup + 40 Linux).",
 "Status Change Log shows old rate -> new rate."
 ],
-"status": "Failed",
-"actual": "SUB000000000206 (uat-vm-01) Billable Rate = 318.00, expected 398.00. NN:CGB:VMPricingComponents: Increment Units empty for CPU, RAM and Storage, and Base/Min empty for Storage, so only base 250 + backup 28 + Linux 40 is charged. Needs data: CPU increment 2, RAM increment 2, Storage base 100 / increment 100. (Label on the subscription form reads 'MTS Covered'.)",
-"defect": "DEF-035",
-"evidence": "SUB000000000206",
-"date": "2026-10-17",
-"updated": 1792254900000
+"status": "Passed",
+"actual": "Retest 10/19 after the DEF-035 data fix (Claude as uat_billadmin). VM rate is now built from every component: SUB000000000211 (4 cores, 8 GB, 200 GB, Backup Yes, Linux No) = 368.00 = 260 base + 30 CPU + 20 RAM + 30 storage + 28 backup - the test's 4/8/200 configuration; with Linux it would be 408.00 (the expected 398.00 assumed a 250 base; Base VM is now 260.00). SUB000000000206 (6/12/100, Backup, Linux) = 428.00 = 260+60+40+0+28+40, covering the Linux component. Status Change Log shows old -> new rate, e.g. 'VM rate recalculated from 338.00 to 368.000000000 (4.0 cores, 8.0 GB RAM, 200.0 GB storage)' - new rate printed with 9 decimals (DEF-063, cosmetic).",
+"defect": "DEF-035 (closed), DEF-063",
+"evidence": "SUB000000000206, SUB000000000211 Status Change Log 10/19 10:31-10:33 PM",
+"date": "2026-10-19",
+"updated": 1792467300000
 },
 {
 "id": "UT-E-16",
@@ -3338,14 +3338,14 @@
 "ref": "DEF-035",
 "case": "UT-E-15",
 "sev": "Medium",
-"owner": "N. Foy",
-"status": "Open",
+"owner": "Claude",
+"status": "Closed",
 "title": "VM pricing components are missing increment units, so the VM rate is too low",
 "desc": "SUB000000000206 (uat-vm-01) Billable Rate 318.00, expected 398.00. NN:CGB:VMPricingComponents has empty Increment Units for CPU, RAM and Storage and empty Base/Min for Storage, so only base 250 + backup 28 + Linux 40 is charged.",
-"work": "Data (yours): CPU increment 2, RAM increment 2, Storage base 100 / increment 100; then re-save SUB206 and retest UT-E-15.",
-"target": "",
+"work": "Data fixed 10/19 by Claude as uat_billadmin (N. Foy's OK): Additional CPU cores Increment 2 (Base 2); Additional RAM Increment 2 (Base 4); Additional Storage Base 100, Increment 100. Each save re-priced the VM Hosting subscriptions that have a VM configuration (only 4, all UAT): SUB000000000206 6 cores/12 GB/100 GB/Backup/Linux 388.00 -> 428.00 (260+60+40+0+28+40); SUB000000000211 4/8/200/Backup 338.00 -> 368.00 (260+30+20+30+28); SUB000000000207 2/4/100 260.00 and SUB000000000208 2/4/100/Backup 288.00 unchanged. All match the formula. Note: Base VM is now 260.00 (test data assumed 250). Minor: the log line shows the new rate as '428.000000000' (DEF-063).",
+"target": "Data: NN:CGB:VMPricingComponents",
 "created": 1792255200000,
-"updated": 1792255200000
+"updated": 1792467300000
 },
 {
 "ref": "DEF-036",
@@ -3697,6 +3697,19 @@
 "target": "Rockefeller_CGB_DEF062_ReasonWindowLoad_v2_101926.def",
 "created": 1792463300000,
 "updated": 1792464600000
+},
+{
+"ref": "DEF-063",
+"case": "UT-E-15",
+"sev": "Low",
+"owner": "Claude",
+"status": "Open",
+"title": "VM rate log line prints the new rate with 9 decimals",
+"desc": "Found 10/19. When CPU/RAM/storage increments apply, NN:CGB:SUB:VMRate_060_Log writes e.g. 'VM rate recalculated from 338.00 to 368.000000000 (...)'. The computed working field keeps full precision from the TRUNC/division expression; the Billable Rate itself is stored correctly as 368.00.",
+"work": "Planned fix (Chargeback workflow): round the computed rate to 2 decimals (ROUND) in VMRate_032/034/036 or format it in VMRate_060_Log.",
+"target": "",
+"created": 1792467300000,
+"updated": 1792467300000
 },
 {
 "ref": "OQ-01",
