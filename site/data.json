@@ -1,5 +1,5 @@
 {
-"generated": 1792510315256,
+"generated": 1792512261178,
 "areas": {
 "A": "Catalog items and ticket setup",
 "B": "PTAEO defaulting and validation",
@@ -3716,13 +3716,13 @@
 "case": "",
 "sev": "Medium",
 "owner": "Claude",
-"status": "Fix built - import",
+"status": "Fixed - verified",
 "title": "Incident from DWP has no Service SKU, so Time Worked never produces a Charge Amount",
 "desc": "Found 10/20 by N. Foy in Smart IT / PV: Self Service incident (reported 10/17/2026 12:40:48 AM, Device Issue, description 'SKU (will be hidden): 13279') with Time Worked 0.5 shows no Charge Amount. The Service SKU field on the incident is empty, so Billing Type and Billable Rate are never set and NN:HPD:CGB_Incident_CalculateHourlyCharge (needs Billing Type = Hourly and a rate) does not run. The DWP request puts the SKU only into the description; it is not mapped to the incident's Service SKU field (546872002). Also: SKU 13279 (SVC000000000097, Device Support / Device Issue) has Billable Rate 0.00 and no Billing Type, so even when mapped it would charge 0.00.",
-"work": "Decision N. Foy 10/20: Billing Type and Billable Rate are read-only and set by the Service SKU (Chargeback Master and Config may edit them); when the SKU cannot be matched, a configurable default applies so the ticket is still created. Build (incident only, 2 new filters + 2 new active links): NN:HPD:CGB_SKU_015_ClearUnknownSKU clears a Service SKU that is not an Active NN:CGB:Service record; NN:HPD:CGB_SKU_016_DefaultSKU sets Service SKU = CGB-DEFAULT when it is empty on create (or was cleared on this save); existing SKU_020 then fills Billing Type, rate and expenditure codes. NN:HPD:CGB_BillingTypeRate_010_ReadOnly / _020_ReadWriteForAdmin (800003, 800004) for the classic form. Still needed: create NN:CGB:Service record CGB-DEFAULT (Billing Type, rate, expenditure codes to be decided); mark the two fields read-only in the Smart IT incident screen (Smart IT ignores active links); work orders not yet covered.",
-"target": "Rockefeller_CGB_DEF064_IncidentSKUDefault_102026.def + NN:CGB:Service record CGB-DEFAULT (data)",
+"work": "Decision N. Foy 10/20: Billing Type and Billable Rate are read-only and set by the Service SKU (Chargeback Master and Config may edit them); when the SKU cannot be matched, a configurable default applies so the ticket is still created. Build (incident only, 2 new filters + 2 new active links): NN:HPD:CGB_SKU_015_ClearUnknownSKU, NN:HPD:CGB_SKU_016_DefaultSKU (Service SKU = CGBDEFAULT when empty on create or cleared on the save), NN:HPD:CGB_BillingTypeRate_010_ReadOnly / _020_ReadWriteForAdmin (800003, 800004). Default record NN:CGB:Service SVC000000000311, SKU CGBDEFAULT, Hourly, 85.00, 63719/54101, not in portal (created by Claude 10/20; SKU field max 10 chars). Retest 10/20 as uat_technician: classic form shows Billing Type and Billable Rate read-only (admin read/write link not loaded for technicians). INC000000167377 (N. Foy, Smart IT create, UAT Customer02, no Service SKU; then Time Worked 0.5): Service SKU CGBDEFAULT, Billing Type Hourly, Billable Rate 85.00, Time Worked 0.5, Charge Amount 21.25. PASSED. Open: mark the two fields read-only in the Smart IT incident screen (Smart IT ignores active links); work orders not covered yet (decision); unmatched-SKU case (made-up SKU) not yet run; DWP SKU still only in the description.",
+"target": "Rockefeller_CGB_DEF064_IncidentSKUDefault_102026.def (imported 10/20) + NN:CGB:Service SVC000000000311 CGBDEFAULT",
 "created": 1792509900000,
-"updated": 1792510400000
+"updated": 1792512200000
 },
 {
 "ref": "OQ-01",
