@@ -1,5 +1,5 @@
 {
-"generated": 1792512261178,
+"generated": 1792531862824,
 "areas": {
 "A": "Catalog items and ticket setup",
 "B": "PTAEO defaulting and validation",
@@ -2724,12 +2724,12 @@
 "No chargeback panel, no PTAEO default, no billing fields, no popup message (e.g. no 'USER company is ...').",
 "No ledger rows; Assignee Groups not changed by InfoSec workflow."
 ],
-"status": "Not run",
-"actual": "PARKED: needs the UAT Other-Tenant User login (Claude does not sign in). J-04, J-05 and J-06 need the same login or other-tenant data.",
+"status": "Passed",
+"actual": "Run 10/20 with other-tenant login nfoy_sen (company Sentinel; N. Foy signed in, picked the customer and resolved in Smart IT; Claude created and checked). New Incident in Best Practice View: no chargeback panel; Service SKU, Billing Type, Billable Rate, Charge Amount, Time Worked, PTAEO Account and Expenditure Debit all hidden; no PTAEO default; no pop-up message. Created INC000000167378 (customer 23Hundred, Groundskeeper; Assigned, Helpdesk) - saved record has no chargeback values and no CGBDEFAULT (DEF-064 default correctly limited to Rockefeller). Resolved (Nathan Foy_SEN, 'test reso'): chargeback fields still empty; Assignee Groups = Sentinel groups + customer email, nothing added by InfoSec workflow. Chargeback Ledger as uat_billadmin: 'Originating Ticket' = INC000000167378 -> no matches (the same query shape returns 30 incident rows for LIKE 'INC%'). Time Worked could not be added because the field is hidden for this tenant - expected. Note: opening a saved incident in the classic form redirects to the landing console for all logins (see DEF-038).",
 "defect": "",
-"evidence": "",
-"date": "2026-10-17",
-"updated": 1792284000000
+"evidence": "INC000000167378 (Sentinel)",
+"date": "2026-10-20",
+"updated": 1792531900000
 },
 {
 "id": "UT-J-04",
