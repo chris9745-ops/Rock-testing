@@ -1,5 +1,5 @@
 {
-"generated": 1792461914250,
+"generated": 1792462566057,
 "areas": {
 "A": "Catalog items and ticket setup",
 "B": "PTAEO defaulting and validation",
@@ -3326,13 +3326,13 @@
 "case": "UT-E-05",
 "sev": "High",
 "owner": "N. Foy",
-"status": "Open",
+"status": "Closed",
 "title": "NN:CGB:SubStatusChange Confirm and Cancel buttons have no permissions",
 "desc": "btn_Confirm (536870926) and btn_Cancel (536870927) on NN:CGB:SubStatusChange have no group permissions, so the reason window cannot be confirmed or cancelled. Blocks UT-E-05 and UT-E-07 (and UT-E-23 step 3).",
-"work": "Form permission change (yours): give the Billing Admin / Chargeback groups Change on both buttons, then flush the cache. Rechecked 10/17 night as uat_billadmin: no buttons render. PARKED for N. Foy.",
-"target": "",
+"work": "Fixed by N. Foy: btn_Confirm and btn_Cancel now have Chargeback Config (800004) and Master (800003), same as the form. Retest 10/19 21:20 as uat_billadmin (Claude): NN:CGB:SubStatusChange renders Confirm and Cancel; mid-tier compiles the Confirm chain (CGB:SSC:100..290) and Cancel (CGB:SSC close). Confirm with no category shows 'Select a Reason Category before confirming. (ARERR 10000)'. PASSED. Full hold/release (UT-E-05) and terminate (UT-E-07) runs continue from the console; the reason window opens as a pop-up, which only a user click can open in the browser pane.",
+"target": "Form permission change in DEV (N. Foy, ~10/18 07:30); confirmed by export Rockefeller_CGB_Checkpoint_SubStatusChange_101826.def",
 "created": 1792255200000,
-"updated": 1792298361425
+"updated": 1792462600000
 },
 {
 "ref": "DEF-035",
