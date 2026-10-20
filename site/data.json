@@ -1,5 +1,5 @@
 {
-"generated": 1792461620636,
+"generated": 1792461914250,
 "areas": {
 "A": "Catalog items and ticket setup",
 "B": "PTAEO defaulting and validation",
@@ -36,10 +36,10 @@
 ],
 "status": "Passed",
 "actual": "INC000000167320 (Company The Rockefeller University, Customer Jai Kasturi, Assigned Group IT Support / Service Desk). Service SKU UAT-901 (catalog record SVC000000000301). Before save: Billing Type Hourly, Billable Rate 80.00, Expenditure Debit 63719, Expenditure Credit 54101 (fields fill on Enter, not on menu pick - see DEF-001). After save and reopen: SKU UAT-901, Billing Type Hourly, Billable Rate 80.00, Debit 63719, Credit 54101, Do Not Bill False, Status Assigned.",
-"defect": "DEF-001",
+"defect": "DEF-001 (closed 10/19)",
 "evidence": "INC000000167320; catalog item SVC000000000301",
 "date": "2026-10-15",
-"updated": 1792105300000
+"updated": 1792462200000
 },
 {
 "id": "UT-A-02",
@@ -2923,13 +2923,13 @@
 "case": "UT-A-01",
 "sev": "Medium",
 "owner": "Claude",
-"status": "Fixed - retest",
+"status": "Closed",
 "title": "Picking a Service SKU from the menu does not fill the billing fields",
 "desc": "Incident (Best Practice View), chargeback panel. Selecting UAT-901 from the Service SKU menu (Hourly Support > UAT-901) leaves SKU, Billing Type, Billable Rate and Expenditure Debit/Credit empty. Pressing Enter in the Service SKU field fills them. Active link NN:WO:RF_SetServiceDetails (focus field 546872002, Menu Choice + Return) - the Menu Choice trigger does not fire in mid-tier. Values are correct after save (INC000000167320). Also seen: chargeback panel draws over the form header in Best Practice View (cosmetic).",
-"work": "Workaround: press Enter in Service SKU after picking from the menu; save-time workflow also fills the fields. Fix 10/19: NN:WO:RF_SetServiceDetails execute-on changed from Return + Menu Choice (mask 130) to Return + Menu Choice + Lose Focus (mask 386, the same combination the product's own field active links use). Picking from the menu and then tabbing or clicking out of Service SKU now fills SKU, Billing Type, Billable Rate and Expenditure Debit/Credit. Actions unchanged; applies to Incident and Work Order. Retest: new Incident, pick Hourly Support > UAT-901, click into another field, check the four fields fill before save.",
+"work": "Workaround (no longer needed): press Enter in Service SKU after picking from the menu. Fix 10/19: NN:WO:RF_SetServiceDetails execute-on changed from Return + Menu Choice (mask 130) to Return + Menu Choice + Lose Focus (mask 386). Rockefeller_CGB_DEF001_ServiceSKU_LoseFocus_101926.def imported by N. Foy. Retest 10/19 21:05 as uat_technician (Claude): mid-tier HPD:Help Desk form.js now has LoseFocus, MenuChoice and Return handlers on Service SKU. New Incident (Best Practice View, The Rockefeller University), picked Hourly Support > UAT-901 from the menu, no Enter: SKU UAT-901, Billing Type Hourly, Billable Rate 85.00, Recurring Charge No, Expenditure Debit 63719, Expenditure Credit 54101 filled immediately. Not saved. PASSED. Note: rate is now 85.00 (was 80.00 on 10/15), taken from the current NN:CGB:Service record. Work Order: the mid-tier Work Order views do not show Service SKU, so only the compiled trigger was checked there.",
 "target": "Rockefeller_CGB_DEF001_ServiceSKU_LoseFocus_101926.def",
 "created": 1792105300000,
-"updated": 1792461600000
+"updated": 1792462200000
 },
 {
 "ref": "DEF-002",
