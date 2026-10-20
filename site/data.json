@@ -1,5 +1,5 @@
 {
-"generated": 1792536758253,
+"generated": 1792539859026,
 "areas": {
 "A": "Catalog items and ticket setup",
 "B": "PTAEO defaulting and validation",
@@ -3381,10 +3381,10 @@
 "status": "Open",
 "title": "Work order subscription actions cannot be run by technicians: Smart IT has no Subscription fields and classic redirects",
 "desc": "Smart IT Edit Work Order shows Billing Type, Quantity, Rate, Charge and PTAEO but not Subscription ID, Subscription Action, Subscription Billing Type or VM Name. The classic WOI:WorkOrder form has them, but for uat_technician any search that loads a record jumps to SHR:LandingConsole, and New mode needs the person-search popup. Blocks UT-E-08, 09, 10, 11, 14, 17. WO0000000114386 was created for UT-E-08 (no subscription fields set).",
-"work": "Yours (or Chris): add Subscription ID, Subscription Action, Subscription Billing Type and VM Name to the Smart IT work order view, or allow classic WO for the UAT technician. Recheck 10/19 23:00 (Claude): classic WOI:WorkOrder still redirects to SHR:LandingConsole when a record loads, now also for uat_billadmin. But the work-order subscription actions themselves run: WO0000000114394 (uat_technician, 10/19 8:14 AM) changed the PTAEO on SUB000000000203, and WO0000000114393 (uat_technician, 10/19 10:04 AM) requested termination of SUB000000000210. Open question for N. Foy: how were those two set (Smart IT with new fields, or another route)? If Smart IT now shows the fields, log the pane in as uat_technician and Claude retests UT-E-08, 09, 10, 11, 14, 17.",
+"work": "Yours (or Chris): add Subscription ID, Subscription Action, Subscription Billing Type and VM Name to the Smart IT work order view, or allow classic WO for the UAT technician. Recheck 10/19 23:00 (Claude): classic WOI:WorkOrder still redirects to SHR:LandingConsole when a record loads, now also for uat_billadmin. Finding 10/20 (Claude): WO0000000114394 came from DWP request 35453 (description 'What do you need?: Change PTAEO / Select the subscription: SUB000000000203'), so the subscription and action are set by the DWP catalog and the technician only completes the WO; Smart IT shows Chargeback with PTAEO, Service SKU UAT-906, Billing Type Subscription. Decision for N. Foy: if subscription actions always start in DWP, close DEF-038 and rerun UT-E-08..11, 14, 17 through DWP; if technicians must start them by hand in Smart IT, the Subscription fields are still needed on the SV views.",
 "target": "",
 "created": 1792255200000,
-"updated": 1792469600000
+"updated": 1792540000000
 },
 {
 "ref": "DEF-039",
@@ -3576,10 +3576,10 @@
 "status": "Fixed - retest",
 "title": "UAT Technician has full chargeback change and console access",
 "desc": "uat_technician opened NN:CGB:AdminConsole and modified Department, Subscription, Chargeback Ledger, OracleExport and BillingRun records on 10/17. Expected: only Chargeback Config and Chargeback Master can see/use the Admin Console (N. Foy 10/17 20:27); technicians get no change access. Group IDs from the 10/14 export: AdminConsole form = 800003 (view) + 800004 (view); all 148 console active links = 800004 only. Change (\\2) on: Account 7; BillingRun 800001, 800002, 7; Ledger 800001; Department 7, 800001, 800002; OracleExport 800001, 800002, 7; Service 800001, 800002; Subscription 800001, 800002, 7 (7 = Assignee Group, row level). The console active links ran for uat_technician, so uat_technician is in group 800004 (or has admin rights).",
-"work": "N. Foy removed Chargeback Config/Master from uat_technician and tightened form/field permissions. Retest 21:56 as uat_technician: console and all chargeback forms refuse changes (ARERR 9264 / 330; Ledger silently). Left to do: re-test as UAT Customer01; set BillingRun 000000000000003 Problem Acknowledged back to Yes as Billing Admin (left at No by the last technician test).",
+"work": "N. Foy removed Chargeback Config/Master from uat_technician and tightened form/field permissions. Retest 21:56 as uat_technician: console and all chargeback forms refuse changes (ARERR 9264 / 330; Ledger silently). Checked 10/20 as uat_billadmin: BillingRun 000000000000003 Problem Acknowledged is already Yes (nothing to reset). Left to do: re-test as UAT Customer01 (console and chargeback forms refuse changes).",
 "target": "",
 "created": 1792284000000,
-"updated": 1792295000000
+"updated": 1792540000000
 },
 {
 "ref": "DEF-054",
@@ -3703,13 +3703,13 @@
 "case": "UT-E-15",
 "sev": "Low",
 "owner": "Claude",
-"status": "Open",
+"status": "Fixed - import pending",
 "title": "VM rate log line prints the new rate with 9 decimals",
 "desc": "Found 10/19. When CPU/RAM/storage increments apply, NN:CGB:SUB:VMRate_060_Log writes e.g. 'VM rate recalculated from 338.00 to 368.000000000 (...)'. The computed working field keeps full precision from the TRUNC/division expression; the Billable Rate itself is stored correctly as 368.00.",
-"work": "Planned fix (Chargeback workflow): round the computed rate to 2 decimals (ROUND) in VMRate_032/034/036 or format it in VMRate_060_Log.",
+"work": "Fix built 10/20: Rockefeller_CGB_DEF063_VMRateLogRounding_102026.def (from Checkpoint 101426_EOD). VMRate_060_Log now prints Subscription Charge Amount (537888302, decimal precision 2, set by VMRate_050_Charge one step earlier) as the new rate instead of the full-precision working field 537888227. Rate calculation unchanged. Retest UT-E-15 after import: change CPU/RAM/storage on a VM test sub; log reads 'from 338.00 to 368.00'.",
 "target": "",
 "created": 1792467300000,
-"updated": 1792467300000
+"updated": 1792540000000
 },
 {
 "ref": "DEF-064",
