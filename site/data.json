@@ -1,5 +1,5 @@
 {
-"generated": 1792463719606,
+"generated": 1792464585266,
 "areas": {
 "A": "Catalog items and ticket setup",
 "B": "PTAEO defaulting and validation",
@@ -3690,13 +3690,13 @@
 "case": "UT-E-05",
 "sev": "Low",
 "owner": "Claude",
-"status": "Fixed - retest",
+"status": "Closed",
 "title": "Subscription status reason window shows blank Subscription ID, Subscriber, SKU and Current Status",
 "desc": "Found 10/19 in UT-E-05/UT-E-07. Opening NN:CGB:SubStatusChange from the console (Place On Hold / Release Hold / Terminate) shows Action filled but Subscription ID, Subscriber Name, Service SKU, Current Status and Billing Impact blank (Terminate shows no 'billing continues through the 15th' text). The selected subscription is passed correctly (hidden Subscription Request ID) and Confirm acts on the right record; Current Status only fills when Confirm runs its recheck. CGB:SSC:011_ShowSubscriptionID runs on Window Loaded, apparently before mid-tier applies the open-window input values, and it is limited to Chargeback Config (800004); the Billing Impact text depends on Current Status/Current Period, which are never loaded. Users cannot see which subscription they are changing, or the billing impact, before confirming.",
-"work": "Cause (from mid-tier form.js): the window's Window Loaded chain (CGB:SSC:010_Init, 011, 020-023) loads the subscription and the Billing Impact text from the passed Subscription Request ID, but it runs before mid-tier copies the console's values in (even the Hold text, which only needs Action, stayed blank). Fix 10/19, 5 NEW active links, nothing replaced: CGB:SSC:030_LoadOnFocus (Reason Category gain/lose focus, Subscription ID still blank: loads Subscription ID, Subscriber, SKU, Current Status, Current Period) and CGB:SSC:031-034 (Billing Impact text for Hold / Release / Terminate / Terminate from hold), for Master and Config. 010_Init already moves focus to Reason Category, so they should fire as the window opens, and at the latest when a reason is picked. Retest: Place On Hold, Release Hold and Terminate on a test subscription - fields and Billing Impact filled before Confirm.",
-"target": "Rockefeller_CGB_DEF062_ReasonWindowLoad_101926.def",
+"work": "Cause: the reason window's Window Loaded chain (CGB:SSC:010_Init, 011, 020-023) runs before mid-tier copies in the console's values. Fix: 5 NEW active links on Reason Category gain/lose focus, Master + Config: CGB:SSC:030_LoadOnFocus (shows the passed Subscription ID; loads Subscriber, SKU, Current Status, Current Period) and 031-034 (Billing Impact text). v1 read Subscription ID from a field blank on UAT records; v2 shows the passed Request ID. Retest 10/19 as uat_billadmin (window clicks N. Foy, checks Claude), after clicking into Reason Category: Terminate on SUB000000000087 (Cancelled, record unchanged) - SUB000000000087 / Robin Bruckenstein-Kowitz / 13850 VM Server / Active / 'Pending Termination: billed through the 15th...'; Release Hold on SUB000000000206 - SUB000000000206 / Customer01, UAT / 13850 VM Server / On Hold / 'The subscription returns to Active...'; Place On Hold text checked in v1 retest. PASSED. Known limit: fields fill when the user clicks into Reason Category (required), not the instant the window opens; filling on open would need the console's open-window active links to pass the values. Side effect of the v1 retest: SUB000000000206 was put On Hold at 9:41:43 PM (Confirm clicked); released 9:49:00 PM with log 'Release Hold - Other: Undo accidental hold during DEF-062 retest', now Active.",
+"target": "Rockefeller_CGB_DEF062_ReasonWindowLoad_v2_101926.def",
 "created": 1792463300000,
-"updated": 1792463800000
+"updated": 1792464600000
 },
 {
 "ref": "OQ-01",
