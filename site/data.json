@@ -1,5 +1,5 @@
 {
-"generated": 1792462566057,
+"generated": 1792463294375,
 "areas": {
 "A": "Catalog items and ticket setup",
 "B": "PTAEO defaulting and validation",
@@ -1308,12 +1308,12 @@
 "Status = On Hold; Status Change Log has date, user and reason; console shows \"Status change saved.\"",
 "After Release Hold, Status = Active with a new log line."
 ],
-"status": "Blocked",
-"actual": "Retest after DEF-033: 'Place Sub On Hold' on SUB000000000205 now opens the reason window NN:CGB:SubStatusChange. Still blocked by DEF-034: retest 10/17 night as uat_billadmin shows no Confirm/Cancel buttons on NN:CGB:SubStatusChange. PARKED for N. Foy: give the buttons group permissions (DEF-034). The same blocks UT-E-07 and UT-E-23 step 3.",
-"defect": "DEF-033 (fixed), DEF-034",
-"evidence": "SUB000000000205",
-"date": "2026-10-17",
-"updated": 1792298361425
+"status": "Passed",
+"actual": "Retest 10/19 as uat_billadmin in console Admin View v2 (reason window clicks by N. Foy, checks by Claude). SUB000000000203 (UAT-906, UAT Customer01, $27.00, Active). Place Sub On Hold opens NN:CGB:SubStatusChange with Confirm/Cancel. 1) Confirm with no category: 'Select a Reason Category before confirming.' 2) Other with empty details: 'Reason Details are required when the category is Other.' 3) Billing dispute + details: console 'Status change saved. Place On Hold - Billing dispute: UT-E-05 retest 10/19'; Status = On Hold; log '10/19/2026 9:23:37 PM uat_billadmin Place On Hold - Billing dispute: UT-E-05 retest 10/19'; row moves from the Active to the On Hold list and the button becomes Release Hold. 4) Release Hold: Status = Active; new log line '10/19/2026 9:26:55 PM uat_billadmin Release Hold - Other: UT-E-05 retest - resolved'. Also: the status guard correctly refused Place On Hold on SUB000000000210 (Pending Termination since WO0000000114393, 10/19). Minor: the reason window leaves Subscription ID / Subscriber / SKU / Current Status blank until Confirm (DEF-062).",
+"defect": "DEF-033 (closed), DEF-034 (closed), DEF-062",
+"evidence": "SUB000000000203 Status Change Log 10/19 9:23:37 PM and 9:26:55 PM (uat_billadmin)",
+"date": "2026-10-19",
+"updated": 1792463300000
 },
 {
 "id": "UT-E-06",
@@ -3684,6 +3684,19 @@
 "target": "Rockefeller_CGB_Staging_1_Form / 2_Filters / 3_ActiveLinks / 4_Sweep_101926.def (supersedes Rockefeller_CGB_Import_1/2/3_101926.def)",
 "created": 1792435300000,
 "updated": 1792437000000
+},
+{
+"ref": "DEF-062",
+"case": "UT-E-05",
+"sev": "Low",
+"owner": "Claude",
+"status": "Open",
+"title": "Subscription status reason window shows blank Subscription ID, Subscriber, SKU and Current Status",
+"desc": "Found 10/19 in UT-E-05. Opening NN:CGB:SubStatusChange from the console (Place On Hold / Release Hold / Terminate) shows Action filled but Subscription ID, Subscriber Name, Service SKU and Current Status blank. The selected subscription is passed correctly (hidden Subscription Request ID) and Confirm acts on the right record; Current Status only fills when Confirm runs its recheck. CGB:SSC:011_ShowSubscriptionID runs on Window Loaded, apparently before mid-tier applies the open-window input values, and it is limited to Chargeback Config (800004). Users cannot see which subscription they are changing before confirming.",
+"work": "Planned fix (Chargeback workflow): fill Subscription ID, Subscriber Name, Service SKU, Current Status and Current Period from NN:CGB:Subscription on Window Loaded AND on Display/Set Default, for Master and Config; or pass them from the console in the open-window input.",
+"target": "",
+"created": 1792463300000,
+"updated": 1792463300000
 },
 {
 "ref": "OQ-01",
