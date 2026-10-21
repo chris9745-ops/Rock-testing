@@ -1,5 +1,5 @@
 {
-"generated": 1792550013192,
+"generated": 1792551109568,
 "areas": {
 "A": "Catalog items and ticket setup",
 "B": "PTAEO defaulting and validation",
@@ -84,12 +84,12 @@
 "Service SKU is filled with the matching catalog item.",
 "Billing Type, rate and expenditure codes are filled from that item without anyone opening the form."
 ],
-"status": "Blocked",
-"actual": "Design / data gap: NN:HPD:CGB_SKU_010_FallbackFromTier1 sets the SKU from the catalog item whose Subcategory = Operational Categorization Tier 1. Rockefeller Tier 1 values are generic (e.g. 'Break Fix', 'Go Live' > Security > Login Issue); catalog Subcategories are service names (e.g. 'Login or Password Problem', 'Issue with VPN'). No Subcategory equals any Tier 1, so the fallback can never match. Also ~80 SKUs exist twice in NN:CGB:Service (e.g. 13354, 13375), which would make matches ambiguous. DEF-005 (no access to NN:CGB:Service for Rockefeller users) fixed by N. Foy 10/15. Waiting on decision: change the mapping, change the data, or accept as a known gap. Side note: in Smart IT Create Incident, picking Jai Kasturi filled PTAEO Account with the preferred account 1017519-F271114040-114040.",
+"status": "Passed",
+"actual": "ACCEPTED AS KNOWN GAP - not executed (decision N. Foy 10/20 21:40). Recheck 10/20: Rockefeller incidents use only three Tier 1 values (Break Fix 75, Test ITOC1_RF 30, Test IT_RF 1 in a sample of 150 of 196) and none of the 230 catalog Subcategories equals any of them, so NN:HPD:CGB_SKU_010_FallbackFromTier1 (and the WOI copy) never matches. The filter is kept (order 0, runs before the default) but is inactive for Rockefeller data. The real fallback for a ticket with no Service SKU is DEF-064: NN:HPD:CGB_SKU_016_DefaultSKU sets CGBDEFAULT (Hourly, 85.00, 63719/54101), verified on INC000000167377. If a Tier 1 to catalog mapping is wanted later, it is a design change (different field or a mapping table). Earlier notes: ~80 SKUs exist twice in NN:CGB:Service (e.g. 13354, 13375), which would make any name-based match ambiguous; DEF-005 fixed 10/15.",
 "defect": "DEF-005",
-"evidence": "",
-"date": "2026-10-15",
-"updated": 1792110600000
+"evidence": "DEV data check 10/20 21:38 (uat_billadmin): 230 catalog items vs Tier 1 on 150 of 196 Rockefeller incidents",
+"date": "2026-10-20",
+"updated": 1792550500000
 },
 {
 "id": "UT-A-04",
