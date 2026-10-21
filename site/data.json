@@ -1,5 +1,5 @@
 {
-"generated": 1792554008286,
+"generated": 1792588574502,
 "areas": {
 "A": "Catalog items and ticket setup",
 "B": "PTAEO defaulting and validation",
@@ -2086,12 +2086,12 @@
 "\"Step 4 is blocked: N hosting and M storage CI(s) are missing a PTAEO. Resolve them (Steps 2-3), then run Step 4 again.\"",
 "Second click: \"Step 4 done: N staged R/UFS row(s) promoted to subscriptions...\""
 ],
-"status": "Not run",
-"actual": "Parked by N. Foy 10/17. Needs a hosting or storage CI without a PTAEO (both console counters are 0); the second Step 4 click would promote the 243 waiting 'VMWare Import' staging rows into subscriptions.",
+"status": "Passed",
+"actual": "PASSED with a hand-made test row. Created CIBilling 000000000000162 for CMDB CI UAT-PC-01 (Billing Category Hosting, Active, no PTAEO, Notes 'UT-F-12 test row'). Console: Hosting CIs missing PTAEO = 1. Step 4 click -> 'Step 4 is blocked: 1 hosting and 0 storage CI(s) are missing a PTAEO. Resolve them (Steps 2-3), then run Step 4 again.' (nothing posted). Resolved by setting the test row Inactive (counter 0), Step 4 again -> 'Step 4 done: 0 R/UFS and 0 VMware validated staging row(s) sent to posting. Rows that could not be posted are now Error on the staging form.' (no validated rows were waiting, so nothing changed). Wording differs from the original test ('...staged R/UFS row(s) promoted to subscriptions') because of the staging redesign (DEF-061). Note: the 'Resolve missing accounts' button opens a popup that the test browser blocks, so the Resolve screen itself was not exercised here.",
 "defect": "",
-"evidence": "",
-"date": "2026-10-17",
-"updated": 1792279300000
+"evidence": "CIBilling 000000000000162 (UAT-PC-01), console 10/20 22:47-22:50",
+"date": "2026-10-20",
+"updated": 1792554400000
 },
 {
 "id": "UT-G-01",
@@ -2770,12 +2770,12 @@
 "The Rockefeller CI is used (not the other tenant's); no error from duplicate names.",
 "The view lists no other-tenant CIs."
 ],
-"status": "Not run",
-"actual": "",
+"status": "Blocked",
+"actual": "Partial check 10/20 22:52 as uat_billadmin. The missing-PTAEO view NN:CGB:CIBilling_MissingPAO_Join is BMC.CORE:BMC_BaseElement (all CMDB CIs, every tenant) outer-joined to NN:CGB:CIBilling; it has no company filter of its own. Company = The Rockefeller University: 17,149 rows; other companies: 2,000+ rows, which uat_billadmin sees as blank rows (CI Name, Class, Category empty - CMDB row-level security hides the values). So unless the Resolve Missing Accounts screen filters by company in its table qualification, Billing Admin would see blank other-tenant rows (same symptom as DEF-037 for technicians). Could not open that screen here: the console button opens a popup, which the test browser blocks. R Stuff part needs UAT-SRV-01 and a same-named other-tenant CI (TD-06). Needs N. Foy: open Resolve missing accounts as uat_billadmin, Show = All, no filter, and check for blank / non-Rockefeller rows.",
 "defect": "",
 "evidence": "",
-"date": "",
-"updated": null
+"date": "2026-10-20",
+"updated": 1792554500000
 },
 {
 "id": "UT-J-06",
