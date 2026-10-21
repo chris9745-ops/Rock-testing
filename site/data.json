@@ -1,5 +1,5 @@
 {
-"generated": 1792552049241,
+"generated": 1792553181582,
 "areas": {
 "A": "Catalog items and ticket setup",
 "B": "PTAEO defaulting and validation",
@@ -1479,12 +1479,12 @@
 "SUB-RUFS-02: Quantity 0, charge 0.00 (under 1 TB).",
 "Unknown ID and duplicate line are staging errors; the report counts them."
 ],
-"status": "Blocked",
-"actual": "Parked - needs your attention: no TD-08 R/UFS staging rows loaded. The staging form holds 160 'Wireless Import' New rows from another source; running Step 1 would process all of them, so it was not run.",
-"defect": "",
-"evidence": "",
-"date": "2026-10-17",
-"updated": 1792254900000
+"status": "Passed",
+"actual": "PASSED with hand-made test data (N. Foy OK 22:07). Test subscriptions (UAT Customer01, SKU 13350 RUFS/RUCFS Collaborative, R/UFS Soft Provision, $25/TB): SUB000000000218 = Legacy SUB-RUFS-01, SUB000000000219 = SUB-RUFS-02. Staging file UAT_rufs_20261020.csv (period 202610): STG407 SUB-RUFS-01 1,536 GB, STG408 SUB-RUFS-02 800 GB, STG409 unknown SUB-RUFS-99, STG410 duplicate SUB-RUFS-01 line. Console R/UFS note: '2 staging row(s) validated - run Step 4 to post them; 2 row(s) in error; 0 still New'. STG409 Error 'No R/UFS subscription with this Legacy Sub ID; subscriptions are never created from the usage file'; STG410 Error 'Subscription ID appears more than once in this file; first row already applied'. Step 4 note: '2 R/UFS and 0 VMware validated staging row(s) sent to posting'. Result: SUB218 Quantity 2.0, Subscription Charge Amount 50.00, RUFS Usage 1536 GB / 202610; SUB219 Quantity 0.0, charge 0.00, 800 GB / 202610. Minor: the staging Processing Log says 'period Qty 0 TB, Charge 0' and 'WARNING: Helix computed 0 TB from 1536 GB but the file says 2 TB' - it reads the values before the subscription is updated (phase 2), so the log and warning are wrong although the subscription is right.",
+"defect": "DEF-061",
+"evidence": "SUB000000000218/219, STG000000000407-410, console notes 22:15-22:17",
+"date": "2026-10-20",
+"updated": 1792553300000
 },
 {
 "id": "UT-E-13",
@@ -1503,12 +1503,12 @@
 "\"RUFS file <name> was already added to this subscription for period <YYYY-MM>. Nothing changed.\"",
 "\"RUFS usage period <older> is older than period <current> already on this subscription. Nothing changed.\""
 ],
-"status": "Blocked",
-"actual": "Parked: depends on UT-E-12 test data (TD-08 R/UFS rows).",
-"defect": "",
-"evidence": "",
-"date": "2026-10-17",
-"updated": 1792254900000
+"status": "Passed",
+"actual": "PASSED with notes. (1) Same file again: STG411 (SUB-RUFS-01, UAT_rufs_20261020.csv) is stopped at validation with 'Subscription ID appears more than once in this file; first row already applied' - nothing changed (SUB218 still 2 TB / 50.00). The wording differs from the expected 'RUFS file <name> was already added to this subscription for period <YYYY-MM>. Nothing changed.' (that subscription-side message is now only a backstop). (2) Older period: STG412 (SUB-RUFS-02, UAT_rufs_20260920.csv, 202609) validated, then Step 4 -> subscription rejected it: 'RUFS usage period 202609 is older than period 202610 already on this subscription. Nothing changed.'; SUB219 unchanged (0 TB, 0.00, 800 GB, 202610). Defect found: STG412 shows Status = Posted (Error = Yes) instead of Error - same phase-2 issue as wireless; fix Rockefeller_CGB_DEF061_StagingErrorHandlers_102026.def (RUFS/VM/PAO/RS _900 handlers set Error).",
+"defect": "DEF-061",
+"evidence": "STG000000000411/412, SUB000000000218/219 10/20 22:18-22:24",
+"date": "2026-10-20",
+"updated": 1792553300000
 },
 {
 "id": "UT-E-14",
@@ -1622,11 +1622,11 @@
 "Report gives processed / error counts and the hosting CIs still missing a PTAEO."
 ],
 "status": "Blocked",
-"actual": "Parked: no TD-08 R Stuff staging rows loaded.",
+"actual": "Parked: needs CMDB server CIs. No UAT-SRV-01/02/03 exist in BMC.ASSET (checked 10/20 22:25; only UAT-PC-01 and UAT-PC-MSS computer systems). R Stuff validation looks the server up in BMC.ASSET, so UAT-SRV-01 and UAT-SRV-03 (IT owned) must be created in the CMDB first; UAT-SRV-02 stays absent on purpose. Then Claude can stage the R Stuff rows by hand (approved 10/20).",
 "defect": "",
 "evidence": "",
 "date": "2026-10-17",
-"updated": 1792254900000
+"updated": 1792553300000
 },
 {
 "id": "UT-E-19",
@@ -1648,11 +1648,11 @@
 "UAT-SRV-02 staging row is in error (server not in BMC.ASSET); nothing created."
 ],
 "status": "Blocked",
-"actual": "Parked: no TD-08 R Stuff staging rows loaded.",
+"actual": "Parked with UT-E-18: needs CMDB server CIs UAT-SRV-01 and UAT-SRV-03 (IT owned) in BMC.ASSET. Note for the counter check: after any import button, the console 'Hosting CIs missing PTAEO' tile showed the import's validated count (2, then 1) instead of the real 0 until the console was reopened - see DEF-066.",
 "defect": "",
 "evidence": "",
 "date": "2026-10-17",
-"updated": 1792254900000
+"updated": 1792553300000
 },
 {
 "id": "UT-E-20",
@@ -1674,12 +1674,12 @@
 "Re-import adds no second pair.",
 "A NN:CGB:WirelessImportSnapshot row exists for the phone."
 ],
-"status": "In Progress",
-"actual": "Partly PASSED with the real carrier file (DEF-061, 10/20): two phones given the test PTAEO 1000999-F271999999-999999 posted one ledger pair each - WLS-2032159070-2026-10 123.65 (LDG271/272) and WLS-2129603516-2026-10 198.37 (LDG273/274), SKU 13276 Telephone (Wireless) (decision N. Foy: no 'Wireless' catalog item; use 13276), codes 63210/54397, IT credit 1000028-F271110510-110510; no subscription created; a WirelessImportSnapshot row per phone; re-running Validate leaves Posted rows untouched. Not yet shown: (b) a phone with no CI -> staging error, (c) a $0.00 line posts nothing, (d) re-import of the same phone/period adds no second pair. Needs either a carrier file with those lines or N. Foy's OK to stage test rows by hand.",
+"status": "Passed",
+"actual": "PASSED (DEF-061 staging design, SKU 13276 per N. Foy). Real-file rows: STG001/002 posted one pair each - WLS-2032159070-2026-10 123.65 (LDG271/272) and WLS-2129603516-2026-10 198.37 (LDG273/274), debit 1000999-F271999999-999999 / IT credit 1000028-F271110510-110510, SKU 13276, codes 63210/54397, period 2026-10; no subscription created; snapshot rows written. Hand-made rows 10/20 22:08 (file UAT_handmade_E20.csv, N. Foy OK): STG404 phone 2125550199 (no CI) = Error 'No wireless CI found: set Phone Number on its CI billing record (category Wireless), or name the CMDB CI with the phone number' - nothing posted; STG405 2032159070 0.00 = Posted, no ledger row; STG406 2032159070 123.65 again for 2026-10 = Posted, matched the existing pair, ledger still 4 WLS rows (no second pair). Console Wireless note: '2 staging row(s) validated - use Post validated rows on the staging form to post them; 159 row(s) in error; 0 still New'. Notes: a WirelessImportSnapshot row is written for every posted row, so the 0.00 line and the repeat each added one (6 rows for 2 phones); review whether the snapshot should be one row per phone per period (affects UT-E-21).",
 "defect": "DEF-061",
-"evidence": "STG000000000001/002, LDG000000000271-274, WirelessImportSnapshot 003/004",
+"evidence": "STG000000000001/002/404/405/406, LDG000000000271-274, WirelessImportSnapshot 001-006",
 "date": "2026-10-20",
-"updated": 1792552000000
+"updated": 1792553300000
 },
 {
 "id": "UT-E-21",
@@ -1722,11 +1722,11 @@
 "Notification to the PAO key members: NOT BUILT YET (expected to fail until delivered)."
 ],
 "status": "Blocked",
-"actual": "Parked - data: UAT Customer04 has no subscription to put On Hold. Notification part is NOT BUILT (expected fail).",
+"actual": "Data ready 10/20 22:27: SUB000000000220 created for UAT Customer04 (UAT-906, 9.00, Active, Assignee Groups 'uat_customer04'). Next: set UAT Customer04 (PPL000000047104) Profile Status = Offline in CTM:People (N. Foy, or Claude with OK) and check SUB220 goes On Hold with the log line. Notification part is NOT BUILT (expected fail).",
 "defect": "",
 "evidence": "",
 "date": "2026-10-17",
-"updated": 1792254900000
+"updated": 1792553300000
 },
 {
 "id": "UT-E-23",
@@ -3680,7 +3680,7 @@
 "status": "In test",
 "title": "Chargeback imports: move from RequestBridge to new NN:CGB:ChargebackStaging_Interface",
 "desc": "Found 10/19. Each import button (CGB:Admin:IMP_PAO/RStuff/RUFS/VMware/Wireless_*) counts waiting staging rows, pushes z1D_Action to process them, shows a Note-type message, then opens NN:RequestBridge_Interface. Problems: (1) the open-window step has no qualification and a nonexistent view ('Admin View'; the form's view is 'Default Administrator View'), so it opens in empty Search mode. (2) The 970 loaded VMware rows have Application Type 'VMWare Import' but the workflow looks for 'VM Import', so the count is 0 and nothing is processed. (3) The Atrium Integrator column layouts don't match the workflow. VMware row: F01=06/25/2026, F02=AAARAD, F03=VirtualMachine-vm-814487, F04=TRUE, F05=2, F10=4, F11=100, F12=250; the workflow expects F01=VM Name, F02=CPU, F03=RAM, F04=Storage, F05=Backup, F10=OS, F11=Legacy ID. Wireless row: F01=phone, F02=123.65, F03=att, F04=file path; the workflow expects F03=Amount and F04=period YYYY-MM, so pressing Wireless would charge 'att' as the amount. (4) The count/result messages are Notes (status bar only). PAO: only 3 rows, all already Completed/Error. RUFS: no rows loaded.",
-"work": "Imported 10/19. Test 14:00-14:05 as uat_billadmin. UT-L-01 form OK. UT-L-02 old path off: console Wireless button runs the staging chain and leaves RequestBridge untouched. UT-L-03 sweep OK: 160 Wireless and 243 VMware rows staged (the other 727 VMware rows move on the next runs); source RB rows Completed/Promoted with 'Moved to ... STG...'; Received date copies the RB Create Date (1/29/1970, set that way by Atrium Integrator). UT-L-05 mapping OK (Wireless phone/amount/carrier; VMware AAARAD 2/4/100/TRUE/Machine ID). UT-L-06 validate OK: 160 Wireless rows Error 'The wireless CI has no PTAEO; add it on its CI billing record (Steps 2-3)' - CI found by CMDB name, IT PTAEO and period 2026-10 set; genuine data gap. Bug: the console 'open staging rows' step (winmod Modify) opens an empty Search - fix Rockefeller_CGB_OpenWindow_Display_Fix_101926.def (Display mode; also Refund Requests). 15:44 retest by N. Foy (own browser, console Admin View v2): Wireless button note shows 0 validated / 160 error / 0 New, OK opens NN:CGB:ChargebackStaging_Interface with '160 of 160 results', all Wireless Import / Error - open-window fix PASSED. Added console count 'CIs Missing PTAEO: Wireless' (field 537889311 + Rockefeller_CGB_Console_WirelessMissingPTAEO_2_ActiveLink_101926.def). 10/20 20:55 (uat_billadmin): console form field added (Rockefeller_CGB_Console_WirelessMissingPTAEO_1_Form_102026.def, Admin View v2 tile) + active link imported; tile shows 160 - PASSED (v2 of the form DEF adds the missing tile border, optional). Decision N. Foy: test PTAEO on 2 CIs. CIBilling 000000000000001 (2032159070) and 000000000000002 (2129603516) given 1000999-F271999999-999999 (UAT-DEPT-01; the planned 1000999-F271999989-999989 does not exist in NN:CGB:Account). Re-validate 20:58: those rows pass the PTAEO check but all 160 now fail 'No active catalog item named Wireless' - WLS_330 looks up NN:CGB:Service by Service = 'Wireless' and no such item exists (Service holds the family, e.g. Device Support). Decision N. Foy 21:05: use SKU 13276 Telephone (Wireless), codes 63210/54397. Fix: Rockefeller_CGB_DEF061_WirelessSKU13276_102026.def (WLS_330 lookup by SKU 13276; WLS_332 message). 21:04 imported; re-validate: STG000000000001/002 Validated (SKU 13276, debit 1000999-F271999999-999999, IT credit 1000028-F271110510-110510, period 2026-10), 158 Error (no PTAEO) - PASSED. 21:06 post with N. Foy's OK: FAILED - both ledger pushes ARERR 306 (Ledger Pair ID max length 10; wireless pair WLS-<phone>-<period> is 22), no ledger rows written, but both staging rows show Posted (Push Fields run in phase 2, after WLS_350_Complete set Posted; Error = Yes + message set by WLS_900). Side effect: 2 rows written to NN:CGB:WirelessImportSnapshot (000000000000001/002) by the failed attempt. Fix: Rockefeller_CGB_DEF061_WirelessPostFix_102026.def (Ledger Pair ID length 40, keeping the DEF-053 Request ID change; WLS_900 sets Status Error, clears Target Record ID / Posted Date, logs 'Wireless post failed'). 21:12 fix imported (N. Foy). STG000000000001/002 reset to Validated (Error No, Target Record ID and Posted Date cleared) with N. Foy's OK, then posted 21:16 - PASSED: both rows Posted, Error No, Target = CI recon ID; ledger pairs LDG000000000271/272 (WLS-2032159070-2026-10, 123.65) and 273/274 (WLS-2129603516-2026-10, 198.37): debit 1000999-F271999999-999999 / credit 1000028-F271110510-110510, SKU 13276, codes 63210/54397 (credit row reversed), period 2026-10, Related CI = phone, Customer Award F271999999. Notes: (a) Source Reference Type, Billing Pathway and Billing Type are all '4000 Manual Entry' (as designed in WLS_340/341); (b) Assignee Groups empty - wireless rows have no customer login, so customers do not see them; (c) the staging rows keep the old 306 text in Error Message after a successful post (cosmetic); (d) NN:CGB:WirelessImportSnapshot has 4 rows - 000000000000001/002 from the failed 21:06 attempt duplicate 003/004 (left in place, no deletes). 21:20 guard: re-ran Wireless 'Validate this import' - Posted rows untouched (modified date unchanged), 158 Error, ledger still 4 WLS rows - PASSED. VMware: 243 staged rows (file vmware_20260911_1100.csv) all Error 'No live VM Hosting subscription...' - correct, no real VM name matches the 4 UAT VM subs. The 727 VMware rows left in RequestBridge are the 20261011 file loaded 3 times (243 distinct VMs), all Error = Yes from the old workflow ('No subscription_ref found.'), so the sweep correctly skips them. Match test (N. Foy OK): SUB000000000207 Legacy Sub ID set to VirtualMachine-vm-814487; re-validate -> STG000000000161 (AAARAD 2/4/100, backup TRUE) Validated, matched SUB207, 242 Error - PASSED. Post 21:27 (N. Foy OK): STG161 Posted, Target SUB000000000207; SUB207 VM Name uat-vm-02 -> AAARAD (VM file is the name source), CPU/RAM/Storage unchanged 2/4/100, VM Backup No -> Yes, VM Last Sync set. OPEN: SUB207 rate stayed 260.00 and no 'VM rate recalculated' log line, although Backup changed to Yes and the Backup price component (28.00) is active - expected 288.00 if backup is still part of the VM rate. Possibly intended if Chris's DEF-059 work (VM Backup as a separate child subscription) took backup out of the VM rate; needs the current VMRate_039/040 definitions to confirm. Test data: SUB207 now VM Name AAARAD, Legacy Sub ID VirtualMachine-vm-814487, Backup Yes. 21:31 N. Foy: VM backup is out of the VM rate and is its own child subscription - so SUB207 staying 260.00 is correct (PASSED). The post also created the child: SUB000000000217 (21:27:19, uat_billadmin), SKU 13292 Enterprise Server Backup, 28.00/month, uat_customer01, PTAEO 1000999-F271999999-999999, Originating Ticket SUB000000000207, log 'Backup for VM uat-vm-02 (SUB000000000207)'. Notes for Chris (DEF-059): (a) the child's Related CI and log use the old VM name uat-vm-02, while the same post renamed the parent to AAARAD; (b) child rate 28.00 comes from the VM Pricing Backup component, while catalog SKU 13292 says 24.00 - which is authoritative?; (c) SUB206 (428.00) and SUB208 (288.00) still have Backup = Yes with backup inside the VM rate and no child yet - existing VM subs need a migration. Remaining for DEF-061: real PTAEOs for the other 158 wireless CIs.",
+"work": "Imported 10/19. Test 14:00-14:05 as uat_billadmin. UT-L-01 form OK. UT-L-02 old path off: console Wireless button runs the staging chain and leaves RequestBridge untouched. UT-L-03 sweep OK: 160 Wireless and 243 VMware rows staged (the other 727 VMware rows move on the next runs); source RB rows Completed/Promoted with 'Moved to ... STG...'; Received date copies the RB Create Date (1/29/1970, set that way by Atrium Integrator). UT-L-05 mapping OK (Wireless phone/amount/carrier; VMware AAARAD 2/4/100/TRUE/Machine ID). UT-L-06 validate OK: 160 Wireless rows Error 'The wireless CI has no PTAEO; add it on its CI billing record (Steps 2-3)' - CI found by CMDB name, IT PTAEO and period 2026-10 set; genuine data gap. Bug: the console 'open staging rows' step (winmod Modify) opens an empty Search - fix Rockefeller_CGB_OpenWindow_Display_Fix_101926.def (Display mode; also Refund Requests). 15:44 retest by N. Foy (own browser, console Admin View v2): Wireless button note shows 0 validated / 160 error / 0 New, OK opens NN:CGB:ChargebackStaging_Interface with '160 of 160 results', all Wireless Import / Error - open-window fix PASSED. Added console count 'CIs Missing PTAEO: Wireless' (field 537889311 + Rockefeller_CGB_Console_WirelessMissingPTAEO_2_ActiveLink_101926.def). 10/20 20:55 (uat_billadmin): console form field added (Rockefeller_CGB_Console_WirelessMissingPTAEO_1_Form_102026.def, Admin View v2 tile) + active link imported; tile shows 160 - PASSED (v2 of the form DEF adds the missing tile border, optional). Decision N. Foy: test PTAEO on 2 CIs. CIBilling 000000000000001 (2032159070) and 000000000000002 (2129603516) given 1000999-F271999999-999999 (UAT-DEPT-01; the planned 1000999-F271999989-999989 does not exist in NN:CGB:Account). Re-validate 20:58: those rows pass the PTAEO check but all 160 now fail 'No active catalog item named Wireless' - WLS_330 looks up NN:CGB:Service by Service = 'Wireless' and no such item exists (Service holds the family, e.g. Device Support). Decision N. Foy 21:05: use SKU 13276 Telephone (Wireless), codes 63210/54397. Fix: Rockefeller_CGB_DEF061_WirelessSKU13276_102026.def (WLS_330 lookup by SKU 13276; WLS_332 message). 21:04 imported; re-validate: STG000000000001/002 Validated (SKU 13276, debit 1000999-F271999999-999999, IT credit 1000028-F271110510-110510, period 2026-10), 158 Error (no PTAEO) - PASSED. 21:06 post with N. Foy's OK: FAILED - both ledger pushes ARERR 306 (Ledger Pair ID max length 10; wireless pair WLS-<phone>-<period> is 22), no ledger rows written, but both staging rows show Posted (Push Fields run in phase 2, after WLS_350_Complete set Posted; Error = Yes + message set by WLS_900). Side effect: 2 rows written to NN:CGB:WirelessImportSnapshot (000000000000001/002) by the failed attempt. Fix: Rockefeller_CGB_DEF061_WirelessPostFix_102026.def (Ledger Pair ID length 40, keeping the DEF-053 Request ID change; WLS_900 sets Status Error, clears Target Record ID / Posted Date, logs 'Wireless post failed'). 21:12 fix imported (N. Foy). STG000000000001/002 reset to Validated (Error No, Target Record ID and Posted Date cleared) with N. Foy's OK, then posted 21:16 - PASSED: both rows Posted, Error No, Target = CI recon ID; ledger pairs LDG000000000271/272 (WLS-2032159070-2026-10, 123.65) and 273/274 (WLS-2129603516-2026-10, 198.37): debit 1000999-F271999999-999999 / credit 1000028-F271110510-110510, SKU 13276, codes 63210/54397 (credit row reversed), period 2026-10, Related CI = phone, Customer Award F271999999. Notes: (a) Source Reference Type, Billing Pathway and Billing Type are all '4000 Manual Entry' (as designed in WLS_340/341); (b) Assignee Groups empty - wireless rows have no customer login, so customers do not see them; (c) the staging rows keep the old 306 text in Error Message after a successful post (cosmetic); (d) NN:CGB:WirelessImportSnapshot has 4 rows - 000000000000001/002 from the failed 21:06 attempt duplicate 003/004 (left in place, no deletes). 21:20 guard: re-ran Wireless 'Validate this import' - Posted rows untouched (modified date unchanged), 158 Error, ledger still 4 WLS rows - PASSED. VMware: 243 staged rows (file vmware_20260911_1100.csv) all Error 'No live VM Hosting subscription...' - correct, no real VM name matches the 4 UAT VM subs. The 727 VMware rows left in RequestBridge are the 20261011 file loaded 3 times (243 distinct VMs), all Error = Yes from the old workflow ('No subscription_ref found.'), so the sweep correctly skips them. Match test (N. Foy OK): SUB000000000207 Legacy Sub ID set to VirtualMachine-vm-814487; re-validate -> STG000000000161 (AAARAD 2/4/100, backup TRUE) Validated, matched SUB207, 242 Error - PASSED. Post 21:27 (N. Foy OK): STG161 Posted, Target SUB000000000207; SUB207 VM Name uat-vm-02 -> AAARAD (VM file is the name source), CPU/RAM/Storage unchanged 2/4/100, VM Backup No -> Yes, VM Last Sync set. OPEN: SUB207 rate stayed 260.00 and no 'VM rate recalculated' log line, although Backup changed to Yes and the Backup price component (28.00) is active - expected 288.00 if backup is still part of the VM rate. Possibly intended if Chris's DEF-059 work (VM Backup as a separate child subscription) took backup out of the VM rate; needs the current VMRate_039/040 definitions to confirm. Test data: SUB207 now VM Name AAARAD, Legacy Sub ID VirtualMachine-vm-814487, Backup Yes. 21:31 N. Foy: VM backup is out of the VM rate and is its own child subscription - so SUB207 staying 260.00 is correct (PASSED). The post also created the child: SUB000000000217 (21:27:19, uat_billadmin), SKU 13292 Enterprise Server Backup, 28.00/month, uat_customer01, PTAEO 1000999-F271999999-999999, Originating Ticket SUB000000000207, log 'Backup for VM uat-vm-02 (SUB000000000207)'. Notes for Chris (DEF-059): (a) the child's Related CI and log use the old VM name uat-vm-02, while the same post renamed the parent to AAARAD; (b) child rate 28.00 comes from the VM Pricing Backup component, while catalog SKU 13292 says 24.00 - which is authoritative?; (c) SUB206 (428.00) and SUB208 (288.00) still have Backup = Yes with backup inside the VM rate and no child yet - existing VM subs need a migration. 22:05-22:24 UT-E-20/12/13 with hand-made rows (N. Foy OK): wireless no-CI, 0.00 and repeat lines behave correctly; R/UFS validate + Step 4 correct (SUB218 2 TB / 50.00, SUB219 0 / 0.00; unknown ID and duplicate line in Error; older period rejected by the subscription). New findings: (e) STG000000000412 (older R/UFS period, rejected by the subscription) still shows Posted (Error = Yes) - same phase-2 issue as WLS; fix Rockefeller_CGB_DEF061_StagingErrorHandlers_102026.def (RUFS/VM/PAO/RS _900 handlers set Status Error, clear Target/Posted Date, log '<type> post failed'); (f) R/UFS Processing Log 'period Qty 0 TB, Charge 0' and 'WARNING: Helix computed 0 TB ... file says 2 TB' are read before the subscription is updated - wrong text, subscription correct (Low); (g) a same-file reload is stopped by the in-file duplicate check, so the subscription's 'RUFS file ... already added' message is never shown (OK, wording differs from the test); (h) WirelessImportSnapshot gets a row for every posted row (incl. 0.00 and repeats). Console tile issue logged as DEF-066. Remaining for DEF-061: import the error-handler DEF; real PTAEOs for the other 158 wireless CIs.",
 "target": "Rockefeller_CGB_Staging_1_Form / 2_Filters / 3_ActiveLinks / 4_Sweep_101926.def (supersedes Rockefeller_CGB_Import_1/2/3_101926.def)",
 "created": 1792435300000,
 "updated": 1792437000000
@@ -3736,6 +3736,19 @@
 "target": "Rockefeller_CGB_WO_ChargebackTab_2_DEF065_ActiveLinks_v3_102026.def + _1_Form_v3b_test_102026.def (imported 10/20)",
 "created": 1792533200000,
 "updated": 1792534900000
+},
+{
+"ref": "DEF-066",
+"case": "UT-E-19",
+"sev": "Low",
+"owner": "Claude",
+"status": "Open",
+"title": "Console 'Hosting CIs missing PTAEO' tile shows the last import's count after an import button",
+"desc": "Found 10/20 22:10-22:18 as uat_billadmin on NN:CGB:AdminConsole Admin View v2. Fresh console: Hosting CIs missing PTAEO = 0 (correct - no hosting CIBilling row lacks a PTAEO). After the Wireless button (2 validated) the tile showed 2; after the R/UFS button (2 validated) 2; after the second R/UFS run (1 validated) 1. Reopening the console shows 0 again. The tile appears to be refreshed after the button from $LASTCOUNT$ of the import's own query instead of its CIBilling count. Step 4 stops while this counter is above 0, so a wrong value could block Step 4 until the console is reopened.",
+"work": "Needs the console counter active links (CGB:Admin:SetCount_CIMissingPTAEO_Hosting and the import-button links) from an export to confirm and fix: re-run the hosting count query after each button, or move the refresh before the import's own count.",
+"target": "",
+"created": 1792553300000,
+"updated": 1792553300000
 },
 {
 "ref": "OQ-01",
