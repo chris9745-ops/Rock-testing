@@ -1,5 +1,5 @@
 {
-"generated": 1792551510097,
+"generated": 1792552049241,
 "areas": {
 "A": "Catalog items and ticket setup",
 "B": "PTAEO defaulting and validation",
@@ -1381,12 +1381,12 @@
 "Status Change Log line names the Work Order number.",
 "No ledger rows for this Work Order."
 ],
-"status": "Blocked",
-"actual": "Blocked by DEF-038: Smart IT Edit Work Order has no Subscription ID / Subscription Action / Subscription Billing Type / VM Name fields, and classic WOI:WorkOrder redirects uat_technician to SHR:LandingConsole when a record loads (New mode needs the person-search popup). WO0000000114386 created (UAT Customer01, SKU UAT-906, Billing Type Subscription, PTAEO defaulted to ACCT-A) but the subscription fields cannot be set.",
+"status": "Passed",
+"actual": "PASSED via the DWP route (the request is raised in DWP 'My Subscriptions & Charges' and the technician completes the Work Order). WO0000000114394 (DWP request 35453, 'Change PTAEO' for SUB000000000203, completed by uat_technician 10/19 8:14 AM): SUB203 PTAEO Debit Account = 1000989-F271999989-999989; Status Change Log '10/19/2026 8:14:17 AM uat_technician - WO0000000114394: PTAEO changed to 1000989-F271999989-999989'; no ledger rows for the Work Order (Source Reference / Pair ID search = 0). Starting the action by hand in Smart IT is still DEF-038 (no Subscription fields on the SV views).",
 "defect": "DEF-038",
-"evidence": "WO0000000114386",
-"date": "2026-10-17",
-"updated": 1792255200000
+"evidence": "SUB000000000203 Status Change Log + ledger search, 10/20 22:05 (uat_billadmin)",
+"date": "2026-10-20",
+"updated": 1792552000000
 },
 {
 "id": "UT-E-09",
@@ -1427,12 +1427,12 @@
 "exp": [
 "Status = Pending Termination; effective date = 15th 23:59:59 of the current period; log names the Work Order."
 ],
-"status": "Blocked",
-"actual": "Blocked by DEF-038: Smart IT Edit Work Order has no Subscription ID / Subscription Action / Subscription Billing Type / VM Name fields, and classic WOI:WorkOrder redirects uat_technician to SHR:LandingConsole when a record loads (New mode needs the person-search popup).",
+"status": "Passed",
+"actual": "PASSED via the DWP route. WO0000000114393 (DWP 'Cancel', completed by uat_technician 10/19 10:04 AM): SUB000000000210 Status = Pending Termination; Termination Effective Date = 10/15/2026 (date field - the 15th of the current period, same as UT-E-07); log '10/19/2026 10:04:39 AM uat_technician - WO0000000114393: termination requested; billing continues to the end of the current period'; no ledger rows for the Work Order. Minor: the log also has a second, undated line 'WO0000000114393: termination requested' (a second filter appends without the date/user header) - cosmetic. Terminated status after the escalation is checked with UT-E-07.",
 "defect": "DEF-038",
-"evidence": "",
-"date": "2026-10-17",
-"updated": 1792255200000
+"evidence": "SUB000000000210 Status Change Log + ledger search, 10/20 22:05 (uat_billadmin)",
+"date": "2026-10-20",
+"updated": 1792552000000
 },
 {
 "id": "UT-E-11",
@@ -1574,12 +1574,12 @@
 "Report: \"VMware: N staged VM row(s) waiting for Step 4; M row(s) in error.\"",
 "After Step 4 the configuration matches the file and Billable Rate = 250.00; Last Sync filled."
 ],
-"status": "Blocked",
-"actual": "Parked: no TD-08 VMware staging rows. Also staging rows are labelled 'VMWare Import' while the console counts 'VM Import' - counts will not match.",
-"defect": "DEF-036",
-"evidence": "",
-"date": "2026-10-17",
-"updated": 1792254900000
+"status": "Passed",
+"actual": "PASSED with the staging design (DEF-061). Console VMware button note: 'VMware import: 0 staging row(s) validated - run Step 4 to post them; 242 row(s) in error (see Error Message); 0 still New. Opening the VMware staging rows.' Real file row STG000000000161 (AAARAD 2 cores / 4 GB / 100 GB, backup TRUE) matched UAT VM subscription SUB000000000207 by Legacy Sub ID (set for the test), validated and posted 10/20 21:27: SUB207 config 2/4/100, VM Backup Yes, VM Last Sync filled, VM Name = AAARAD from the file, rate 260.00. Differences from the written test: Base VM is 260 (not 250, decision 10/19); backup is now its own child subscription (SUB000000000217, SKU 13292, 28.00) per N. Foy 10/20, so the VM rate excludes it; the row was posted with the staging form's 'Post validated rows' (Step 4 posts the same Validated rows). The 242 other staged VMs have no matching subscription (correct).",
+"defect": "DEF-061",
+"evidence": "STG000000000161 / SUB000000000207, console VMware note 10/20 22:06",
+"date": "2026-10-20",
+"updated": 1792552000000
 },
 {
 "id": "UT-E-17",
@@ -1674,12 +1674,12 @@
 "Re-import adds no second pair.",
 "A NN:CGB:WirelessImportSnapshot row exists for the phone."
 ],
-"status": "Blocked",
-"actual": "Parked: TD-08 wireless rows not loaded; 160 'Wireless Import' New rows from another source are in staging - running Step 1 would post all of them. Needs your decision.",
-"defect": "",
-"evidence": "",
-"date": "2026-10-17",
-"updated": 1792254900000
+"status": "In Progress",
+"actual": "Partly PASSED with the real carrier file (DEF-061, 10/20): two phones given the test PTAEO 1000999-F271999999-999999 posted one ledger pair each - WLS-2032159070-2026-10 123.65 (LDG271/272) and WLS-2129603516-2026-10 198.37 (LDG273/274), SKU 13276 Telephone (Wireless) (decision N. Foy: no 'Wireless' catalog item; use 13276), codes 63210/54397, IT credit 1000028-F271110510-110510; no subscription created; a WirelessImportSnapshot row per phone; re-running Validate leaves Posted rows untouched. Not yet shown: (b) a phone with no CI -> staging error, (c) a $0.00 line posts nothing, (d) re-import of the same phone/period adds no second pair. Needs either a carrier file with those lines or N. Foy's OK to stage test rows by hand.",
+"defect": "DEF-061",
+"evidence": "STG000000000001/002, LDG000000000271-274, WirelessImportSnapshot 003/004",
+"date": "2026-10-20",
+"updated": 1792552000000
 },
 {
 "id": "UT-E-21",
