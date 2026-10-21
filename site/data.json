@@ -1,5 +1,5 @@
 {
-"generated": 1792553181582,
+"generated": 1792553593087,
 "areas": {
 "A": "Catalog items and ticket setup",
 "B": "PTAEO defaulting and validation",
@@ -2864,11 +2864,11 @@
 "With a row: \"<Item> <id> updated.\" and the change is saved and audited."
 ],
 "status": "Blocked",
-"actual": "Retest 10/18 after the overnight DEF and cache flush, as uat_billadmin. Ledger -> Post Charge Processing -> PAO Wallet -> Subscription -> Chargeback Ledger: each choice brings its own panel and table to the front (the PAO Wallet and Ledger focus problem is fixed). Still blocked: Account, Department, Service and VM Pricing have no panel on NN:CGB:AdminConsole (536870949-952, form change by N. Foy).",
+"actual": "Retest 10/18: Ledger, Post Charge Processing, PAO Wallet, Subscription switch correctly. 10/20 22:35: Account, Department, Service and VM Pricing Component still leave the Ledger panel showing - cause found: their panels (536870949-952) exist on Admin View v2 but have no permissions, so they are never rendered (DEF-050). Fix built: Rockefeller_CGB_DEF050_ConsoleModulePanels_102026.def (panels visible to Config + Master; Master added where Config had access, DEF-054). Retest after import.",
 "defect": "DEF-050",
 "evidence": "NN:CGB:AdminConsole",
 "date": "2026-10-18",
-"updated": 1792325800000
+"updated": 1792554000000
 },
 {
 "id": "UT-K-04",
@@ -3533,14 +3533,14 @@
 "ref": "DEF-050",
 "case": "UT-K-03",
 "sev": "Medium",
-"owner": "N. Foy",
-"status": "Open - form change",
+"owner": "Claude",
+"status": "Fix built - import pending",
 "title": "Admin Console Module selection does not switch the panel",
 "desc": "Choosing Account, Subscription or Post Charge Processing in Module leaves the Ledger tab and table showing. Active links CGB:Admin:Module_* show/hide panels 536870947-536870953 and 536870923, but 536870949-536870952 (presumably the Account / Department / Service / VM Pricing panels) do not exist on NN:CGB:AdminConsole. Only Panel_CGB, Panel_Subscription, Panel_PAOWallet and Panel_PostChargeProcessing are on the form.",
-"work": "(a) Focus fix verified 10/18: Ledger, Subscription, PAO Wallet and Post Charge Processing switch correctly. (b) Still open (N. Foy, form change): add the Account, Department, Service and VM Pricing panels (536870949-952) to NN:CGB:AdminConsole. Their active links already focus them.",
+"work": "(a) Focus fix verified 10/18: Ledger, Subscription, PAO Wallet and Post Charge Processing switch correctly. (b) Recheck 10/20 22:35 (uat_billadmin, Admin View v2): the CGBALL 102026 export shows Panel_Account/Department/Service/VMPricingComponent (536870949-952) ARE on Admin View v2 inside the module page holder 536870946, with their tables, buttons and detail fields, but the four panels have no permissions at all, so the mid-tier never renders them (the page holder only contains Ledger, Subscription, PAO Wallet, Post Charge Processing). Picking Account leaves the Ledger tab showing. Fix: Rockefeller_CGB_DEF050_ConsoleModulePanels_102026.def - the four panels get view for 800004 Config and 800003 Master; plus DEF-054: 111 console fields that Config had but Master did not now include Master with the same access. Built on the wireless-tile console DEF, so it carries 537889311/312 too. Retest UT-K-03 after import: switch to each module, Modify / View Details with and without a row.",
 "target": "Rockefeller_CGB_Overnight_Fixes_101826.def",
 "created": 1792283000000,
-"updated": 1792325800000
+"updated": 1792554000000
 },
 {
 "ref": "DEF-051",
