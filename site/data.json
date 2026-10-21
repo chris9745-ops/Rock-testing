@@ -1,5 +1,5 @@
 {
-"generated": 1792588574502,
+"generated": 1792616858774,
 "areas": {
 "A": "Catalog items and ticket setup",
 "B": "PTAEO defaulting and validation",
@@ -2394,12 +2394,12 @@
 "Customer account (ACCT-A) is credited 60.00; 1000028-F271110510-110510 is debited 60.00 with Task 01.",
 "Codes reverse the original charge; AuditLog entry for the refund."
 ],
-"status": "Not run",
-"actual": "PARKED: section H needs the DWP 'Request a Refund' service as UAT Billing Admin, and H-05 needs the UAT Customer01 login. Claude does not sign in as other users. H-03(a) (Work Order created in Helix with the Refunds flag) could be tried as uat_technician once Work Order creation works in the view used (see DEF-038).",
-"defect": "",
-"evidence": "",
-"date": "2026-10-17",
-"updated": 1792284000000
+"status": "Passed",
+"actual": "10/21 15:35 as uat_billadmin: DWP Refund Request_RF2, Original Ticket INC000000167336 -> charge details filled from billing (PTAEO 1000999-F271999999-999999, 60.00, SKU UAT-901); refund 60.00 to the original PTAEO. Created WO0000000114442 (Refunds = Yes, Refund Reference ID INC000000167336, Charge 60.00). Completed in Smart IT 15:38 -> CGB Entry Written Yes, Ledger. Rows: LDG000000000275 Debit 60.00 debit 1000028-F271110510-110510 / credit 1000999-F271999999-999999, Exp 54101/63719; LDG000000000276 Credit 60.00 reversed. Both Is Reversal = Yes, Source Reference Type = Refund, Charge For 'REFUND INC000000167336', Task 01, Pending, 2026-10. Codes reverse the original LDG104 (63719/54101). AuditLog AUD000000002072 'Refund Posted - Refund of 60 on SKU UAT-901; reference INC000000167336'. Customer on the WO and rows is UAT Billing Admin, not UAT Customer01 (DEF-067). Note: INC000000167336 already had a 12.50 refund (WO0000000114392), so refunds now exceed the 60.00 charge (H-04 known gap).",
+"defect": "DEF-067",
+"evidence": "WO0000000114442, LDG000000000275/276, AUD000000002072",
+"date": "2026-10-21",
+"updated": 1792615500000
 },
 {
 "id": "UT-H-02",
@@ -2416,12 +2416,12 @@
 "exp": [
 "The customer-side refund row uses ACCT-PREF, not the original account."
 ],
-"status": "Not run",
-"actual": "",
-"defect": "",
-"evidence": "",
-"date": "",
-"updated": null
+"status": "Passed",
+"actual": "10/21 15:40 as uat_billadmin: DWP refund of 10.00 (partial) against INC000000167336 with Refund to PTAEO overridden to 1000028-F271110510-110510 (N. Foy's choice). WO0000000114443 (PTAEO Account = the override) completed in Smart IT. Rows LDG000000000277 Debit / LDG000000000278 Credit 10.00: the customer-side row uses the override 1000028-F271110510-110510, not the original 1000999-F271999999-999999. Because the chosen override is the IT account itself, both sides of this pair are the same account (nets to zero) - expected for this data choice, not a defect. Customer again UAT Billing Admin (DEF-067).",
+"defect": "DEF-067",
+"evidence": "WO0000000114443, LDG000000000277/278",
+"date": "2026-10-21",
+"updated": 1792615500000
 },
 {
 "id": "UT-H-03",
@@ -2442,12 +2442,12 @@
 "(d) \"This work order is a refund. The Refunds flag cannot be removed; cancel the work order instead.\"",
 "(e) \"The refund has no service SKU. Categorize the work order with the original service before completing it.\""
 ],
-"status": "Not run",
-"actual": "",
-"defect": "",
-"evidence": "",
-"date": "",
-"updated": null
+"status": "Failed",
+"actual": "As uat_billadmin 10/21. (a) WO created in Helix with the Refunds flag: not run - Smart IT does not show the Refunds field and a direct update was blocked by the session's safety check; N. Foy 10/21: admin-created refund WOs (console / v2 Refund request) are intended and post the same way, so only a hand-set flag on a non-refund WO remains to try (classic WO form). (b) Amount 0 in DWP: FAILED - accepted, created WO0000000114444 as a non-refund WO (Refunds No, no amount/SKU), no message (DEF-068). (c) Expired PAO: DWP's Refund-to list offers expired 1015318-F241110310-110310 and the WO is created (WO0000000114445, Refunds Yes, 1.00); completing it in Smart IT is refused: 'Refund PAO 1015318-F241110310-110310 is missing or not an Active account. Refunds cannot be issued to a closed (prior FY) account.' PASS at completion (not at submission). (d) Remove the Refunds flag: not run (field not in Smart IT; same blocker as (a)). (e) No SKU: on WO0000000114445 with PTAEO set back to active 1000999-F271999999-999999 and Service SKU cleared, completing is refused: 'The refund has no service SKU. Categorize the work order with the original service before completing it.' PASS. Edits discarded; WO0000000114445 left Assigned, nothing posted (no ledger rows).",
+"defect": "DEF-068",
+"evidence": "WO0000000114444, WO0000000114445",
+"date": "2026-10-21",
+"updated": 1792616400000
 },
 {
 "id": "UT-H-04",
@@ -2464,12 +2464,12 @@
 "exp": [
 "Each is refused. KNOWN GAP: these checks are not built yet (T36); expected to fail and be logged as a defect."
 ],
-"status": "Not run",
-"actual": "",
-"defect": "",
-"evidence": "",
-"date": "",
-"updated": null
+"status": "Failed",
+"actual": "Known gap confirmed, as the test expects. INC000000167336 (charge 60.00) now has refunds 12.50 + 60.00 + 10.00 posted and 1.00 open - every refund was accepted, so repeat refunds and refunds above the charge are not refused. Uncharged ticket WO0000000114441 in DWP: charge details do not fill (PTAEO and SKU empty), no message; not submitted. Logged as DEF-069.",
+"defect": "DEF-069",
+"evidence": "WO0000000114392, 114442, 114443, 114445, 114441",
+"date": "2026-10-21",
+"updated": 1792616400000
 },
 {
 "id": "UT-H-05",
@@ -2487,11 +2487,11 @@
 "The refund request is not available to non-billing users."
 ],
 "status": "Not run",
-"actual": "",
+"actual": "Needs a DWP sign-in as a non-billing user (UAT Customer01 or uat_technician); Claude does not sign in as other users. Parked for N. Foy. (As uat_billadmin the catalog shows 'Refund Request_RF2'.)",
 "defect": "",
 "evidence": "",
-"date": "",
-"updated": null
+"date": "2026-10-21",
+"updated": 1792616400000
 },
 {
 "id": "UT-I-01",
@@ -2885,12 +2885,12 @@
 "exp": [
 "Each opens its form (Oracle Export, PAO Expiration Report, wireless exceptions, Rate Staging, FY Cutover Control, refund Work Orders)."
 ],
-"status": "Failed",
-"actual": "Retest 10/17 night as uat_billadmin: Wireless Exception Report, Promote Rates and Increment F-Accounts are OK. On the Post Charge Processing panel, PAO Expiration Report opens NN:CGB:PAOExpirationReport (OK) and Export Charge Report opens NN:CGB:OracleExport (OK). Still failing: Refund Requests opens NN:CGB:Chargeback Ledger with no qualification, and Dashboard Reports does nothing because it has no active link. PARKED for N. Foy: decide what these two buttons should open (DEF-051).",
+"status": "In Progress",
+"actual": "Retest 10/17 night as uat_billadmin: Wireless Exception Report, Promote Rates, Increment F-Accounts, PAO Expiration Report and Export Charge Report open the right forms. 10/21: Refund Requests creates a refund work order for the selected Ledger / Subscription row and opens it in Smart IT (confirmed by N. Foy). Dashboard Reports now opens Helix Dashboards home (button added to console v2, link loaded). Remaining: point it at the pre-built Chargeback reports and share them with billing admins; N. Foy researching (10/21).",
 "defect": "DEF-051",
 "evidence": "NN:CGB:AdminConsole",
 "date": "2026-10-17",
-"updated": 1792298361425
+"updated": 1792612600000
 },
 {
 "id": "UT-K-05",
@@ -3186,7 +3186,7 @@
 "status": "Closed",
 "title": "No 'None Found' PTAEO Source on tickets created outside the classic UI",
 "desc": "INC000000167359 created in Smart IT for UAT Customer03 (UAT-DEPT-02, no department PTAEO, no preferred row): PTAEO empty and no 'None Found' indicator. Only classic active links set 'None Found', and the department-default filter labels the source 'Department Default' even when the department has no PTAEO. Fixed by v2 (imported 10/16): WO0000000114380, new in Smart IT, shows PTAEO Source = None Found.",
-"work": "v1 (Rockefeller_CGB_PTAEO_NoneFound_ServerSide_101626.def) was imported on 10/16 but did not work. Retest WO0000000114379 (Smart IT, Customer03 / UAT-DEPT-02) showed PTAEO empty and PTAEO Source = 'Department Default'. The department filter (order 5) sets the source to Department Default even when the department has no PTAEO, and v1 only acted when the source was empty. v2 (Rockefeller_CGB_PTAEO_NoneFound_ServerSide_v2_101626.def, same filter names NN:HPD:CGB_PTAEO_070_NoneFound / NN:WOI:CGB_PTAEO_070_NoneFound) sets PTAEO Source = None Found whenever the ticket has a customer and still no PTAEO after the defaults, and is not Resolved / Completed. Chargeback workflow only.",
+"work": "v1 (Rockefeller_CGB_PTAEO_NoneFound_ServerSide_101626.def) was imported on 10/16 but did not work. Retest WO0000000114379 (Smart IT, Customer03 / UAT-DEPT-02) showed PTAEO empty and PTAEO Source = 'Department Default'. The department filter (order 5) sets the source to Department Default even when the department has no PTAEO, and v1 only acted when the source was empty. v2 (Rockefeller_CGB_PTAEO_NoneFound_ServerSide_v2_101626.def, same filter names NN:HPD:CGB_PTAEO_070_NoneFound / NN:WOI:CGB_PTAEO_070_NoneFound) sets PTAEO Source = None Found whenever the ticket has a customer and still no PTAEO after the defaults, and is not Resolved / Completed. Chargeback workflow only. Re-verified 10/21 14:34 (N. Foy request): WO0000000114441 created in Smart IT (Progressive View) as uat_billadmin for UAT Customer03 (PPL000000047105, UAT-DEPT-02, still no preferred PTAEO), summary 'DEF-021 retest - UAT Customer03 no PTAEO'. Saved record: PTAEO Account empty, PTAEO Source = None Found, Status Assigned. Stays Closed.",
 "target": "",
 "created": 1792182000000,
 "updated": null
@@ -3495,13 +3495,13 @@
 "case": "UT-G-08",
 "sev": "Low",
 "owner": "Claude",
-"status": "Fixed - retest",
+"status": "Closed",
 "title": "Export shows 'Batch generated' note even when the export is stopped",
 "desc": "When Generate is stopped by a ledger-pair error, the bar shows 'Batch OE1792280346 generated: 136 lines...' plus the stop error. Nothing is actually created (transaction rolled back), but the note is misleading. NN:CGB:OE:RUN_080_UpdateSummary sends the note at order 80 in phase 1; the pair check errors come later (phase 2 of the line writes).",
-"work": "Decision 10/19 (N. Foy): reword. RUN_080 note now: 'Generating batch ... If no error message follows, the batch is saved ...'. Retest UT-G-08: the stopped export no longer claims the batch was generated.",
+"work": "Decision 10/19 (N. Foy): reword. RUN_080 note now: 'Generating batch ... If no error message follows, the batch is saved ...'. Retest 10/21 11:55 (UT-G-08 repeat, with N. Foy's OK): LDG000000000268 (credit pair of LDG267, WO0000000114392, UAT-901, 12.50) set to 12.49; new Run record (Notes 'UAT DEF-047 retest') saved. Message bar: 'Generating batch OE1792601716 (8 lines). If no error follows, it is saved...'; error: 'Export stopped: ledger entry LDG000000000267 ... has no matching Pending debit/credit line...'. No OracleExport record and no ledger row with batch OE1792601716. LDG268 restored to 12.50 (Pending). Closed.",
 "target": "Rockefeller_CGB_DefectFixes_1_Filters_101926.def",
 "created": 1792281000000,
-"updated": 1792436500000
+"updated": 1792601800000
 },
 {
 "ref": "DEF-048",
@@ -3550,10 +3550,10 @@
 "status": "In progress",
 "title": "Console report buttons unreachable / Refund Requests opens the ledger",
 "desc": "(1) Refund Requests (CGB:Admin:OpenRefundRequest) opens NN:CGB:Chargeback Ledger with no qualification; refund Work Orders were expected. (2) The Dashboard Reports button (536870941) has no active link. (3) Resolved: retest as billadmin shows Export Charge Report and PAO Expiration Report open the right forms from the Post Charge Processing panel.",
-"work": "Refund Requests imported 10/18 and checked as uat_billadmin: the button now opens WOI:WorkOrder (mid-tier used Simplified User View) with the Rockefeller + Refunds = Yes query. It shows no records for billadmin, because that user has no Work Order access (also seen in UT-H), so the result list must be confirmed by a user with WO access (nfoy). Dashboard Reports: waiting on the Helix Dashboards URL from N. Foy.",
+"work": "Refund Requests: decision 10/21 (N. Foy) - create a refund WO in Smart IT instead of a classic WO search. Rockefeller_CGB_Console_RefundSmartIT_102126.def (CGB:Admin:Refund_100-161 on button 537888908; 160/161 restore the console audit qualification). Old CGB:Admin:OpenRefundRequest disabled. Confirmed working by N. Foy 10/21. Dashboard Reports: Rockefeller_CGB_DEF051_DashboardReports_102126.def (CGB:Admin:DashboardReports_010_Open, OPEN-URL NEW https://hms-itom-dev.onbmc.com/dashboards/) and Rockefeller_CGB_Console_DashboardButtonV2_102126.def (button shown on console Admin View v2, Financial Reports card) imported 10/21; button and link verified on the page. Open: N. Foy wants the button to open the pre-built Chargeback reports instead of the Dashboards home; uat_billadmin sees no Chargeback dashboards (only 3 items, folder 'Helix AI Service Management'), so the folder also needs sharing with billing admins. N. Foy researching the URL / sharing (10/21 14:55).",
 "target": "Rockefeller_CGB_K04_RefundButton_101826.def (imported 10/18)",
 "created": 1792283000000,
-"updated": 1792381200000
+"updated": 1792612600000
 },
 {
 "ref": "DEF-052",
@@ -3703,13 +3703,13 @@
 "case": "UT-E-15",
 "sev": "Low",
 "owner": "Claude",
-"status": "Fixed - import pending",
+"status": "Closed",
 "title": "VM rate log line prints the new rate with 9 decimals",
 "desc": "Found 10/19. When CPU/RAM/storage increments apply, NN:CGB:SUB:VMRate_060_Log writes e.g. 'VM rate recalculated from 338.00 to 368.000000000 (...)'. The computed working field keeps full precision from the TRUNC/division expression; the Billable Rate itself is stored correctly as 368.00.",
-"work": "Fix built 10/20: Rockefeller_CGB_DEF063_VMRateLogRounding_102026.def (from Checkpoint 101426_EOD). VMRate_060_Log now prints Subscription Charge Amount (537888302, decimal precision 2, set by VMRate_050_Charge one step earlier) as the new rate instead of the full-precision working field 537888227. Rate calculation unchanged. Retest UT-E-15 after import: change CPU/RAM/storage on a VM test sub; log reads 'from 338.00 to 368.00'.",
+"work": "v1 (log reads 537888302 instead of 537888227) imported; retest 10/21 11:48 on SUB000000000207 (CPU 2 -> 3) still logged 'from 260.00 to 290.000000000': inside the filter transaction 537888302 still carries full precision. v2 (Rockefeller_CGB_DEF063_VMRateLogRounding_v2_102126.def): VMRate_060_Log cuts the text after two decimals, LEFT(537888302, STRSTR(537888302, '.') + 3). Imported by N. Foy 10/21. Retest 10/21 14:23 on SUB207: CPU 3 -> 2 logged 'from 290.00 to 260.00'; CPU 2 -> 3 (the case that failed) logged 'VM rate recalculated from 260.00 to 290.00 (3.0 cores, 4.0 GB RAM, 100.0 GB storage)'; CPU set back to 2, rate 260.00. Closed.",
 "target": "",
 "created": 1792467300000,
-"updated": 1792540000000
+"updated": 1792610000000
 },
 {
 "ref": "DEF-064",
@@ -3749,6 +3749,45 @@
 "target": "",
 "created": 1792553300000,
 "updated": 1792553300000
+},
+{
+"ref": "DEF-067",
+"case": "UT-H-01",
+"sev": "Medium",
+"owner": "Claude",
+"status": "Open",
+"title": "Refund ledger rows belong to the DWP requester (billing admin) instead of the original ticket's customer",
+"desc": "Found 10/21 on WO0000000114442 / LDG000000000275-276 and WO0000000114443 / LDG000000000277-278 (DWP Refund Request_RF2 submitted by uat_billadmin against INC000000167336, whose charge LDG104/105 is for UAT Customer01). The refund work order's Customer is the DWP requester (UAT Billing Admin), and both refund ledger rows carry Customer Name = UAT Billing Admin and Customer Login ID = uat_billadmin instead of the original ticket's customer. Accounts and codes are right. Effect: with DEF-053 row-level access the customer (uat_customer01) cannot see the refund rows that credit their account, and reporting by customer misattributes refunds to the billing admin.",
+"work": "Proposed fix (needs N. Foy's OK): when the refund WO is created from DWP, set Customer (and the ledger Customer Name / Login ID) from the original ticket (Refund Reference ID), or copy them from the original ledger pair at post time. Design confirmed by N. Foy 10/21: two entrances (DWP Refund Request for customers/users; Admin Console / v2 Refund request for admins), same refund WO and the same posting on completion - so the template path passing REF:010_DWPOnly is intended, not a defect.",
+"target": "",
+"created": 1792615500000,
+"updated": 1792616400000
+},
+{
+"ref": "DEF-068",
+"case": "UT-H-03",
+"sev": "Medium",
+"owner": "Claude",
+"status": "Open",
+"title": "DWP refund with amount 0 creates a plain (non-refund) work order instead of being refused",
+"desc": "UT-H-03(b) 10/21 15:51 as uat_billadmin: DWP Refund Request_RF2 for INC000000167336 with Refund amount 0 was accepted (no message). It created WO0000000114444 'Refund: INC000000167336 / UAT-901' as an ordinary work order: Refunds = No, no Refund Reference ID, no Charge / Manual Charge Amount, no SKU, PTAEO 1000028-F271110510-110510 (the request answers are only in the description). Expected: 'Enter a refund amount greater than zero.' NN:WOI:CGB:REF:030_RequireAmount never fires because the refund fields (Refunds flag, amount, SKU) are not mapped when the amount is 0, so the WO is no longer a refund.",
+"work": "Options: (1) make Refund amount > 0 required in the DWP Refund Request_RF2 form (question validation / min value), and/or (2) map the refund fields regardless of amount so REF:030 refuses it server-side. WO0000000114444 should be cancelled (test leftover).",
+"target": "",
+"created": 1792616400000,
+"updated": 1792616400000
+},
+{
+"ref": "DEF-069",
+"case": "UT-H-04",
+"sev": "Medium",
+"owner": "Claude",
+"status": "Open",
+"title": "Refunds are not checked against the original charge (over-refund, repeat refund, uncharged ticket)",
+"desc": "Known gap (T36), logged as the test asks. 10/21: refunds of INC000000167336 (charge 60.00, LDG104/105) were all accepted: 12.50 (WO0000000114392, earlier), 60.00 (WO0000000114442, posted), 10.00 (WO0000000114443, posted), 1.00 (WO0000000114445, open) - posted refunds 82.50 > 60.00 charge, and repeated refunds of the same ticket are allowed. A never-charged ticket (WO0000000114441) entered in DWP: the form does not fill the charge (Original PTAEO and SKU stay empty and required), but nothing tells the requester the ticket has no charge; not submitted.",
+"work": "Build (T36): on refund WO submit/complete, sum posted + open refunds for the Refund Reference ID from the ledger (Source Reference Type Refund, Charge For 'REFUND <ticket>') and refuse when the new amount would exceed the original charge; refuse when the reference has no Pending/Exported charge row. Decide whether open (not yet completed) refunds count.",
+"target": "",
+"created": 1792616400000,
+"updated": 1792616400000
 },
 {
 "ref": "OQ-01",
