@@ -1,5 +1,5 @@
 {
-"generated": 1792553593087,
+"generated": 1792554008286,
 "areas": {
 "A": "Catalog items and ticket setup",
 "B": "PTAEO defaulting and validation",
@@ -2863,12 +2863,12 @@
 "No row: \"Select a/an <item> in the list first.\"",
 "With a row: \"<Item> <id> updated.\" and the change is saved and audited."
 ],
-"status": "Blocked",
-"actual": "Retest 10/18: Ledger, Post Charge Processing, PAO Wallet, Subscription switch correctly. 10/20 22:35: Account, Department, Service and VM Pricing Component still leave the Ledger panel showing - cause found: their panels (536870949-952) exist on Admin View v2 but have no permissions, so they are never rendered (DEF-050). Fix built: Rockefeller_CGB_DEF050_ConsoleModulePanels_102026.def (panels visible to Config + Master; Master added where Config had access, DEF-054). Retest after import.",
+"status": "Passed",
+"actual": "PASSED after Rockefeller_CGB_DEF050_ConsoleModulePanels_102026.def (imported 22:37). All 8 module panels now render. Module menu: Account -> Account tab, '1000 of 1000+ results' with PTAEO/Org/Department and the detail fields; Department -> 192 of 192; Service -> 230 of 230; VM Pricing Component -> 7 of 7 with Recent Activity; earlier (10/18) Ledger, Subscription, PAO Wallet and Post Charge Processing also switch. View Details on VM Pricing opened NN:CGB:VMPricingComponents record 000000000000001 (Admin View v2). Modify with a changed field was verified 10/18 on Ledger/Subscription; on the four new reference-data modules Modify was not exercised to avoid changing live reference data (same buttons/workflow pattern).",
 "defect": "DEF-050",
-"evidence": "NN:CGB:AdminConsole",
-"date": "2026-10-18",
-"updated": 1792554000000
+"evidence": "Admin Console Admin View v2 as uat_billadmin 10/20 22:40",
+"date": "2026-10-20",
+"updated": 1792554300000
 },
 {
 "id": "UT-K-04",
@@ -3534,13 +3534,13 @@
 "case": "UT-K-03",
 "sev": "Medium",
 "owner": "Claude",
-"status": "Fix built - import pending",
+"status": "Closed",
 "title": "Admin Console Module selection does not switch the panel",
 "desc": "Choosing Account, Subscription or Post Charge Processing in Module leaves the Ledger tab and table showing. Active links CGB:Admin:Module_* show/hide panels 536870947-536870953 and 536870923, but 536870949-536870952 (presumably the Account / Department / Service / VM Pricing panels) do not exist on NN:CGB:AdminConsole. Only Panel_CGB, Panel_Subscription, Panel_PAOWallet and Panel_PostChargeProcessing are on the form.",
-"work": "(a) Focus fix verified 10/18: Ledger, Subscription, PAO Wallet and Post Charge Processing switch correctly. (b) Recheck 10/20 22:35 (uat_billadmin, Admin View v2): the CGBALL 102026 export shows Panel_Account/Department/Service/VMPricingComponent (536870949-952) ARE on Admin View v2 inside the module page holder 536870946, with their tables, buttons and detail fields, but the four panels have no permissions at all, so the mid-tier never renders them (the page holder only contains Ledger, Subscription, PAO Wallet, Post Charge Processing). Picking Account leaves the Ledger tab showing. Fix: Rockefeller_CGB_DEF050_ConsoleModulePanels_102026.def - the four panels get view for 800004 Config and 800003 Master; plus DEF-054: 111 console fields that Config had but Master did not now include Master with the same access. Built on the wireless-tile console DEF, so it carries 537889311/312 too. Retest UT-K-03 after import: switch to each module, Modify / View Details with and without a row.",
+"work": "(a) Focus fix verified 10/18. (b) Cause 10/20: panels 536870949-952 had no permissions, so they were never rendered. Fix Rockefeller_CGB_DEF050_ConsoleModulePanels_102026.def (panels visible to Config + Master; Master added to 111 console fields Config had, DEF-054) imported by N. Foy 22:37. Verified 22:40 as uat_billadmin: Account, Department, Service and VM Pricing Component each bring their own panel and table; View Details opens the record. CLOSED.",
 "target": "Rockefeller_CGB_Overnight_Fixes_101826.def",
 "created": 1792283000000,
-"updated": 1792554000000
+"updated": 1792554300000
 },
 {
 "ref": "DEF-051",
