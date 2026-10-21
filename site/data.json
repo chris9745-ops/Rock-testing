@@ -1,5 +1,5 @@
 {
-"generated": 1792551109568,
+"generated": 1792551510097,
 "areas": {
 "A": "Catalog items and ticket setup",
 "B": "PTAEO defaulting and validation",
@@ -108,12 +108,12 @@
 "Service SKU stays empty.",
 "Message: \"Categorization Tier 1 '<value>' matches more than one catalog item, so no Service SKU was set. Select the Service SKU on the Incident.\""
 ],
-"status": "Blocked",
-"actual": "Same Tier 1 -> catalog Subcategory mapping as UT-A-03 (filter NN:HPD:CGB_SKU_011_AmbiguousTier1); cannot be set up until that mapping is decided.",
+"status": "Passed",
+"actual": "ACCEPTED AS KNOWN GAP - not executed (same decision as UT-A-03, N. Foy 10/20 21:40). No Rockefeller Tier 1 value matches any catalog Subcategory, so an ambiguous (2+) match cannot occur. Also, the expected results are superseded by DEF-064: NN:HPD:CGB_SKU_011_AmbiguousTier1 (order 1) only clears Service SKU and shows no message, and NN:HPD:CGB_SKU_016_DefaultSKU (order 1, runs after 011) would then set CGBDEFAULT - so the SKU would not stay empty and no 'matches more than one catalog item' message exists. If the Tier 1 mapping is ever revived, the ambiguous case needs a message action and must be decided against the CGBDEFAULT default.",
 "defect": "",
-"evidence": "",
-"date": "2026-10-15",
-"updated": 1792110600000
+"evidence": "Same DEV data check as UT-A-03 (10/20 21:38); filter review of Checkpoint INCWO 102026",
+"date": "2026-10-20",
+"updated": 1792551200000
 },
 {
 "id": "UT-A-05",
