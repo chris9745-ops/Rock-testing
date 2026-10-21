@@ -1,5 +1,5 @@
 {
-"generated": 1792543080144,
+"generated": 1792543092303,
 "areas": {
 "A": "Catalog items and ticket setup",
 "B": "PTAEO defaulting and validation",
@@ -3576,7 +3576,7 @@
 "status": "Reopened",
 "title": "UAT Technician has full chargeback change and console access",
 "desc": "uat_technician opened NN:CGB:AdminConsole and modified Department, Subscription, Chargeback Ledger, OracleExport and BillingRun records on 10/17. Expected: only Chargeback Config and Chargeback Master can see/use the Admin Console (N. Foy 10/17 20:27); technicians get no change access. Group IDs from the 10/14 export: AdminConsole form = 800003 (view) + 800004 (view); all 148 console active links = 800004 only. Change (\\2) on: Account 7; BillingRun 800001, 800002, 7; Ledger 800001; Department 7, 800001, 800002; OracleExport 800001, 800002, 7; Service 800001, 800002; Subscription 800001, 800002, 7 (7 = Assignee Group, row level). The console active links ran for uat_technician, so uat_technician is in group 800004 (or has admin rights).",
-"work": "N. Foy removed Chargeback Config/Master from uat_technician and tightened form/field permissions. Retest 21:56 as uat_technician: console and all chargeback forms refuse changes (ARERR 9264 / 330; Ledger silently). Checked 10/20 as uat_billadmin: BillingRun 000000000000003 Problem Acknowledged is already Yes (nothing to reset). Left to do: re-test as UAT Customer01 (console and chargeback forms refuse changes).",
+"work": "N. Foy removed Chargeback Config/Master from uat_technician and tightened form/field permissions. Retest 10/17 21:56 as uat_technician: console and chargeback forms refuse changes (ARERR 9264 / 330). Retest 10/20 19:40 as UAT Customer01: Admin Console refused (ARERR 9264) and Smart IT shows 'not authorized' - OK. FAILED on data forms: the customer can open and read records on 12 chargeback forms (Subscription incl. SUB000000000087, a real subscriber; Account, BillingRun, CIBilling, CustomerPreferredPTAEO, Department, FYCutoverControl, OracleExport, RateStaging, Service, SystemwideSettings, VMPricingComponents). Refused: AdminConsole, Chargeback (ledger), SubStatusChange, PAOExpirationReport, ChargebackStaging_Interface, WirelessImportSnapshot. Change test on BillingRun 000000000000003: the first save of Problem Acknowledged Yes -> No WENT THROUGH; the second save (No -> Yes) was refused with ARERR 8932 (no write license) + 330 (no write access to Problem Acknowledged). The record is left at No: reset to Yes as uat_billadmin. Fix (N. Foy): remove Public/customer groups from the view permission on these forms (keep only what DWP 'My Subscriptions & Charges' needs, e.g. Subscription/CustomerPreferredPTAEO row-level), and remove change access on BillingRun fields; then find why the first save passed (floating write license?).",
 "target": "",
 "created": 1792284000000,
 "updated": 1792543100000
