@@ -1,5 +1,5 @@
 {
-"generated": 1792632106652,
+"generated": 1792632495336,
 "areas": {
 "A": "Catalog items and ticket setup",
 "B": "PTAEO defaulting and validation",
@@ -3771,7 +3771,7 @@
 "status": "Fixed - retest",
 "title": "DWP refund with amount 0 creates a plain (non-refund) work order instead of being refused",
 "desc": "UT-H-03(b) 10/21 15:51 as uat_billadmin: DWP Refund Request_RF2 for INC000000167336 with Refund amount 0 was accepted (no message). It created WO0000000114444 'Refund: INC000000167336 / UAT-901' as an ordinary work order: Refunds = No, no Refund Reference ID, no Charge / Manual Charge Amount, no SKU, PTAEO 1000028-F271110510-110510 (the request answers are only in the description). Expected: 'Enter a refund amount greater than zero.' NN:WOI:CGB:REF:030_RequireAmount never fires because the refund fields (Refunds flag, amount, SKU) are not mapped when the amount is 0, so the WO is no longer a refund.",
-"work": "Options: (1) make Refund amount > 0 required in the DWP Refund Request_RF2 form (question validation / min value), and/or (2) a server-side guard. Built (2) 10/21: NN:WOI:CGB:REF:025_DWPRefundNeedsAmount (WOI:WorkOrder, Submit, order 25): Rockefeller company AND created from DWP (SRID or SRInstanceID set) AND Summary LIKE 'Refund: %' AND Description LIKE '%Refund amount: %' AND Refunds No/empty -> error 'Enter a refund amount greater than zero...'; the WO is not created. Console / v2 refunds ('Chargeback refund request: ...') and refunds with an amount are not affected. (1) recommended as well so the requester is stopped on the DWP form (DWP Catalog setting, N. Foy). Retest: DWP refund with amount 0 (expect no WO, request in error) and 1.00 (expect normal refund WO, then cancel it). WO0000000114444 to cancel (test leftover).",
+"work": "Options: (1) make Refund amount > 0 required in the DWP Refund Request_RF2 form (question validation / min value), and/or (2) a server-side guard. Built (2) 10/21: NN:WOI:CGB:REF:025_DWPRefundNeedsAmount (WOI:WorkOrder, Submit, order 25): Rockefeller company AND created from DWP (SRID or SRInstanceID set) AND Summary LIKE 'Refund: %' AND Description LIKE '%Refund amount: %' AND Refunds No/empty -> error 'Enter a refund amount greater than zero...'; the WO is not created. Console / v2 refunds ('Chargeback refund request: ...') and refunds with an amount are not affected. (1) recommended as well so the requester is stopped on the DWP form (DWP Catalog setting, N. Foy). Retest: DWP refund with amount 0 (expect no WO, request in error) and 1.00 (expect normal refund WO, then cancel it). WO0000000114444 to cancel (test leftover). Retest 10/21 20:26 (amount 0, DWP request 35519): still created plain WO0000000114448 - the guard did not fire. Pending confirmation that the DEF-068 file was imported (the import at 20:25 was confirmed for the Finance buttons file, both buttons now show). uat_billadmin cannot read WOI:WorkOrder in mid-tier, so SRID/Refunds values at submit could not be checked. WO0000000114448 to cancel.",
 "target": "Rockefeller_CGB_DEF068_RefundZeroAmount_102126.def",
 "created": 1792616400000,
 "updated": 1792632100000
