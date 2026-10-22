@@ -1,5 +1,5 @@
 {
-"generated": 1792636755556,
+"generated": 1792637761899,
 "areas": {
 "A": "Catalog items and ticket setup",
 "B": "PTAEO defaulting and validation",
@@ -2885,12 +2885,12 @@
 "exp": [
 "Each opens its form (Oracle Export, PAO Expiration Report, wireless exceptions, Rate Staging, FY Cutover Control, refund Work Orders)."
 ],
-"status": "In Progress",
-"actual": "Retest 10/17 night as uat_billadmin: Wireless Exception Report, Promote Rates, Increment F-Accounts, PAO Expiration Report and Export Charge Report open the right forms. 10/21: Refund Requests creates a refund work order for the selected Ledger / Subscription row and opens it in Smart IT (confirmed by N. Foy). Dashboard Reports now opens Helix Dashboards home (button added to console v2, link loaded). Remaining: point it at the pre-built Chargeback reports and share them with billing admins; N. Foy researching (10/21).",
+"status": "Passed",
+"actual": "Console buttons, as uat_billadmin. 10/17: Wireless Exception Report, Promote Rates, Increment F-Accounts, PAO Expiration Report and Export Charge Report open the right forms. 10/21: Refund Requests creates a refund work order for the selected Ledger / Subscription row and opens it in Smart IT (confirmed by N. Foy); Dashboard Reports opens Helix Dashboards (https://hms-itom-dev.onbmc.com/dashboards/); 'Review and promote PAOs' and 'Finance export run' now show on console v2 (Promotions and Financial Reports cards, Rockefeller_CGB_Console_FinanceButtonsV2_102126.def) - their links are unchanged from the 10/17 pass; clicking them opens a popup window, which only a user's own click can open in the test browser. Decision N. Foy 10/21 21:45: UT-K-04 passes on the buttons; the Chargeback report content stays open under DEF-051 (Helix Dashboards has no Chargeback dashboards for uat_billadmin - only 3 ITSM dashboards in folder 'Helix AI Service Management').",
 "defect": "DEF-051",
-"evidence": "NN:CGB:AdminConsole",
-"date": "2026-10-17",
-"updated": 1792612600000
+"evidence": "NN:CGB:AdminConsole Admin View v2; Helix Dashboards search as uat_billadmin",
+"date": "2026-10-21",
+"updated": 1792637000000
 },
 {
 "id": "UT-K-05",
@@ -3547,13 +3547,13 @@
 "case": "UT-K-04",
 "sev": "Medium",
 "owner": "Claude",
-"status": "In progress",
-"title": "Console report buttons unreachable / Refund Requests opens the ledger",
+"status": "Open",
+"title": "Console Dashboard Reports button: Chargeback dashboards to build and share",
 "desc": "(1) Refund Requests (CGB:Admin:OpenRefundRequest) opens NN:CGB:Chargeback Ledger with no qualification; refund Work Orders were expected. (2) The Dashboard Reports button (536870941) has no active link. (3) Resolved: retest as billadmin shows Export Charge Report and PAO Expiration Report open the right forms from the Post Charge Processing panel.",
-"work": "Refund Requests: decision 10/21 (N. Foy) - create a refund WO in Smart IT instead of a classic WO search. Rockefeller_CGB_Console_RefundSmartIT_102126.def (CGB:Admin:Refund_100-161 on button 537888908; 160/161 restore the console audit qualification). Old CGB:Admin:OpenRefundRequest disabled. Confirmed working by N. Foy 10/21. Dashboard Reports: Rockefeller_CGB_DEF051_DashboardReports_102126.def (CGB:Admin:DashboardReports_010_Open, OPEN-URL NEW https://hms-itom-dev.onbmc.com/dashboards/) and Rockefeller_CGB_Console_DashboardButtonV2_102126.def (button shown on console Admin View v2, Financial Reports card) imported 10/21; button and link verified on the page. Open: N. Foy wants the button to open the pre-built Chargeback reports instead of the Dashboards home; uat_billadmin sees no Chargeback dashboards (only 3 items, folder 'Helix AI Service Management'), so the folder also needs sharing with billing admins. N. Foy researching the URL / sharing (10/21 14:55).",
+"work": "Fixed and verified (10/21): Refund Requests creates a refund WO in Smart IT (Rockefeller_CGB_Console_RefundSmartIT_102126.def, confirmed by N. Foy); Dashboard Reports button shown on console v2 and opens https://hms-itom-dev.onbmc.com/dashboards/ (Rockefeller_CGB_DEF051_DashboardReports_102126.def + Rockefeller_CGB_Console_DashboardButtonV2_102126.def). Remaining (UT-K-04 passed on the buttons, decision N. Foy 10/21 21:45): build or locate the Chargeback dashboards and share their folder with billing admins - checked 10/21 21:43 through the Dashboards search API as uat_billadmin: searches for chargeback / CGB / refund / ledger / billing return nothing; the user sees only folder 'Helix AI Service Management' with ITSM Insights and Proactive Problem Management Advanced Analytics. Then change CGB:Admin:DashboardReports_010_Open to the dashboard or folder URL. N. Foy researching.",
 "target": "Rockefeller_CGB_K04_RefundButton_101826.def (imported 10/18)",
 "created": 1792283000000,
-"updated": 1792612600000
+"updated": 1792637000000
 },
 {
 "ref": "DEF-052",
