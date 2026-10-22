@@ -1,5 +1,5 @@
 {
-"generated": 1792630958641,
+"generated": 1792631805641,
 "areas": {
 "A": "Catalog items and ticket setup",
 "B": "PTAEO defaulting and validation",
@@ -3755,13 +3755,13 @@
 "case": "UT-H-01",
 "sev": "Medium",
 "owner": "Claude",
-"status": "Fixed - retest",
+"status": "Closed",
 "title": "Refund ledger rows belong to the DWP requester (billing admin) instead of the original ticket's customer",
 "desc": "Found 10/21 on WO0000000114442 / LDG000000000275-276 and WO0000000114443 / LDG000000000277-278 (DWP Refund Request_RF2 submitted by uat_billadmin against INC000000167336, whose charge LDG104/105 is for UAT Customer01). The refund work order's Customer is the DWP requester (UAT Billing Admin), and both refund ledger rows carry Customer Name = UAT Billing Admin and Customer Login ID = uat_billadmin instead of the original ticket's customer. Accounts and codes are right. Effect: with DEF-053 row-level access the customer (uat_customer01) cannot see the refund rows that credit their account, and reporting by customer misattributes refunds to the billing admin.",
-"work": "Design confirmed by N. Foy 10/21: two entrances (DWP Refund Request; Admin Console / v2 Refund request), same refund WO and posting. Fix v1: Rockefeller_CGB_DEF067_RefundCustomer_102126.def (NN:CGB:LED:Submit_016-020 on refund rows: customer from the original charge row, else the LDG row, else the subscription; Customer Name from CTM:People) - imported 10/21 19:20. LDG000000000275-278 corrected by hand (Customer UAT Customer01 / uat_customer01, Assignee Groups 'uat_customer01';). Retest 1 (10/21 19:31, DWP refund 1.00 vs INC000000167336 -> WO0000000114446 Completed -> LDG000000000283 debit / 284 credit): Customer Name correctly UAT Customer01, but Customer Login ID empty and Assignee Groups empty. Cause: v1 Submit_020 had both assignments in one Set Fields action whose source was CTM:People, so $z1D Char02$ was read from the People match (null). Fix v2: Rockefeller_CGB_DEF067_RefundCustomer_v2_102126.def splits 020 into two actions (login from transaction, then name from CTM:People). LDG283/284 corrected by hand (Claude 10/21): login uat_customer01, Assignee Groups set by RowAccess_990. Also found: the 10/21 CSV import created four empty rows LDG000000000279-282 (279 deleted by N. Foy); 280-282 still to delete. Retest v2 needs one more 1.00 refund after import.",
+"work": "Design confirmed by N. Foy 10/21: two entrances (DWP Refund Request; Admin Console / v2 Refund request), same refund WO and posting. Fix v1: Rockefeller_CGB_DEF067_RefundCustomer_102126.def (NN:CGB:LED:Submit_016-020 on refund rows: customer from the original charge row, else the LDG row, else the subscription; Customer Name from CTM:People) - imported 10/21 19:20. Retest 1 (WO0000000114446 -> LDG283/284): name right, Customer Login ID and Assignee Groups empty - v1 Submit_020 read $z1D Char02$ inside a CTM:People-sourced Set Fields action. Fix v2: Rockefeller_CGB_DEF067_RefundCustomer_v2_102126.def splits 020 into two actions - imported 10/21 20:09. Retest 2 PASSED 10/21 20:12: DWP refund 1.00 vs INC000000167336 -> WO0000000114447 Completed -> LDG000000000285 (Debit) and LDG000000000286 (Credit), both Customer Name UAT Customer01, Customer Login ID uat_customer01, Assignee Groups 'uat_customer01'; with no manual fix. Data: LDG275-278 and LDG283/284 corrected by hand. The 10/21 CSV import created empty rows LDG000000000279-282; 279 deleted by N. Foy, 280-282 still to delete.",
 "target": "Rockefeller_CGB_DEF067_RefundCustomer_v2_102126.def (replaces Submit_020)",
 "created": 1792615500000,
-"updated": 1792629600000
+"updated": 1792631700000
 },
 {
 "ref": "DEF-068",
