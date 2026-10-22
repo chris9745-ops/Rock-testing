@@ -1,5 +1,5 @@
 {
-"generated": 1792634374352,
+"generated": 1792634949475,
 "areas": {
 "A": "Catalog items and ticket setup",
 "B": "PTAEO defaulting and validation",
@@ -3781,13 +3781,13 @@
 "case": "UT-H-04",
 "sev": "Medium",
 "owner": "Claude",
-"status": "Open",
+"status": "Fixed - retest",
 "title": "Refunds are not checked against the original charge (over-refund, repeat refund, uncharged ticket)",
 "desc": "Known gap (T36), logged as the test asks. 10/21: refunds of INC000000167336 (charge 60.00, LDG104/105) were all accepted: 12.50 (WO0000000114392, earlier), 60.00 (WO0000000114442, posted), 10.00 (WO0000000114443, posted), 1.00 (WO0000000114445, open) - posted refunds 82.50 > 60.00 charge, and repeated refunds of the same ticket are allowed. A never-charged ticket (WO0000000114441) entered in DWP: the form does not fill the charge (Original PTAEO and SKU stay empty and required), but nothing tells the requester the ticket has no charge; not submitted.",
-"work": "Build (T36): on refund WO submit/complete, sum posted + open refunds for the Refund Reference ID from the ledger (Source Reference Type Refund, Charge For 'REFUND <ticket>') and refuse when the new amount would exceed the original charge; refuse when the reference has no Pending/Exported charge row. Decide whether open (not yet completed) refunds count.",
-"target": "",
+"work": "Decisions N. Foy 10/21 21:00: check at completion; only posted refunds count; no charge on the Ledger -> refuse. Built: new form NN:CGB:RefundBalance (one record per refund reference + SKU: Charge Amount, Refunded to date, Last refund amount / WO) with filters NN:CGB:RFB:010-050 (charge = original Debit ledger row: LDG row itself, SUB debit row by Related Subscription + SKU, ticket debit row by Originating Ticket + SKU; error when no charge; error when refunded + this refund > charge; else add to Refunded to date). WO filter NN:WOI:CGB:REF:185_RefundCapCheck (Modify, order 185, same qualification as REF:190 posting) pushes reference / SKU / amount / WO into the balance record, so the check and the running total happen in the completion transaction. Backfill CSV: INC000000167336/UAT-901 refunded 84.50 (12.50+60+10+1+1), INC000000167347/UAT-902 refunded 13.00. Known limits: DWP (INC...) and console (LDG...) refunds of the same charge keep separate balances; first matching debit row is the charge. Retest plan: complete open refund WO0000000114453 (1.00 on INC000000167336, already over-refunded) -> expect refusal 'would bring the refunds ... to 85.50, more than the original charge of 60.00'; then a fresh charged ticket: refund within the charge (passes, balance updates), a second refund exceeding the rest (refused).",
+"target": "Rockefeller_CGB_DEF069_RefundCap_102126.def + DEF069_RefundBalance_Backfill_102126.csv",
 "created": 1792616400000,
-"updated": 1792616400000
+"updated": 1792635000000
 },
 {
 "ref": "OQ-01",
