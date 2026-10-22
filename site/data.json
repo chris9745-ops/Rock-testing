@@ -1,5 +1,5 @@
 {
-"generated": 1792637761899,
+"generated": 1792638728198,
 "areas": {
 "A": "Catalog items and ticket setup",
 "B": "PTAEO defaulting and validation",
@@ -2607,12 +2607,12 @@
 "Every change is in AuditLog.",
 "Wireless and Data Center CIs: check the CIBilling PTAEO too (KNOWN GAP if not incremented)."
 ],
-"status": "Not run",
-"actual": "Test data staged 10/17 22:1x: SUB000000000210 (UAT-906) PTAEO -> 1000994-F261999994-999994 (ACCT-F26); CustomerPreferredPTAEO 000000000000102 (UAT Customer01, Default No) PTAEO -> ACCT-F26 and Status Inactive -> Active (Account_150 only updates Active preferred PTAEOs); new Department DPT000000000303 'UAT-DEPT-F26' PTAEO ACCT-F26; SUB000000000216 PTAEO -> 1000993-F261999993-999993 (ACCT-F26-NOMATCH, for UT-I-06). Incident resolved 6/16-6/30: none exist (resolved date is system-set) - sub-check will be Blocked. Execute F26->F27 would also increment IT 1000028-F261110510-110510 (2 subscriptions, LED000000000017/18) and Freiwald 1006733-F261111080-111080 - waiting for N. Foy's OK.",
-"defect": "",
-"evidence": "",
-"date": "2026-10-17",
-"updated": 1792297000000
+"status": "Passed",
+"actual": "Run 10/21 22:01 as uat_billadmin (OK from N. Foy): FYCutoverControl 000000000000002, FY 2027, F26 -> F27, Status Execute -> 'F-Account increment complete: 5 processed (F26 -> F27), 0 with no new-year match. See NN:CGB:AuditLog (FY Increment).' Test data: SUB000000000210, preferred PTAEO 102 (UAT Customer01) and DPT000000000303 now 1000994-F271999994-999994; AuditLog rows for each plus 'FY Increment - F-Account Incremented' on Account 3107. Also incremented (expected, real data): Account 140 Freiwald -> 1006733-F271111080-111080; Account 143 IT -> 1000028-F271110510-110510 with SUB000000000093 / SUB000000000102 (PTAEO + expiration 6/30/2027), preferred PTAEO 16 (Chris Langlais) and pending ledger rows LED000000000017/018. CIBilling: no PTAEO contains F26 (before or after), so the Wireless / Data Center gap could not be exercised. Incident resolved 6/16-6/30: Blocked (none exist; resolved date is system-set). Observations (DEF-070): no-match count wrong (see UT-I-06); incremented-row description reads 'Incremented to new FY-Account ID : ...' with the ID missing; preferred PTAEO audit rows say only 'Record Modified'; 2 subscriptions on F26 PTAEOs that have no Account record (1000504-F261160040-160040, 1000021-F261110380-110380) were silently skipped.",
+"defect": "DEF-070",
+"evidence": "FYCutoverControl 000000000000002; AuditLog AUD000000002083-2098",
+"date": "2026-10-21",
+"updated": 1792638700000
 },
 {
 "id": "UT-I-06",
@@ -2630,12 +2630,12 @@
 "The subscription keeps the F26 account.",
 "AuditLog entry 'FY Increment - No New FY-Account' and the run counts it."
 ],
-"status": "Not run",
-"actual": "",
-"defect": "",
-"evidence": "",
-"date": "",
-"updated": null
+"status": "Failed",
+"actual": "Same run as UT-I-05. Subscription SUB000000000216 keeps 1000993-F261999993-999993 (ACCT-F26-NOMATCH) - PASS. AuditLog has Error rows 'FY Increment - No New FY-Account' for Account 3109 (1000993-F261999993-999993) and Account 3104 (1000997-F261999997-999997): 'No Active new-year F-Account found for this PTAEO. References were NOT incremented.' - PASS. But the run does not count them: the message and the 'Run Complete' AuditLog row say 'with no new-year match = 0' (expected 2) - FAIL (DEF-070).",
+"defect": "DEF-070",
+"evidence": "SUB000000000216; AuditLog AUD000000002092, AUD000000002097, AUD000000002098",
+"date": "2026-10-21",
+"updated": 1792638700000
 },
 {
 "id": "UT-I-07",
@@ -3788,6 +3788,19 @@
 "target": "Rockefeller_CGB_DEF069_RefundCap_102126.def + DEF069_RefundBalance_Backfill_102126.csv",
 "created": 1792616400000,
 "updated": 1792636800000
+},
+{
+"ref": "DEF-070",
+"case": "UT-I-06",
+"sev": "Low",
+"owner": "Claude",
+"status": "Open",
+"title": "F-Account increment reports 0 'with no new-year match' although no-match accounts were logged",
+"desc": "FY cutover run 10/21 22:01 (FYCutoverControl 000000000000002, F26 -> F27): 5 accounts processed, 3 incremented, 2 without an Active F27 account (1000993-F261999993-999993, 1000997-F261999997-999997). NN:CGB:FYI:Account_120 wrote both Error rows to the AuditLog, but the run message and the 'FY Increment - Run Complete' row report 'with no new-year match = 0'. The count comes from NN:CGB:FYI:Control_900_Complete: Set Fields from NN:CGB:AuditLog (Audit Type Error, Field Changed 'FY Increment', Changed Date >= run start) then $LASTCOUNT$; it returned 0 although the matching rows have the same timestamp (10:01:21 PM). Minor, same run: the 'F-Account Incremented' description shows 'Incremented to new FY-Account ID : ...' with the ID empty; preferred PTAEO audit rows only say 'Record Modified'; subscriptions whose F26 PTAEO has no Account record are skipped without a log entry (1000504-F261160040-160040, 1000021-F261110380-110380).",
+"work": "Workflow found in Rockefeller_CGB_Checkpoint_101426_EOD.def (NN:CGB:FYI:Control_010-900, Account_100-180). Fix to design: count the no-match accounts without reading back rows written in the same transaction (e.g. count them in Control_030 with a second query: F26 F-Accounts whose built F27 PTAEO has no Active Account), then show that number.",
+"target": "",
+"created": 1792638700000,
+"updated": 1792638700000
 },
 {
 "ref": "OQ-01",
