@@ -1,5 +1,5 @@
 {
-"generated": 1792633283303,
+"generated": 1792633903693,
 "areas": {
 "A": "Catalog items and ticket setup",
 "B": "PTAEO defaulting and validation",
@@ -3768,13 +3768,13 @@
 "case": "UT-H-03",
 "sev": "Medium",
 "owner": "Claude",
-"status": "Open",
+"status": "Fixed - retest",
 "title": "DWP refund with amount 0 creates a plain (non-refund) work order instead of being refused",
 "desc": "UT-H-03(b) 10/21 15:51 as uat_billadmin: DWP Refund Request_RF2 for INC000000167336 with Refund amount 0 was accepted (no message). It created WO0000000114444 'Refund: INC000000167336 / UAT-901' as an ordinary work order: Refunds = No, no Refund Reference ID, no Charge / Manual Charge Amount, no SKU, PTAEO 1000028-F271110510-110510 (the request answers are only in the description). Expected: 'Enter a refund amount greater than zero.' NN:WOI:CGB:REF:030_RequireAmount never fires because the refund fields (Refunds flag, amount, SKU) are not mapped when the amount is 0, so the WO is no longer a refund.",
-"work": "Server-side guard NN:WOI:CGB:REF:025_DWPRefundNeedsAmount (v1 with SRID condition, v2 without) on WO Submit - WITHDRAWN. Retest of v2 10/21 20:36-20:38: amount 0 (DWP request 35520) -> Fault, no WO (as intended); but amount 1.00 (request 35521) -> Fault, no WO too: the guard refused a valid refund. So DWP creates the WO first and sets the refund fields (Refunds, amount, SKU, Refund Reference) in a later update, and at submit every DWP refund looks the same. Rockefeller_CGB_DEF068_Disable_102126.def sets REF:025 enable 0 - N. Foy to import. New finding from the DWP activity list: the earlier zero-amount requests 35514 (WO0000000114444) and 35519 (WO0000000114448) also ended in Fault. Most likely the DWP update that stamps the refund fields is refused by NN:WOI:CGB:REF:030_RequireAmount ('Enter a refund amount greater than zero.'), so the request faults and the WO is left behind as a plain work order. Fix options to decide: (1) DWP Catalog - Refund amount question minimum > 0 (stops the requester on the form; recommended); (2) WO filter on Modify: when the DWP update brings Refunds = Yes with amount <= 0, cancel the WO instead of refusing the update. Test leftovers to cancel: WO0000000114444, WO0000000114448. uat_billadmin and nfoy cannot read Rockefeller WOs in mid-tier (row-level), so WO field values could not be checked directly.",
-"target": "Rockefeller_CGB_DEF068_Disable_102126.def (switch REF:025 off)",
+"work": "Server-side guard NN:WOI:CGB:REF:025_DWPRefundNeedsAmount (v1 with SRID condition, v2 without) on WO Submit - WITHDRAWN. Retest of v2 10/21 20:36-20:38: amount 0 (DWP request 35520) -> Fault, no WO (as intended); but amount 1.00 (request 35521) -> Fault, no WO too: the guard refused a valid refund. So DWP creates the WO first and sets the refund fields (Refunds, amount, SKU, Refund Reference) in a later update, and at submit every DWP refund looks the same. Rockefeller_CGB_DEF068_Disable_102126.def sets REF:025 enable 0 - imported by N. Foy 10/21 20:42; recheck: DWP 1.00 refund (request 35522) created WO0000000114451, request In Progress (no Fault) - valid DWP refunds work again. WO0000000114451 to cancel (not completed, nothing posted). Decision N. Foy 10/21 20:46: build the backstop. Built: NN:WOI:CGB:REF:015_DWPZeroRefundCancel (WOI:WorkOrder, Modify, order 15, before REF:030): Rockefeller AND Summary 'Refund: %' AND Description '%Refund amount: %' AND Refunds being set to Yes now (TR Yes, DB not Yes) AND amount empty or <= 0 -> Refunds = No, Status = Cancelled, reason appended to the description. Admin refunds and edits of an existing refund WO to 0 are still refused by REF:030. Retest: DWP refund with amount 0 -> expect WO created then Cancelled (request not left open); DWP refund 1.00 -> normal refund WO. New finding from the DWP activity list: the earlier zero-amount requests 35514 (WO0000000114444) and 35519 (WO0000000114448) also ended in Fault. Most likely the DWP update that stamps the refund fields is refused by NN:WOI:CGB:REF:030_RequireAmount ('Enter a refund amount greater than zero.'), so the request faults and the WO is left behind as a plain work order. Fix options to decide: (1) DWP Catalog - Refund amount question minimum > 0 (stops the requester on the form; recommended); (2) WO filter on Modify: when the DWP update brings Refunds = Yes with amount <= 0, cancel the WO instead of refusing the update. Test leftovers to cancel: WO0000000114444, WO0000000114448. uat_billadmin and nfoy cannot read Rockefeller WOs in mid-tier (row-level), so WO field values could not be checked directly.",
+"target": "Rockefeller_CGB_DEF068_ZeroRefundBackstop_102126.def (+ DWP Refund amount minimum > 0, N. Foy)",
 "created": 1792616400000,
-"updated": 1792633300000
+"updated": 1792633700000
 },
 {
 "ref": "DEF-069",
