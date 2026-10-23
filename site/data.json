@@ -1,5 +1,5 @@
 {
-"generated": 1792724056270,
+"generated": 1792763935499,
 "areas": {
 "A": "Catalog items and ticket setup",
 "B": "PTAEO defaulting and validation",
@@ -3794,13 +3794,13 @@
 "case": "UT-I-06",
 "sev": "Low",
 "owner": "Claude",
-"status": "Open",
+"status": "Fix built - import",
 "title": "F-Account increment reports 0 'with no new-year match' although no-match accounts were logged",
 "desc": "FY cutover run 10/21 22:01 (FYCutoverControl 000000000000002, F26 -> F27): 5 accounts processed, 3 incremented, 2 without an Active F27 account (1000993-F261999993-999993, 1000997-F261999997-999997). NN:CGB:FYI:Account_120 wrote both Error rows to the AuditLog, but the run message and the 'FY Increment - Run Complete' row report 'with no new-year match = 0'. The count comes from NN:CGB:FYI:Control_900_Complete: Set Fields from NN:CGB:AuditLog (Audit Type Error, Field Changed 'FY Increment', Changed Date >= run start) then $LASTCOUNT$; it returned 0 although the matching rows have the same timestamp (10:01:21 PM). Minor, same run: the 'F-Account Incremented' description shows 'Incremented to new FY-Account ID : ...' with the ID empty; preferred PTAEO audit rows only say 'Record Modified'; subscriptions whose F26 PTAEO has no Account record are skipped without a log entry (1000504-F261160040-160040, 1000021-F261110380-110380).",
-"work": "Workflow found in Rockefeller_CGB_Checkpoint_101426_EOD.def (NN:CGB:FYI:Control_010-900, Account_100-180). Fix to design: count the no-match accounts without reading back rows written in the same transaction (e.g. count them in Control_030 with a second query: F26 F-Accounts whose built F27 PTAEO has no Active Account), then show that number. PARKED by N. Foy 10/21 22:12; a retest needs a fresh Execute run on new test data.",
-"target": "",
+"work": "Unparked 10/22 23:02 (N. Foy). Cause found: Push Fields run in filter phase 2, so Control_900 counted the AuditLog Error rows in phase 1 before Control_100's push to the F-Accounts had run - the count is always 0 (the 'processed' count is right because Control_030 reads Account in phase 1). Fix (filters only, no cache flush): Control_100 also pushes the control Request ID to Account z1D 1000001583; new Account_190_NotifyControlRecount sets z1D Action = FYI_RECOUNT on the control record after each account's own log rows; new Control_950_RecountNoMatch counts this run's FY Increment rows (Create Date of control or later, old PTAEO LIKE %Old seg%, new PTAEO LIKE %New seg%) and rewrites the 'FY Increment - Run Complete' AuditLog row with processed and no-match counts; Control_900's message no longer shows the count. Depends on phase-2 queue order - to be proven by the retest. Contained retest plan: unused segment F98 -> F99, FY 2099: three test F-Accounts 1000995-F981999995-999995 (successor 1000995-F991999995-999995 Active) and 1000996-F981999996-999996 (no successor). Expected Run Complete row: processed = 2; with no new-year match = 1. No real account has an F98 segment, so nothing else is touched. Minor items in the description (empty ID in 'Incremented' text, preferred PTAEO audit text, skipped subscriptions without an Account record) are not part of this fix.",
+"target": "Rockefeller_CGB_DEF070_FYNoMatchCount_102226.def",
 "created": 1792638700000,
-"updated": 1792638700000
+"updated": 1792728600000
 },
 {
 "ref": "DEF-071",
