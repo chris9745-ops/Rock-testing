@@ -1,5 +1,5 @@
 {
-"generated": 1792638728198,
+"generated": 1792715521658,
 "areas": {
 "A": "Catalog items and ticket setup",
 "B": "PTAEO defaulting and validation",
@@ -1358,11 +1358,11 @@
 "Afterwards Status = Terminated with a log line; it is not billed next period."
 ],
 "status": "In Progress",
-"actual": "Step 1 PASSED 10/19 as uat_billadmin (console Admin View v2; window clicks by N. Foy, checks by Claude). SUB000000000203 (UAT-906, $27.00, Active, Last Billed 2026-10) > Terminate Subscription > Customer request, 'UT-E-07 test' > Confirm. Status = Pending Termination; Termination Effective Date = 10/15/2026 (date field; 15th of current period 2026-10, which was already billed on 10/15 - matches FR-SUB-007 'stop at end of current period'); log '10/19/2026 9:30:57 PM uat_billadmin Terminate - Customer request: UT-E-07 test'. The Billing Impact text did not appear in the reason window (DEF-062: window fields not filled before Confirm). Steps 2-3 wait for the termination escalation / next monthly cycle: expect Terminated with a log line and no November charge. SUB000000000210 (Pending Termination since WO0000000114393, effective 10/15) can be checked at the same time.",
+"actual": "Step 1 PASSED 10/19 as uat_billadmin (console Admin View v2; window clicks by N. Foy, checks by Claude). SUB000000000203 (UAT-906, $27.00, Active, Last Billed 2026-10) > Terminate Subscription > Customer request, 'UT-E-07 test' > Confirm. Status = Pending Termination; Termination Effective Date = 10/15/2026 (date field; 15th of current period 2026-10, which was already billed on 10/15 - matches FR-SUB-007 'stop at end of current period'); log '10/19/2026 9:30:57 PM uat_billadmin Terminate - Customer request: UT-E-07 test'. The Billing Impact text did not appear in the reason window (DEF-062: window fields not filled before Confirm). Steps 2-3 wait for the termination escalation / next monthly cycle: expect Terminated with a log line and no November charge. SUB000000000210 (Pending Termination since WO0000000114393, effective 10/15) can be checked at the same time. Check 10/21 22:45 (Claude): SUB000000000203, 204 and 210 still Pending Termination. Cause found: NN:CGB:SUB:TerminateSubscription is an escalation that only runs on the 14th, 15th and 16th of the month at 05:00 and 17:00 (server time) and terminates Pending Termination subscriptions whose Termination Effective Date has passed. These were set to Pending Termination on 10/19, after this month's window, so they terminate on 11/14. Steps 2-3 can be checked on 11/14-11/15 (with UT-F-10). Question for N. Foy: is a monthly window the intended design (a subscription stays Pending Termination for up to a month)?",
 "defect": "DEF-034 (closed), DEF-062",
 "evidence": "SUB000000000203 Status Change Log 10/19/2026 9:30:57 PM (uat_billadmin)",
 "date": "2026-10-19",
-"updated": 1792463500000
+"updated": 1792642000000
 },
 {
 "id": "UT-E-08",
@@ -1747,11 +1747,11 @@
 "After termination: MSS Covered = No (On Hold leaves it Yes)."
 ],
 "status": "In Progress",
-"actual": "Step 1 PASSED on retest after the DEF-019 fix: WO0000000114376 (UAT Customer01, UAT-908, CI UAT-PC-MSS related in Smart IT) completed; subscription SUB000000000202 Active, MSS Enrollment True, CI Reconciliation ID REGC6CRYI4LHAATNAK58TNAK58XT76; CI Billing for UAT-PC-MSS: MSS Covered = Yes, MSS Subscription ID = SUB000000000202. (First attempt WO0000000114375 / SUB000000000201 failed with DEF-019; CI was set on it by hand as a workaround - cancel SUB000000000201.) Step 3 (terminate -> MSS Covered = No) not run yet: waits for UT-E-07; subscription kept Active for the MSS tests.",
+"actual": "Step 1 PASSED on retest after the DEF-019 fix: WO0000000114376 (UAT Customer01, UAT-908, CI UAT-PC-MSS related in Smart IT) completed; subscription SUB000000000202 Active, MSS Enrollment True, CI Reconciliation ID REGC6CRYI4LHAATNAK58TNAK58XT76; CI Billing for UAT-PC-MSS: MSS Covered = Yes, MSS Subscription ID = SUB000000000202. (First attempt WO0000000114375 / SUB000000000201 failed with DEF-019; CI was set on it by hand as a workaround - cancel SUB000000000201.) Step 3 (terminate -> MSS Covered = No) not run yet: waits for UT-E-07; subscription kept Active for the MSS tests. 10/21 22:45: Step 3 waits for the termination escalation (runs on the 14th-16th only, see UT-E-07); SUB000000000202 still Active.",
 "defect": "DEF-019 (closed)",
 "evidence": "WO0000000114376, SUB000000000202, CI Billing 000000000000161",
 "date": "2026-10-16",
-"updated": 1792179000000
+"updated": 1792642000000
 },
 {
 "id": "UT-E-24",
@@ -2442,12 +2442,12 @@
 "(d) \"This work order is a refund. The Refunds flag cannot be removed; cancel the work order instead.\"",
 "(e) \"The refund has no service SKU. Categorize the work order with the original service before completing it.\""
 ],
-"status": "Failed",
-"actual": "As uat_billadmin 10/21. (a) WO created in Helix with the Refunds flag: not run - Smart IT does not show the Refunds field and a direct update was blocked by the session's safety check; N. Foy 10/21: admin-created refund WOs (console / v2 Refund request) are intended and post the same way, so only a hand-set flag on a non-refund WO remains to try (classic WO form). (b) Amount 0 in DWP: FAILED - accepted, created WO0000000114444 as a non-refund WO (Refunds No, no amount/SKU), no message (DEF-068). (c) Expired PAO: DWP's Refund-to list offers expired 1015318-F241110310-110310 and the WO is created (WO0000000114445, Refunds Yes, 1.00); completing it in Smart IT is refused: 'Refund PAO 1015318-F241110310-110310 is missing or not an Active account. Refunds cannot be issued to a closed (prior FY) account.' PASS at completion (not at submission). (d) Remove the Refunds flag: not run (field not in Smart IT; same blocker as (a)). (e) No SKU: on WO0000000114445 with PTAEO set back to active 1000999-F271999999-999999 and Service SKU cleared, completing is refused: 'The refund has no service SKU. Categorize the work order with the original service before completing it.' PASS. Edits discarded; WO0000000114445 left Assigned, nothing posted (no ledger rows).",
-"defect": "DEF-068",
+"status": "Passed",
+"actual": "As uat_billadmin 10/21. (a) WO created in Helix with the Refunds flag: not run - Smart IT does not show the Refunds field and a direct update was blocked by the session's safety check; N. Foy 10/21: admin-created refund WOs (console / v2 Refund request) are intended and post the same way, so only a hand-set flag on a non-refund WO remains to try (classic WO form). (b) Amount 0 in DWP: FAILED - accepted, created WO0000000114444 as a non-refund WO (Refunds No, no amount/SKU), no message (DEF-068). (c) Expired PAO: DWP's Refund-to list offers expired 1015318-F241110310-110310 and the WO is created (WO0000000114445, Refunds Yes, 1.00); completing it in Smart IT is refused: 'Refund PAO 1015318-F241110310-110310 is missing or not an Active account. Refunds cannot be issued to a closed (prior FY) account.' PASS at completion (not at submission). (d) Remove the Refunds flag: not run (field not in Smart IT; same blocker as (a)). (e) No SKU: on WO0000000114445 with PTAEO set back to active 1000999-F271999999-999999 and Service SKU cleared, completing is refused: 'The refund has no service SKU. Categorize the work order with the original service before completing it.' PASS. Edits discarded; WO0000000114445 left Assigned, nothing posted (no ledger rows). Rerun / close-out 10/21 (Claude): (b) after the DEF-068 backstop (NN:WOI:CGB:REF:015_DWPZeroRefundCancel) a DWP refund of 0 (request 35523) creates WO0000000114452 and cancels it at once, with the reason in the description; a 1.00 refund (35524) still creates a normal refund WO - PASS (the requester is not stopped on the form; a minimum > 0 on the DWP question is recommended). (a) per N. Foy, refund WOs are created only by DWP or the Admin Console / v2 Refund request (tested 10/20-10/21, UT-H-01/02, DEF-067); a hand-set flag on a non-refund WO is not a supported path. (d) the Refunds flag is not on the Smart IT screens and REF:011_RefundFlagLocked refuses removing it on save - not runnable from the UI. (c) and (e) passed. Status set to Passed by Claude overnight 10/21; N. Foy to confirm (a)/(d) are acceptable as not applicable.",
+"defect": "DEF-068 (closed)",
 "evidence": "WO0000000114444, WO0000000114445",
 "date": "2026-10-21",
-"updated": 1792616400000
+"updated": 1792642000000
 },
 {
 "id": "UT-H-04",
@@ -2771,11 +2771,11 @@
 "The view lists no other-tenant CIs."
 ],
 "status": "Blocked",
-"actual": "Partial check 10/20 22:52 as uat_billadmin. The missing-PTAEO view NN:CGB:CIBilling_MissingPAO_Join is BMC.CORE:BMC_BaseElement (all CMDB CIs, every tenant) outer-joined to NN:CGB:CIBilling; it has no company filter of its own. Company = The Rockefeller University: 17,149 rows; other companies: 2,000+ rows, which uat_billadmin sees as blank rows (CI Name, Class, Category empty - CMDB row-level security hides the values). So unless the Resolve Missing Accounts screen filters by company in its table qualification, Billing Admin would see blank other-tenant rows (same symptom as DEF-037 for technicians). Could not open that screen here: the console button opens a popup, which the test browser blocks. R Stuff part needs UAT-SRV-01 and a same-named other-tenant CI (TD-06). Needs N. Foy: open Resolve missing accounts as uat_billadmin, Show = All, no filter, and check for blank / non-Rockefeller rows.",
+"actual": "Partial check 10/20 22:52 as uat_billadmin. The missing-PTAEO view NN:CGB:CIBilling_MissingPAO_Join is BMC.CORE:BMC_BaseElement (all CMDB CIs, every tenant) outer-joined to NN:CGB:CIBilling; it has no company filter of its own. Company = The Rockefeller University: 17,149 rows; other companies: 2,000+ rows, which uat_billadmin sees as blank rows (CI Name, Class, Category empty - CMDB row-level security hides the values). So unless the Resolve Missing Accounts screen filters by company in its table qualification, Billing Admin would see blank other-tenant rows (same symptom as DEF-037 for technicians). Could not open that screen here: the console button opens a popup, which the test browser blocks. R Stuff part needs UAT-SRV-01 and a same-named other-tenant CI (TD-06). Needs N. Foy: open Resolve missing accounts as uat_billadmin, Show = All, no filter, and check for blank / non-Rockefeller rows. Analysis 10/21 22:50 (Claude, from N. Foy's console export 03:16 UTC): the v2 console button (Resolve missing accounts, CGB:Admin:V2_ResolveMissing_010_Open) opens NN:CGB:ResolveMissingPTAEO, whose table reads NN:CGB:CIBilling (the chargeback CI billing records), not the CMDB join. CIBilling holds only records created by the chargeback imports; today 159 have no PTAEO and all have a CI name (wireless phone numbers) - no blank or other-tenant rows. The CMDB join with blank other-tenant rows is only behind the old Admin View button (CGB:Admin:CIMissing_010_Open). So the screen part of UT-J-05 is expected to pass on v2; it still needs one look in the window (popup, N. Foy) and the R Stuff part still needs UAT-SRV-01 in the CMDB.",
 "defect": "",
 "evidence": "",
 "date": "2026-10-20",
-"updated": 1792554500000
+"updated": 1792642000000
 },
 {
 "id": "UT-J-06",
@@ -3079,13 +3079,13 @@
 "case": "UT-C-01",
 "sev": "High",
 "owner": "NimbusNow",
-"status": "Fixed - verified",
+"status": "Closed",
 "title": "Hourly Incident charge wrong when created in Smart IT (no server calculation on create); Details text missing hours",
 "desc": "INC000000167334 (Smart IT, nfoy_rf, UAT Customer01, SKU UAT-901 Hourly $80, Time Worked = 50): Smart IT showed a Charge Amount preview of 300 before save and the record saved with Charge Amount 300.00 and Charge Amount_Details 'x 80 Hourly Rate = 300 Total'. Expected 60.00 (50 min - 15 free = 35, rounded up to 45 = 0.75 h x $80). The Incident hourly workflow in the build (NN:HPD:CGB_Incident_CalculateHourlyCharge active link and filter) computes TRUNC((Time Worked x 60 - 15 + 14) / 15) x 0.25 x Rate, i.e. it treats Time Worked (537888123) as HOURS: 50 would give 3,980.00 and 0.83 would give 60.00. 300.00 matches neither, so the value Smart IT shows and saves comes from somewhere else (Smart IT does not run classic active links, and the filter only recalculates on Modify when Time Worked changes). The Details text is also missing its first part (the hours). Smart IT also has a separate 'Minutes Worked' field (536870942) that no Incident chargeback workflow reads.",
 "work": "Decision (N. Foy 10/16): technicians enter HOURS in Time Worked (537888123); Minutes Worked is not used. Fix imported 10/16 08:30: Rockefeller_CGB_HPD_HourlyCharge_Fix_101626.def (filter runs on Submit + Modify; Details starts with the hours). Verified INC000000167336 (Smart IT, Time Worked 0.83, UAT-901 $80): Charge Amount 60.00, Details '0.83 h x 80 Hourly Rate = 60 Total'. Smart IT showed no 300 preview this time. Clean-up: INC000000167334 still holds 300.00 (Time Worked 50) from before the fix.",
 "target": "",
 "created": 1792157000000,
-"updated": 1792157700000
+"updated": 1792642000000
 },
 {
 "ref": "DEF-014",
@@ -3589,10 +3589,10 @@
 "status": "Fixed - retest",
 "title": "Chargeback permission model does not match the roles",
 "desc": "Intended (N. Foy): Chargeback Master and Chargeback Config see and use the Admin Console. Found in the 10/14 export: (1) NN:CGB:AdminConsole is visible to 800003 Master and 800004 Config, but all 148 CGB:Admin:* active links (counters, warnings, module switching, Modify/View Details, buttons) are permitted to 800004 Config only, so a Master-only user would see a console that does nothing. (2) On the data forms, Master and Config have view only (\\1); change (\\2) goes to 800001 Chargeback User and/or 800002 Chargeback Approver, plus group 7 (Assignee Group, row level). Account: change only via group 7; Ledger: change only 800001 User; Service: 800001, 800002; BillingRun / OracleExport / Subscription / Department: 800001, 800002, 7. So a Master or Config user can't change data on the forms directly, and console Modify actions may fail for them, while a Chargeback User can edit ledger, export and billing-run records.",
-"work": "Decision 10/19: Master + Config. The 149 Admin Console active links permitted to 800004 only are re-issued with 800003 + 800004 (built from the 10/14 AdminConsole checkpoint plus later DEFs). Data-form permissions remain N. Foy's. Retest: a Master-only user can use the console buttons and module switching.",
-"target": "Rockefeller_CGB_DefectFixes_2_ActiveLinks_101926.def",
+"work": "Decision 10/19: Master + Config. The 149 Admin Console active links permitted to 800004 only are re-issued with 800003 + 800004 (built from the 10/14 AdminConsole checkpoint plus later DEFs). Data-form permissions remain N. Foy's. Static check 10/21 night (Claude) of N. Foy's console export (03:16 UTC 10/22): 304 of 306 enabled console links have 800003 + 800004; two links added later in the v2 work were 800004 only - CGB:Admin:V2_BillingRun_010_Open and CGB:Admin:V2_ResolveMissing_010_Open (Claude's v2 builds); the Subscription table column col_SUB_Status (536880963) has no permissions, so only administrators see the Status column. Fix built (not imported): Rockefeller_CGB_Console_PermFix_102226.def (both links 800003 + 800004; Status column view for 800003/800004; console form built on the 22:26 import). Retest still needs a Master-only (800003, not 800004) login: console buttons, module switching, Billing Run and Resolve Missing Accounts open.",
+"target": "Rockefeller_CGB_DefectFixes_2_ActiveLinks_101926.def; follow-up Rockefeller_CGB_Console_PermFix_102226.def (not imported)",
 "created": 1792289000000,
-"updated": 1792436500000
+"updated": 1792642000000
 },
 {
 "ref": "DEF-055",
@@ -3742,13 +3742,13 @@
 "case": "UT-E-19",
 "sev": "Low",
 "owner": "Claude",
-"status": "Open",
+"status": "Fixed - retest",
 "title": "Console 'Hosting CIs missing PTAEO' tile shows the last import's count after an import button",
 "desc": "Found 10/20 22:10-22:18 as uat_billadmin on NN:CGB:AdminConsole Admin View v2. Fresh console: Hosting CIs missing PTAEO = 0 (correct - no hosting CIBilling row lacks a PTAEO). After the Wireless button (2 validated) the tile showed 2; after the R/UFS button (2 validated) 2; after the second R/UFS run (1 validated) 1. Reopening the console shows 0 again. The tile appears to be refreshed after the button from $LASTCOUNT$ of the import's own query instead of its CIBilling count. Step 4 stops while this counter is above 0, so a wrong value could block Step 4 until the console is reopened.",
-"work": "Needs the console counter active links (CGB:Admin:SetCount_CIMissingPTAEO_Hosting and the import-button links) from an export to confirm and fix: re-run the hosting count query after each button, or move the refresh before the import's own count.",
-"target": "",
+"work": "Cause confirmed 10/21 night from N. Foy's console export (03:16 UTC 10/22): CGB:Admin:STG_<PAO|RS|RUFS|VM|WLS>_020_Count store the number of Validated staging rows in z1D_CIMissingPTAEO_Hosting (537889306) - the Hosting tile field - and _030_Report shows it in the message, so the tile keeps that number until the console is reopened. Step 4 itself is safe: CGB:Admin:Step4_010_Recount recounts before Step4_020_Blocked checks the tiles. Fix built (not imported): five new links CGB:Admin:STG_<type>_035_RestoreCICounters (order 135, same buttons, after the message and before the staging window opens) recount Hosting and Storage exactly like SetCount_CIMissingPTAEO; no existing link changed. Retest: press an import button, check the tiles still show the real Hosting/Storage counts (0 / 0 today).",
+"target": "Rockefeller_CGB_DEF066_CICounterRestore_102226.def (not imported)",
 "created": 1792553300000,
-"updated": 1792553300000
+"updated": 1792642000000
 },
 {
 "ref": "DEF-067",
@@ -3797,7 +3797,7 @@
 "status": "Open",
 "title": "F-Account increment reports 0 'with no new-year match' although no-match accounts were logged",
 "desc": "FY cutover run 10/21 22:01 (FYCutoverControl 000000000000002, F26 -> F27): 5 accounts processed, 3 incremented, 2 without an Active F27 account (1000993-F261999993-999993, 1000997-F261999997-999997). NN:CGB:FYI:Account_120 wrote both Error rows to the AuditLog, but the run message and the 'FY Increment - Run Complete' row report 'with no new-year match = 0'. The count comes from NN:CGB:FYI:Control_900_Complete: Set Fields from NN:CGB:AuditLog (Audit Type Error, Field Changed 'FY Increment', Changed Date >= run start) then $LASTCOUNT$; it returned 0 although the matching rows have the same timestamp (10:01:21 PM). Minor, same run: the 'F-Account Incremented' description shows 'Incremented to new FY-Account ID : ...' with the ID empty; preferred PTAEO audit rows only say 'Record Modified'; subscriptions whose F26 PTAEO has no Account record are skipped without a log entry (1000504-F261160040-160040, 1000021-F261110380-110380).",
-"work": "Workflow found in Rockefeller_CGB_Checkpoint_101426_EOD.def (NN:CGB:FYI:Control_010-900, Account_100-180). Fix to design: count the no-match accounts without reading back rows written in the same transaction (e.g. count them in Control_030 with a second query: F26 F-Accounts whose built F27 PTAEO has no Active Account), then show that number.",
+"work": "Workflow found in Rockefeller_CGB_Checkpoint_101426_EOD.def (NN:CGB:FYI:Control_010-900, Account_100-180). Fix to design: count the no-match accounts without reading back rows written in the same transaction (e.g. count them in Control_030 with a second query: F26 F-Accounts whose built F27 PTAEO has no Active Account), then show that number. PARKED by N. Foy 10/21 22:12; a retest needs a fresh Execute run on new test data.",
 "target": "",
 "created": 1792638700000,
 "updated": 1792638700000
