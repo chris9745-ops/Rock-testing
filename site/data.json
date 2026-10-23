@@ -1,5 +1,5 @@
 {
-"generated": 1792720363722,
+"generated": 1792720853705,
 "areas": {
 "A": "Catalog items and ticket setup",
 "B": "PTAEO defaulting and validation",
@@ -3801,6 +3801,19 @@
 "target": "",
 "created": 1792638700000,
 "updated": 1792638700000
+},
+{
+"ref": "DEF-071",
+"case": "UT-E-17",
+"sev": "Low",
+"owner": "N. Foy (DWP Catalog admin)",
+"status": "Open",
+"title": "DWP VM request shows base price $250; billing rate is $260",
+"desc": "DWP Virtual Server (VM)_RF price text says 'Base virtual server, 2 CPU cores, 4 GB RAM, 100 GB storage: $250' and 'Example: 4 cores, 8 GB, 200 GB, backup and Linux = $398 a month'. The chargeback base VM rate is 260, so the example bills 408 (confirmed in UT-E-15). N. Foy decision 10/22: the rate stays 260 and the DWP text changes.",
+"work": "Text-only change in the DWP Catalog (not in a DEF; uat_billadmin has no catalog admin access). Change '$250' to '$260' and the example '$398' to '$408' (260 + 30 CPU + 20 RAM + 30 storage + 28 backup + 40 Linux). Retest: open Virtual Server (VM)_RF > New virtual server and read the price block.",
+"target": "",
+"created": 1792724400000,
+"updated": 1792724400000
 },
 {
 "ref": "OQ-01",
