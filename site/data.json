@@ -1,5 +1,5 @@
 {
-"generated": 1792719215778,
+"generated": 1792720363722,
 "areas": {
 "A": "Catalog items and ticket setup",
 "B": "PTAEO defaulting and validation",
@@ -1406,11 +1406,11 @@
 "Empty quantity: \"Modify Resources: enter the new Quantity (greater than 0) before completing this work order.\""
 ],
 "status": "Blocked",
-"actual": "Blocked by DEF-038: Smart IT Edit Work Order has no Subscription ID / Subscription Action / Subscription Billing Type / VM Name fields, and classic WOI:WorkOrder redirects uat_technician to SHR:LandingConsole when a record loads (New mode needs the person-search popup).",
-"defect": "DEF-038",
+"actual": "DEF-038 closed (changes always start in DWP), but DWP has no Modify Resources request for a quantity-based subscription: My Subscriptions & Charges_RF offers only Cancel, Change the PTAEO and Refund; Virtual Server (VM)_RF has 'Change an existing virtual server' (VM sizing only). Waiting for a decision on how quantity changes are requested (question to N. Foy).",
+"defect": "",
 "evidence": "",
-"date": "2026-10-17",
-"updated": 1792255200000
+"date": "2026-10-22",
+"updated": 1792720800000
 },
 {
 "id": "UT-E-10",
@@ -1453,12 +1453,12 @@
 "(b) \"Subscription <id> belongs to <UAT Customer01>, not to this work order's customer (<UAT Customer02>). Only the subscriber can modify or terminate it.\"",
 "(c) \"Modify PTAEO: enter a PTAEO that is an active, unexpired account before completing this work order.\""
 ],
-"status": "Blocked",
-"actual": "Blocked by DEF-038: Smart IT Edit Work Order has no Subscription ID / Subscription Action / Subscription Billing Type / VM Name fields, and classic WOI:WorkOrder redirects uat_technician to SHR:LandingConsole when a record loads (New mode needs the person-search popup).",
-"defect": "DEF-038",
+"status": "Passed",
+"actual": "Rerun through DWP (DEF-038 closed: subscription changes always start in DWP). (c) My Subscriptions & Charges_RF > Change the PTAEO, for UAT Customer01, Add new PAO Account = 1000992-F271999992-999992 (Expired): DWP shows 'The account you entered does not exactly match current PAO accounts' and Submit stops with '1 item needs your attention', so no work order is created. Control: Active accounts 1000994-F271999994-999994 and 1000993-F261999993-999993 are accepted. (a) and (b) cannot occur in DWP: the subscription is picked from a list of the requester's own subscriptions (plus those on PTAEOs they manage as award manager), so a made-up ID or another customer's subscription can't be entered. The work order filters remain as a backstop. Open question: an award manager can pick a subscription on their PTAEO that belongs to someone else; the WO check (b) would then refuse it.",
+"defect": "",
 "evidence": "",
-"date": "2026-10-17",
-"updated": 1792255200000
+"date": "2026-10-22",
+"updated": 1792720800000
 },
 {
 "id": "UT-E-12",
@@ -1527,11 +1527,11 @@
 "It is not changed by the soft-provision import."
 ],
 "status": "Blocked",
-"actual": "Blocked by DEF-038: Smart IT Edit Work Order has no Subscription ID / Subscription Action / Subscription Billing Type / VM Name fields, and classic WOI:WorkOrder redirects uat_technician to SHR:LandingConsole when a record loads (New mode needs the person-search popup). (needs Subscription Billing Type = R/UFS Hard).",
-"defect": "DEF-038",
+"actual": "DEF-038 closed (changes always start in DWP), but DWP has no request that provisions R/UFS Hard storage: the only storage item is I Need Something New_RF2 > 'NAS or Local Storage Request', which asks only for PAO, Description and impact questions (no billing type, quantity or SKU). Waiting for a decision on how R/UFS Hard subscriptions are requested (question to N. Foy).",
+"defect": "",
 "evidence": "",
-"date": "2026-10-17",
-"updated": 1792255200000
+"date": "2026-10-22",
+"updated": 1792720800000
 },
 {
 "id": "UT-E-15",
@@ -1596,12 +1596,12 @@
 "exp": [
 "The new subscription has VM Name = UAT-VM-02."
 ],
-"status": "Blocked",
-"actual": "Blocked by DEF-038: Smart IT Edit Work Order has no Subscription ID / Subscription Action / Subscription Billing Type / VM Name fields, and classic WOI:WorkOrder redirects uat_technician to SHR:LandingConsole when a record loads (New mode needs the person-search popup). (needs VM Name).",
-"defect": "DEF-038",
+"status": "In Progress",
+"actual": "Rerun through DWP. Virtual Server (VM)_RF > New virtual server for UAT Customer01, 'I have a name I want to use' = UAT-VM-02, Test / RHEL 9 / 4 cores / 8 GB / 200 GB, no backup, no MSA. Submitted 10/22: WO0000000114458 (request 35534, 'VM Server: New UAT-VM-02'). Next: a user with work order access completes WO0000000114458 in Smart IT, then check the new subscription's VM Name = UAT-VM-02 (expected charge 4 cores/8 GB/200 GB + Linux). Note: the DWP price text still says base $250; the billing rate is 260.",
+"defect": "",
 "evidence": "",
-"date": "2026-10-17",
-"updated": 1792255200000
+"date": "2026-10-22",
+"updated": 1792720800000
 },
 {
 "id": "UT-E-18",
@@ -3378,13 +3378,13 @@
 "case": "UT-E-08",
 "sev": "High",
 "owner": "N. Foy",
-"status": "Open",
+"status": "Closed",
 "title": "Work order subscription actions cannot be run by technicians: Smart IT has no Subscription fields and classic redirects",
 "desc": "Smart IT Edit Work Order shows Billing Type, Quantity, Rate, Charge and PTAEO but not Subscription ID, Subscription Action, Subscription Billing Type or VM Name. The classic WOI:WorkOrder form has them, but for uat_technician any search that loads a record jumps to SHR:LandingConsole, and New mode needs the person-search popup. Blocks UT-E-08, 09, 10, 11, 14, 17. WO0000000114386 was created for UT-E-08 (no subscription fields set).",
-"work": "Yours (or Chris): add Subscription ID, Subscription Action, Subscription Billing Type and VM Name to the Smart IT work order view, or allow classic WO for the UAT technician. Recheck 10/19 23:00 (Claude): classic WOI:WorkOrder still redirects to SHR:LandingConsole when a record loads, now also for uat_billadmin. Finding 10/20 (Claude): WO0000000114394 came from DWP request 35453 (description 'What do you need?: Change PTAEO / Select the subscription: SUB000000000203'), so the subscription and action are set by the DWP catalog and the technician only completes the WO; Smart IT shows Chargeback with PTAEO, Service SKU UAT-906, Billing Type Subscription. Decision for N. Foy: if subscription actions always start in DWP, close DEF-038 and rerun UT-E-08..11, 14, 17 through DWP; if technicians must start them by hand in Smart IT, the Subscription fields are still needed on the SV views.",
+"work": "Decision N. Foy 10/22 20:35: subscription changes always start in DWP (My Subscriptions & Charges / new-service requests); technicians only complete the work order, so the Subscription fields are not needed on the Smart IT screens. Closed as not a defect. UT-E-09, 11, 14 and 17 are rerun through DWP (UT-E-08 and UT-E-10 already passed that way).",
 "target": "",
 "created": 1792255200000,
-"updated": 1792540000000
+"updated": 1792719500000
 },
 {
 "ref": "DEF-039",
