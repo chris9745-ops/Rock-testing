@@ -1,5 +1,5 @@
 {
-"generated": 1792720853705,
+"generated": 1792722185996,
 "areas": {
 "A": "Catalog items and ticket setup",
 "B": "PTAEO defaulting and validation",
@@ -1454,11 +1454,11 @@
 "(c) \"Modify PTAEO: enter a PTAEO that is an active, unexpired account before completing this work order.\""
 ],
 "status": "Passed",
-"actual": "Rerun through DWP (DEF-038 closed: subscription changes always start in DWP). (c) My Subscriptions & Charges_RF > Change the PTAEO, for UAT Customer01, Add new PAO Account = 1000992-F271999992-999992 (Expired): DWP shows 'The account you entered does not exactly match current PAO accounts' and Submit stops with '1 item needs your attention', so no work order is created. Control: Active accounts 1000994-F271999994-999994 and 1000993-F261999993-999993 are accepted. (a) and (b) cannot occur in DWP: the subscription is picked from a list of the requester's own subscriptions (plus those on PTAEOs they manage as award manager), so a made-up ID or another customer's subscription can't be entered. The work order filters remain as a backstop. Open question: an award manager can pick a subscription on their PTAEO that belongs to someone else; the WO check (b) would then refuse it.",
+"actual": "Rerun through DWP (DEF-038 closed: subscription changes always start in DWP). (c) My Subscriptions & Charges_RF > Change the PTAEO, for UAT Customer01, Add new PAO Account = 1000992-F271999992-999992 (Expired): DWP shows 'The account you entered does not exactly match current PAO accounts' and Submit stops with '1 item needs your attention', so no work order is created. Control: Active accounts 1000994-F271999994-999994 and 1000993-F261999993-999993 are accepted. (a) and (b) cannot occur in DWP: the subscription is picked from a list of the requester's own subscriptions plus those on PTAEOs they manage as award manager. N. Foy decision 10/22: award managers may change or cancel subscriptions on their PTAEOs. The WO workflow already allows it: NN:WOI:CGB:SUBMOD_011A_AllowPTAEOAwardManager (order 41, runs before 012_BlockOtherCustomer) accepts the work order when its customer is the Award Manager Login on the subscription's PTAEO account; anyone else still gets the (b) message. The work order filters remain as a backstop.",
 "defect": "",
 "evidence": "",
 "date": "2026-10-22",
-"updated": 1792720800000
+"updated": 1792724400000
 },
 {
 "id": "UT-E-12",
@@ -2746,12 +2746,12 @@
 "exp": [
 "No chargeback fields shown, no subscription, no ledger rows."
 ],
-"status": "Not run",
-"actual": "",
-"defect": "",
-"evidence": "",
-"date": "",
-"updated": null
+"status": "Blocked",
+"actual": "Other-tenant work order WO0000000114419 was created 10/20 as nfoy_sen (Sentinel); saved with no chargeback values (DEF-065 notes). Baseline 10/22 21:10 as uat_billadmin: Chargeback Ledger with Originating Ticket or Source Reference LIKE '%114419%' -> no matches. 10/22 21:20 as nfoy_sen (confirmed in CTM:People: nfoy_sen, Sentinel): Smart IT #/workorder/WO0000000114419 -> 'Ticket not found or you don't have permission to view it (ARERR 51268)'; mid-tier WOI:WorkOrder search for that ID, for WO% and for Submitter = $USER$ -> no matches. nfoy_sen can create work orders but cannot read any (Helix work order permissions, not chargeback). Blocked until nfoy_sen (or another Sentinel user) gets work order read/modify access, or someone who can see the WO completes and closes it.",
+"defect": "DEF-065",
+"evidence": "WO0000000114419 (Sentinel)",
+"date": "2026-10-22",
+"updated": 1792725900000
 },
 {
 "id": "UT-J-05",
