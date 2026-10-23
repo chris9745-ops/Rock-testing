@@ -1,5 +1,5 @@
 {
-"generated": 1792722185996,
+"generated": 1792724056270,
 "areas": {
 "A": "Catalog items and ticket setup",
 "B": "PTAEO defaulting and validation",
@@ -2746,12 +2746,12 @@
 "exp": [
 "No chargeback fields shown, no subscription, no ledger rows."
 ],
-"status": "Blocked",
-"actual": "Other-tenant work order WO0000000114419 was created 10/20 as nfoy_sen (Sentinel); saved with no chargeback values (DEF-065 notes). Baseline 10/22 21:10 as uat_billadmin: Chargeback Ledger with Originating Ticket or Source Reference LIKE '%114419%' -> no matches. 10/22 21:20 as nfoy_sen (confirmed in CTM:People: nfoy_sen, Sentinel): Smart IT #/workorder/WO0000000114419 -> 'Ticket not found or you don't have permission to view it (ARERR 51268)'; mid-tier WOI:WorkOrder search for that ID, for WO% and for Submitter = $USER$ -> no matches. nfoy_sen can create work orders but cannot read any (Helix work order permissions, not chargeback). Blocked until nfoy_sen (or another Sentinel user) gets work order read/modify access, or someone who can see the WO completes and closes it.",
+"status": "Failed",
+"actual": "WO0000000114419 (10/20) cannot be opened by nfoy_sen (ARERR 51268) although nfoy_sen has Work Order Master - row-level access on that record, not chargeback. Rerun 10/22 as nfoy_sen (Sentinel) in Smart IT: created WO0000000114459 (customer Nathan Foy_SEN, Sentinel; Helpdesk / Nathan Foy_SEN; DWP request 35536), Completed (Successful) 21:49:28, Closed 21:49:56. Chargeback fields stayed empty; no error or message. Check 21:55 as uat_billadmin: Chargeback Ledger has no rows for WO0000000114459 or 114419; no Subscription created since 21:45; no AuditLog entries since 21:45. Data side PASSES. FAILED on 'no chargeback fields shown': Smart IT create and view of the work order show PTAEO Account, Save as Preferred Account, Service SKU, Billing Type, Time Worked, Quantity, Billable Rate, Charge Amount and Manual Charge Amount to the Sentinel user (DEF-065 reopened). Retest the display part after the DEF-065 fix.",
 "defect": "DEF-065",
-"evidence": "WO0000000114419 (Sentinel)",
+"evidence": "WO0000000114459 (Sentinel); WO0000000114419",
 "date": "2026-10-22",
-"updated": 1792725900000
+"updated": 1792728000000
 },
 {
 "id": "UT-J-05",
@@ -3729,13 +3729,13 @@
 "case": "UT-J-04",
 "sev": "Medium",
 "owner": "Claude",
-"status": "Fixed - retest",
+"status": "Reopened",
 "title": "Work Order (Best Practice View) shows the chargeback fields to another tenant",
 "desc": "Found 10/20 in UT-J-04 as nfoy_sen (company Sentinel). New Work Order in classic WOI:WorkOrder Best Practice View: the chargeback block at the top of the form is visible - Billable Rate, Charge Amount, Billable Rate For Next FY, Task, SKU, Owner Name, Expenditure Debit/Credit, z1D_BillingType, CI Reconciliation ID, Org Number, Department, Category, Expenditure Code, Subcategory; also PTAEO Account (537888105), 537888121, Billing Type, Time Worked, Subscription Billing Type report visible. It stays visible after the customer (Sentinel) is chosen and on the next New form. The Incident form hides the same fields for Sentinel. NN:WO:RF:HideChargeback_NonRF_OnLoad (run-if 536880971 != Rockefeller) only hides 536870963, 537888105, 537888121, 546872002, 546870786, 304461471, and 536880971 is empty in this view, so the block is never hidden. Server side is fine: saved WO0000000114419 has no chargeback values.",
-"work": "Built 10/20 from Rockefeller_CGB_Checkpoint_INCWO_102026.def, mirroring Incident (login user's company). WOI has no Best Practice View; its default view is Simplified User View. NN:WO:SetLoginUserCompany/_AllViews only fill 536880971 on SV views; NN:WO:RF:CBSection_100-130 only show/hide Section Panel13 on SV_*; NN:WO:RF:HideChargeback_NonRF_OnLoad is disabled. Fix: NN:WO:RF:CBK_010_SetLoginUserCompany_AllViews + CBK_020/021/022_HideChargebackNonRF_AllViews_1..3 (max 20 actions each; v1 single link failed ARERR 182) hiding 59 chargeback fields + the new Chargeback tab when the login company is not The Rockefeller University, all views. CR N. Foy 10/20: Chargeback tab (537890501) on Default User View (+11 locales) and English Simplified User View; Simplified locales not used (decision 17:20); SV_* views untouched. Full all-locale Simplified file failed ARERR 8790, English-only imported fine. Retest 10/20 17:19 as nfoy_sen (Sentinel), Simplified User View and Default User View: login company Sentinel, hide links loaded, Chargeback tab and all chargeback fields hidden, no floating block - PASSED for the other tenant. 17:36 as uat_billadmin (form v5 imported: Simplified tab fields in new XY panel 537890502): Chargeback tab shows the 2-column layout; Service SKU UAT-901 fills SKU, Billing Type Hourly, Rate 85.00, Debit 63719 / Credit 54101 (not saved) - PASSED. 17:50 Smart IT as uat_billadmin: Create Work Order (SV_Create) and WO0000000114394 (SV_View) both show the Chargeback section with Service SKU (UAT-906) - no Smart IT change needed for WO (N. Foy 17:52: good). Still to check: Smart IT work order for nfoy_sen (no Chargeback section).",
+"work": "Built 10/20 from Rockefeller_CGB_Checkpoint_INCWO_102026.def, mirroring Incident (login user's company). WOI has no Best Practice View; its default view is Simplified User View. Fix: NN:WO:RF:CBK_010_SetLoginUserCompany_AllViews + CBK_020/021/022_HideChargebackNonRF_AllViews_1..3 hiding 59 chargeback fields + the Chargeback tab when the login company is not The Rockefeller University, all mid-tier views. Retest 10/20 as nfoy_sen in mid-tier Simplified and Default User View: hidden - PASSED; as uat_billadmin shown - PASSED. REOPENED 10/22 21:48 (UT-J-04): Smart IT as nfoy_sen (Sentinel), Create Work Order and the saved WO0000000114459 (Progressive View, #/create/workorderPV and #/workorderPV) show PTAEO Account, Save as Preferred Account (defaults to No), Service SKU, Billing Type, View Service Details, Time Worked, Quantity, Billable Rate, Charge Amount and Manual Charge Amount. Mid-tier active links do not run in Smart IT Progressive Views, so the fix does not reach them. Server side is fine: WO0000000114459 saved, completed and closed with no chargeback values. Options: (a) in Smart IT View Designer, give the chargeback section/fields of the work order view a visibility condition (Company = The Rockefeller University), or (b) field permissions: grant the chargeback fields to a Rockefeller group instead of Public. Decision needed from N. Foy.",
 "target": "Rockefeller_CGB_WO_ChargebackTab_2_DEF065_ActiveLinks_v3_102026.def + _1_Form_v3b_test_102026.def (imported 10/20)",
 "created": 1792533200000,
-"updated": 1792534900000
+"updated": 1792727400000
 },
 {
 "ref": "DEF-066",
