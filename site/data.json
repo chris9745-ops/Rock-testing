@@ -1,5 +1,5 @@
 {
-"generated": 1792715521658,
+"generated": 1792719215778,
 "areas": {
 "A": "Catalog items and ticket setup",
 "B": "PTAEO defaulting and validation",
@@ -3589,10 +3589,10 @@
 "status": "Fixed - retest",
 "title": "Chargeback permission model does not match the roles",
 "desc": "Intended (N. Foy): Chargeback Master and Chargeback Config see and use the Admin Console. Found in the 10/14 export: (1) NN:CGB:AdminConsole is visible to 800003 Master and 800004 Config, but all 148 CGB:Admin:* active links (counters, warnings, module switching, Modify/View Details, buttons) are permitted to 800004 Config only, so a Master-only user would see a console that does nothing. (2) On the data forms, Master and Config have view only (\\1); change (\\2) goes to 800001 Chargeback User and/or 800002 Chargeback Approver, plus group 7 (Assignee Group, row level). Account: change only via group 7; Ledger: change only 800001 User; Service: 800001, 800002; BillingRun / OracleExport / Subscription / Department: 800001, 800002, 7. So a Master or Config user can't change data on the forms directly, and console Modify actions may fail for them, while a Chargeback User can edit ledger, export and billing-run records.",
-"work": "Decision 10/19: Master + Config. The 149 Admin Console active links permitted to 800004 only are re-issued with 800003 + 800004 (built from the 10/14 AdminConsole checkpoint plus later DEFs). Data-form permissions remain N. Foy's. Static check 10/21 night (Claude) of N. Foy's console export (03:16 UTC 10/22): 304 of 306 enabled console links have 800003 + 800004; two links added later in the v2 work were 800004 only - CGB:Admin:V2_BillingRun_010_Open and CGB:Admin:V2_ResolveMissing_010_Open (Claude's v2 builds); the Subscription table column col_SUB_Status (536880963) has no permissions, so only administrators see the Status column. Fix built (not imported): Rockefeller_CGB_Console_PermFix_102226.def (both links 800003 + 800004; Status column view for 800003/800004; console form built on the 22:26 import). Retest still needs a Master-only (800003, not 800004) login: console buttons, module switching, Billing Run and Resolve Missing Accounts open.",
-"target": "Rockefeller_CGB_DefectFixes_2_ActiveLinks_101926.def; follow-up Rockefeller_CGB_Console_PermFix_102226.def (not imported)",
+"work": "Decision 10/19: Master + Config. The 149 Admin Console active links permitted to 800004 only were re-issued with 800003 + 800004. Data-form permissions remain N. Foy's. 10/21 night static check of the console export found two later v2 links still 800004-only (CGB:Admin:V2_BillingRun_010_Open, V2_ResolveMissing_010_Open) and the Subscription table Status column (536880963) with no permissions. Rockefeller_CGB_Console_PermFix_102226.def fixes all three; imported 10/22 (N. Foy). Check 10/22 20:37 as uat_billadmin: the Subscription table now shows the Status column (Active ...) - PASSED. Remaining: a Master-only login (800003 without 800004) to confirm console buttons, module switching, Billing Run and Resolve Missing Accounts open.",
+"target": "Rockefeller_CGB_DefectFixes_2_ActiveLinks_101926.def; Rockefeller_CGB_Console_PermFix_102226.def (imported 10/22)",
 "created": 1792289000000,
-"updated": 1792642000000
+"updated": 1792719300000
 },
 {
 "ref": "DEF-055",
@@ -3745,10 +3745,10 @@
 "status": "Fixed - retest",
 "title": "Console 'Hosting CIs missing PTAEO' tile shows the last import's count after an import button",
 "desc": "Found 10/20 22:10-22:18 as uat_billadmin on NN:CGB:AdminConsole Admin View v2. Fresh console: Hosting CIs missing PTAEO = 0 (correct - no hosting CIBilling row lacks a PTAEO). After the Wireless button (2 validated) the tile showed 2; after the R/UFS button (2 validated) 2; after the second R/UFS run (1 validated) 1. Reopening the console shows 0 again. The tile appears to be refreshed after the button from $LASTCOUNT$ of the import's own query instead of its CIBilling count. Step 4 stops while this counter is above 0, so a wrong value could block Step 4 until the console is reopened.",
-"work": "Cause confirmed 10/21 night from N. Foy's console export (03:16 UTC 10/22): CGB:Admin:STG_<PAO|RS|RUFS|VM|WLS>_020_Count store the number of Validated staging rows in z1D_CIMissingPTAEO_Hosting (537889306) - the Hosting tile field - and _030_Report shows it in the message, so the tile keeps that number until the console is reopened. Step 4 itself is safe: CGB:Admin:Step4_010_Recount recounts before Step4_020_Blocked checks the tiles. Fix built (not imported): five new links CGB:Admin:STG_<type>_035_RestoreCICounters (order 135, same buttons, after the message and before the staging window opens) recount Hosting and Storage exactly like SetCount_CIMissingPTAEO; no existing link changed. Retest: press an import button, check the tiles still show the real Hosting/Storage counts (0 / 0 today).",
-"target": "Rockefeller_CGB_DEF066_CICounterRestore_102226.def (not imported)",
+"work": "Cause confirmed 10/21 night from N. Foy's console export (03:16 UTC 10/22): CGB:Admin:STG_<PAO|RS|RUFS|VM|WLS>_020_Count store the number of Validated staging rows in z1D_CIMissingPTAEO_Hosting (537889306) - the Hosting tile field - and _030_Report shows it in the message, so the tile keeps that number until the console is reopened. Step 4 itself is safe (Step4_010_Recount recounts first). Fix: five new links CGB:Admin:STG_<type>_035_RestoreCICounters (order 135) recount Hosting and Storage after the message. Imported 10/22 (N. Foy). Check 10/22 20:35 (uat_billadmin): console Hosting 0 / Storage 0; Wireless button -> 'Wireless import: 0 staging row(s) validated ... 159 row(s) in error; 0 still New'; tiles still 0 / 0. Not conclusive: no staging rows are Validated today in any feed (bug only shows when the validated count is above 0). Full retest at the next import that leaves validated rows (e.g. the November feeds).",
+"target": "Rockefeller_CGB_DEF066_CICounterRestore_102226.def (imported 10/22 by N. Foy)",
 "created": 1792553300000,
-"updated": 1792642000000
+"updated": 1792719300000
 },
 {
 "ref": "DEF-067",
