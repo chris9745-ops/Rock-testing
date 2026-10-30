@@ -8,7 +8,7 @@
   "pri": 1,
   "type": "Positive",
   "pre": "TD-02, TD-05 loaded.",
-  "data": "UAT Customer01 \u00b7 Service SKU UAT-901 Hourly Support",
+  "data": "UAT Customer01 · Service SKU UAT-901 Hourly Support",
   "steps": [
    "Create a new Incident for UAT Customer01 (Company The Rockefeller University).",
    "In the chargeback panel, select Service SKU = UAT-901 Hourly Support.",
@@ -31,7 +31,7 @@
   "pri": 1,
   "type": "Positive",
   "pre": "TD-02, TD-05 loaded.",
-  "data": "UAT Customer01 \u00b7 Service SKU UAT-902 Ethernet Cable",
+  "data": "UAT Customer01 · Service SKU UAT-902 Ethernet Cable",
   "steps": [
    "Create a new Work Order for UAT Customer01.",
    "Select Service SKU = UAT-902 Ethernet Cable.",
@@ -93,7 +93,7 @@
   "pri": 1,
   "type": "Positive",
   "pre": "TD-05 loaded.",
-  "data": "UAT Customer01 \u00b7 UAT-905 Courtesy Support (Do Not Bill = Yes)",
+  "data": "UAT Customer01 · UAT-905 Courtesy Support (Do Not Bill = Yes)",
   "steps": [
    "Create an Incident for UAT Customer01 and select Service SKU UAT-905.",
    "Save."
@@ -135,7 +135,7 @@
   "pri": 1,
   "type": "Positive",
   "pre": "Rockefeller_CGB_T15_InfoSec_101526.def imported.",
-  "data": "Requester UAT Customer01 \u00b7 submitter UAT Technician \u00b7 SKU UAT-909 Security Incident",
+  "data": "Requester UAT Customer01 · submitter UAT Technician · SKU UAT-909 Security Incident",
   "steps": [
    "As UAT Technician, create an Incident for UAT Customer01 with Service SKU UAT-909 and save.",
    "Open the Incident's Assignee Groups (field 112) in an admin view.",
@@ -158,7 +158,7 @@
   "pri": 1,
   "type": "Positive",
   "pre": "As UT-A-07.",
-  "data": "UAT Customer01 \u00b7 SKU UAT-909",
+  "data": "UAT Customer01 · SKU UAT-909",
   "steps": [
    "Create a Work Order for UAT Customer01 with Service SKU UAT-909 and save.",
    "Repeat the visibility checks of UT-A-07."
@@ -189,6 +189,126 @@
    "Source Channel = Portal on the DWP Work Order."
   ],
   "passc": "Every expected result is observed; no unexpected error, record or value."
+ },
+ {
+  "id": "UT-A-10",
+  "area": "A",
+  "title": "Ticket with no Service SKU, or an unknown one, gets the default SKU CGBDEFAULT",
+  "req": "FR-CAT-006",
+  "task": "DEF-064",
+  "pri": 1,
+  "type": "Positive",
+  "pre": "Catalog item CGBDEFAULT exists (SVC000000000311: Hourly, 85.00, 63719/54101, not in portal).",
+  "data": "UAT Customer02 · (a) no Service SKU · (b) made-up SKU ZZZ999 · Time Worked 0.5 h",
+  "steps": [
+   "In Smart IT create an Incident for UAT Customer02 with no Service SKU and save.",
+   "Add Time Worked 0.5 and save.",
+   "Create a second Incident with Service SKU typed as ZZZ999 and save.",
+   "Repeat step 1 on a Work Order (decision pending: question 6 of the 10/22 morning report)."
+  ],
+  "exp": [
+   "(a) Service SKU = CGBDEFAULT, Billing Type Hourly, Billable Rate 85.00, Expenditure Debit 63719 / Credit 54101.",
+   "Charge Amount = 21.25 after Time Worked 0.5 is saved.",
+   "(b) The unknown SKU is cleared and CGBDEFAULT is set in its place; the ticket saves without an error.",
+   "Work Order: record what happens. If work orders are not meant to default, the SKU stays empty (no defect)."
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": "Supersedes the Tier 1 fallback in UT-A-03 / UT-A-04 (accepted as a known gap)."
+ },
+ {
+  "id": "UT-A-11",
+  "area": "A",
+  "title": "Billing Type and Billable Rate are read-only for technicians",
+  "req": "FR-CAT-006",
+  "task": "DEF-064",
+  "pri": 2,
+  "type": "Negative",
+  "pre": "UAT Technician and UAT Billing Admin logins.",
+  "data": "Incident with Service SKU UAT-901",
+  "steps": [
+   "As UAT Technician open an Incident in the classic Best Practice View and try to change Billing Type and Billable Rate.",
+   "Repeat as UAT Billing Admin (Master + Config)."
+  ],
+  "exp": [
+   "Technician: both fields are read-only (set by the Service SKU).",
+   "Billing Admin: both fields can be edited (NN:HPD:CGB_BillingTypeRate_020_ReadWriteForAdmin).",
+   "Smart IT: note whether the fields are editable there (Smart IT ignores active links; open item on DEF-064)."
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": ""
+ },
+ {
+  "id": "UT-A-12",
+  "area": "A",
+  "title": "Incident classic view: chargeback fields sit on their own Chargeback tab",
+  "req": "FR-ITSM-003",
+  "task": "HPD tab (10/20)",
+  "pri": 2,
+  "type": "Positive",
+  "pre": "Rockefeller_CGB_HPD_ChargebackTab_ServiceSKU_102026d.def and the RFOnly active link imported.",
+  "data": "Any Rockefeller Incident",
+  "steps": [
+   "Open an Incident in the classic Best Practice View as UAT Technician.",
+   "Open the Chargeback tab (after Date/System).",
+   "Change the Customer, then set Billing Type Hourly with Time Worked and save."
+  ],
+  "exp": [
+   "No chargeback fields float above the BMC header band.",
+   "The Chargeback tab shows the Billing column, the Account section and the Ledger and Refunds section.",
+   "PTAEO Account, PTAEO Source and Department still fill on customer change; Charge Amount still calculates on save.",
+   "Task, z1D fields, Org Number__CGB, Department__CGB, Expenditure Code and Refund Reference ID are not shown."
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": ""
+ },
+ {
+  "id": "UT-A-13",
+  "area": "A",
+  "title": "Service SKU is on the Smart IT standard and essential Incident screens",
+  "req": "FR-CAT-006",
+  "task": "HPD tab (10/20)",
+  "pri": 1,
+  "type": "Positive",
+  "pre": "As UT-A-12.",
+  "data": "UAT Customer01 · Service SKU UAT-901",
+  "steps": [
+   "As a Rockefeller user create an Incident in Smart IT on the standard create screen and pick Service SKU UAT-901.",
+   "Repeat on the essential create screen (ESS_SV_Create) and edit an Incident on the essential edit screen (NewSV_Edit__c)."
+  ],
+  "exp": [
+   "Service SKU is visible and editable on every screen.",
+   "Picking the SKU fills SKU, Billing Type, Billable Rate and Expenditure Debit / Credit."
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": ""
+ },
+ {
+  "id": "UT-A-14",
+  "area": "A",
+  "title": "Work Order classic views: chargeback fields sit on their own Chargeback tab",
+  "req": "FR-ITSM-003",
+  "task": "WO tab (10/20)",
+  "pri": 2,
+  "type": "Positive",
+  "pre": "Rockefeller_CGB_WO_ChargebackTab_1_Form_v5 and _2_DEF065_ActiveLinks_v3 imported.",
+  "data": "Any Rockefeller Work Order · Service SKU UAT-901",
+  "steps": [
+   "As UAT Billing Admin open a Work Order in the Simplified User View, then in the Default User View.",
+   "On the Chargeback tab pick Service SKU UAT-901.",
+   "Set Billing Type Hourly with Time Worked and save."
+  ],
+  "exp": [
+   "No chargeback fields above or beside the form; a Chargeback tab after the other tabs (2 columns on Simplified, 4 on Default).",
+   "Labels match the fields (VM Name, Subscription ID, IT PTAEO, Award Manager are no longer mislabelled).",
+   "SKU, Billing Type, Billable Rate and Expenditure Debit / Credit fill; Charge Amount still calculates on save."
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": ""
  },
  {
   "id": "UT-B-01",
@@ -381,7 +501,7 @@
   "pri": 2,
   "type": "Positive",
   "pre": "UAT Customer01 has no preferred PTAEO.",
-  "data": "UAT Customer01 \u00b7 PTAEO ACCT-PREF typed manually \u00b7 Save as Preferred = Yes",
+  "data": "UAT Customer01 · PTAEO ACCT-PREF typed manually · Save as Preferred = Yes",
   "steps": [
    "On an Incident for UAT Customer01 type PTAEO = ACCT-PREF, set Save as Preferred Account = Yes and save.",
    "Create a second Incident for UAT Customer01."
@@ -424,7 +544,7 @@
   "pri": 1,
   "type": "Positive",
   "pre": "UT-B-11 data. ACCT-A Active.",
-  "data": "Current PTAEO ACCT-EXP \u00b7 New PTAEO ACCT-A",
+  "data": "Current PTAEO ACCT-EXP · New PTAEO ACCT-A",
   "steps": [
    "In the PAO Expiration Report select the ACCT-EXP row, enter New PTAEO Account = ACCT-A and click Promote.",
    "Open the subscription, any preferred rows, department and open tickets that used ACCT-EXP.",
@@ -503,6 +623,30 @@
   "passc": "Every expected result is observed; no unexpected error, record or value."
  },
  {
+  "id": "UT-B-16",
+  "area": "B",
+  "title": "Preferred PTAEO row gets the customer's login from the Person ID",
+  "req": "FR-PTAEO-006",
+  "task": "DEF-026, DEF-053",
+  "pri": 2,
+  "type": "Positive",
+  "pre": "Customer with no preferred PTAEO row.",
+  "data": "UAT Customer01 · Save as Preferred = Yes",
+  "steps": [
+   "On an Incident for the customer type a valid PTAEO, set Save as Preferred Account = Yes and save.",
+   "Open the new NN:CGB:CustomerPreferredPTAEO row.",
+   "Sign in as that customer and look for the row (DWP Subscriptions & Charges or the form)."
+  ],
+  "exp": [
+   "Customer Login ID is filled from CTM:People (NN:CGB:WLT:Login_005 / RowAccess_980).",
+   "Assignee Groups holds the customer's login, so the customer sees the row and no other customer does.",
+   "Clean-up: set the row Inactive / Default No so later tests start from the department default."
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": ""
+ },
+ {
   "id": "UT-C-01",
   "area": "C",
   "title": "Hourly charge: 15-minute increments, first 15 minutes free",
@@ -511,7 +655,7 @@
   "pri": 1,
   "type": "Positive",
   "pre": "TD-02/03/05.",
-  "data": "UAT Customer01 \u00b7 UAT-901 ($80/h) \u00b7 Time Worked 0.83 h (50 minutes)",
+  "data": "UAT Customer01 · UAT-901 ($80/h) · Time Worked 0.83 h (50 minutes)",
   "steps": [
    "Create an Incident for UAT Customer01, SKU UAT-901, Time Worked = 0.83 (hours).",
    "Check the charge preview before saving.",
@@ -574,7 +718,7 @@
   "pri": 1,
   "type": "Positive",
   "pre": "As UT-C-01.",
-  "data": "UAT Customer01 \u00b7 UAT-901 \u00b7 Time Worked 0.83 h (50 minutes)",
+  "data": "UAT Customer01 · UAT-901 · Time Worked 0.83 h (50 minutes)",
   "steps": [
    "Create a Work Order for UAT Customer01 with SKU UAT-901 and Time Worked 0.83 (hours).",
    "Complete it."
@@ -594,7 +738,7 @@
   "pri": 1,
   "type": "Positive",
   "pre": "TD-05.",
-  "data": "UAT-902 ($6.50) \u00b7 Quantity 3",
+  "data": "UAT-902 ($6.50) · Quantity 3",
   "steps": [
    "Create an Incident for UAT Customer01, SKU UAT-902, Quantity 3, and resolve.",
    "Repeat on a Work Order and complete."
@@ -614,7 +758,7 @@
   "pri": 1,
   "type": "Positive",
   "pre": "TD-05.",
-  "data": "UAT-903 \u00b7 Manual Charge Amount $125.00 (Time Worked 0.83 h / 50 minutes also entered)",
+  "data": "UAT-903 · Manual Charge Amount $125.00 (Time Worked 0.83 h / 50 minutes also entered)",
   "steps": [
    "Create an Incident with SKU UAT-903, enter Time Worked 0.83 (hours) and Manual Charge Amount 125.00.",
    "Check the preview; resolve.",
@@ -636,7 +780,7 @@
   "pri": 1,
   "type": "Positive",
   "pre": "TD-05.",
-  "data": "UAT-904 Device Issue \u00b7 Time Worked 1.00 h (60 minutes)",
+  "data": "UAT-904 Device Issue · Time Worked 1.00 h (60 minutes)",
   "steps": [
    "Create an Incident for UAT Customer01 with SKU UAT-904 and Time Worked 1.00 (hours); resolve."
   ],
@@ -656,7 +800,7 @@
   "pri": 1,
   "type": "Negative",
   "pre": "Regression for defect D1.",
-  "data": "UAT-902 \u00b7 Quantity 2",
+  "data": "UAT-902 · Quantity 2",
   "steps": [
    "Create and resolve an Incident with SKU UAT-902 and Quantity 2."
   ],
@@ -674,7 +818,7 @@
   "pri": 1,
   "type": "Negative",
   "pre": "Regression for defect D3.",
-  "data": "UAT-901 \u00b7 Time Worked 0.83 h (50 minutes) \u00b7 Incident left open 2 hours before resolving",
+  "data": "UAT-901 · Time Worked 0.83 h (50 minutes) · Incident left open 2 hours before resolving",
   "steps": [
    "Create the Incident, wait at least 2 hours, then resolve."
   ],
@@ -692,7 +836,7 @@
   "pri": 1,
   "type": "Positive",
   "pre": "TD-05.",
-  "data": "UAT-905 Courtesy Support (Do Not Bill) \u00b7 Time Worked 0.83 h (50 minutes)",
+  "data": "UAT-905 Courtesy Support (Do Not Bill) · Time Worked 0.83 h (50 minutes)",
   "steps": [
    "Create an Incident with SKU UAT-905 and Time Worked 0.83 (hours); resolve.",
    "Repeat on a Work Order."
@@ -712,7 +856,7 @@
   "pri": 1,
   "type": "Positive",
   "pre": "UAT-PC-MSS is MSS Covered = Yes (after UT-E-23).",
-  "data": "CI UAT-PC-MSS \u00b7 SKU UAT-907 \u00b7 Time Worked 0.83 h (50 minutes)",
+  "data": "CI UAT-PC-MSS · SKU UAT-907 · Time Worked 0.83 h (50 minutes)",
   "steps": [
    "Create an Incident for UAT Customer01 with CI = UAT-PC-MSS, SKU UAT-907, Time Worked 0.83 (hours) and save.",
    "Resolve.",
@@ -996,7 +1140,7 @@
   "pri": 1,
   "type": "Positive",
   "pre": "TD-02/05.",
-  "data": "UAT Customer01 \u00b7 SKU UAT-906 ($8/month) \u00b7 Quantity 1",
+  "data": "UAT Customer01 · SKU UAT-906 ($8/month) · Quantity 1",
   "steps": [
    "Create a Work Order for UAT Customer01 with SKU UAT-906 and complete it.",
    "Open NN:CGB:Subscription where Originating Ticket = the Work Order."
@@ -1138,7 +1282,7 @@
   "pri": 1,
   "type": "Positive",
   "pre": "UT-E-01 subscription Active (subscriber UAT Customer01).",
-  "data": "Work Order for UAT Customer01 \u00b7 Subscription ID = that subscription \u00b7 Action Modify PTAEO \u00b7 PTAEO ACCT-PREF",
+  "data": "Work Order for UAT Customer01 · Subscription ID = that subscription · Action Modify PTAEO · PTAEO ACCT-PREF",
   "steps": [
    "Create the Work Order with Subscription ID and Subscription Action = Modify PTAEO, PTAEO = ACCT-PREF; save; complete."
   ],
@@ -1158,7 +1302,7 @@
   "pri": 1,
   "type": "Positive",
   "pre": "UT-E-01 subscription.",
-  "data": "Action Modify Resources \u00b7 Quantity 5",
+  "data": "Action Modify Resources · Quantity 5",
   "steps": [
    "Create the Work Order (Modify Resources, Quantity 5) and complete it.",
    "Repeat with Quantity empty."
@@ -1218,7 +1362,7 @@
   "pri": 1,
   "type": "Positive",
   "pre": "R/UFS soft subscriptions SUB-RUFS-01 and SUB-RUFS-02 exist ($25/TB). TD-08 R/UFS file loaded to staging.",
-  "data": "SUB-RUFS-01 1,536 GB \u00b7 SUB-RUFS-02 800 GB",
+  "data": "SUB-RUFS-01 1,536 GB · SUB-RUFS-02 800 GB",
   "steps": [
    "Admin Console > Step 1: R/UFS button (report).",
    "Step 4: Update Subscriptions (with both CI counters at 0).",
@@ -1279,15 +1423,18 @@
   "pri": 1,
   "type": "Positive",
   "pre": "TD-07 pricing loaded. VM Hosting subscription UAT-VM-01 (VM Name set from its Work Order).",
-  "data": "4 cores \u00b7 8 GB \u00b7 200 GB \u00b7 Backup Yes \u00b7 Linux Yes",
+  "data": "4 cores · 8 GB · 200 GB · Backup Yes · Linux Yes",
   "steps": [
    "On subscription UAT-VM-01 set CPU Cores 4, RAM 8, Storage 200, Backup Yes, Linux OS Yes and save."
   ],
   "exp": [
-   "Billable Rate = 398.00 (250 + 30 CPU + 20 RAM + 30 storage + 28 backup + 40 Linux).",
-   "Status Change Log shows old rate -> new rate."
+   "Billable Rate = 408.00 (260 base + 30 CPU + 20 RAM + 30 storage + 28 backup + 40 Linux). Base VM is 260 since 10/19.",
+   "If Chris's backup child subscription is live, backup is not in this rate (see UT-E-26).",
+   "Status Change Log shows old rate -> new rate with 2 decimals."
   ],
-  "passc": "Every expected result is observed; no unexpected error, record or value."
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "revNote": "Base VM rate 260 (decision 10/19) and VM backup as its own subscription.",
+  "rev": "upd"
  },
  {
   "id": "UT-E-16",
@@ -1380,7 +1527,7 @@
   "pri": 1,
   "type": "Positive",
   "pre": "TD-08 wireless rows loaded; Wireless catalog item exists.",
-  "data": "2125550101 $42.17 \u00b7 2125550199 (no CI) $10.00 \u00b7 $0.00 line",
+  "data": "2125550101 $42.17 · 2125550199 (no CI) $10.00 · $0.00 line",
   "steps": [
    "Admin Console > Step 1: Wireless.",
    "Search the ledger for Pair ID WLS-2125550101-<period>.",
@@ -1496,6 +1643,53 @@
   "passc": "Every expected result is observed; no unexpected error, record or value."
  },
  {
+  "id": "UT-E-26",
+  "area": "E",
+  "title": "VM with Backup gets a separate Backup child subscription",
+  "req": "FR-SUB-002, FR-INT-003",
+  "task": "DEF-059 (Chris)",
+  "pri": 1,
+  "type": "Positive",
+  "pre": "Chris's VM Backup build imported. VM Hosting subscription matched by a VMware staging row with Backups TRUE.",
+  "data": "VMware staging row with Backups TRUE (e.g. AAARAD) · or a DWP new VM request with backup",
+  "steps": [
+   "Post the VMware staging row (or complete the new-VM Work Order) with Backup = Yes.",
+   "Open the VM subscription and search for subscriptions whose Originating Ticket is that subscription."
+  ],
+  "exp": [
+   "The VM subscription rate excludes backup (2 cores / 4 GB / 100 GB = 260.00).",
+   "One child subscription exists: SKU 13292, Billing Type VM Backup, 28.00 per month, same customer and PTAEO, linked to the parent.",
+   "Child's VM name / Related CI matches the parent's current VM name (open item on DEF-059: it kept the old name).",
+   "Open question for Chris: child rate 28.00 (VM Pricing) or 24.00 (catalog SKU 13292)."
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": ""
+ },
+ {
+  "id": "UT-E-27",
+  "area": "E",
+  "title": "An award manager can change a subscription on their own PTAEO",
+  "req": "FR-SUB-006",
+  "task": "SUBMOD_011A",
+  "pri": 2,
+  "type": "Positive",
+  "pre": "Decision N. Foy 10/22. A subscription whose PTAEO account has an Award Manager Login of a test person who is not the subscriber.",
+  "data": "DWP My Subscriptions & Charges as the award manager",
+  "steps": [
+   "As the award manager, open DWP My Subscriptions & Charges and pick the subscriber's subscription on the PTAEO they manage.",
+   "Request Change the PTAEO to an Active account; complete the Work Order as UAT Technician.",
+   "Repeat as a person who is neither the subscriber nor the award manager (through the Work Order directly)."
+  ],
+  "exp": [
+   "The award manager sees subscriptions on PTAEOs they manage and the change is applied, with a Status Change Log line.",
+   "Anyone else is refused by the Work Order filter (other-customer message); nothing changes."
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": ""
+ },
+ {
   "id": "UT-F-01",
   "area": "F",
   "title": "Billing run record opens for the period",
@@ -1503,7 +1697,7 @@
   "task": "T21",
   "pri": 1,
   "type": "Positive",
-  "pre": "Run control imported. In DEV the 15th schedule can be run on demand: open NN:CGB:BillingRun for the period (create it with Billing Period = current YYYY-MM if the 6:55 PM escalation has not created it) and set z1D Action = STEP5, then STEP6, then STEP7, saving after each.",
+  "pre": "Run control imported.",
   "data": "Current period YYYY-MM",
   "steps": [
    "After 6:55 PM on the 15th (or by creating it), open NN:CGB:BillingRun.",
@@ -1523,7 +1717,7 @@
   "task": "T19",
   "pri": 1,
   "type": "Positive",
-  "pre": "In DEV the 15th schedule can be run on demand: open NN:CGB:BillingRun for the period (create it with Billing Period = current YYYY-MM if the 6:55 PM escalation has not created it) and set z1D Action = STEP5, then STEP6, then STEP7, saving after each.",
+  "pre": "Run record open for the period (see the note above).",
   "data": "Active subscription for UAT Customer01 (UAT-DEPT-01) with PTAEO ACCT-EXP",
   "steps": [
    "Run Step 5 (z1D Action = STEP5).",
@@ -1544,7 +1738,7 @@
   "task": "T19",
   "pri": 1,
   "type": "Negative",
-  "pre": "In DEV the 15th schedule can be run on demand: open NN:CGB:BillingRun for the period (create it with Billing Period = current YYYY-MM if the 6:55 PM escalation has not created it) and set z1D Action = STEP5, then STEP6, then STEP7, saving after each.",
+  "pre": "Run record open for the period (see the note above).",
   "data": "Active subscription for UAT Customer03 (UAT-DEPT-02, no default) with PTAEO ACCT-EXP",
   "steps": [
    "Run Step 5.",
@@ -1565,7 +1759,7 @@
   "task": "T20",
   "pri": 1,
   "type": "Positive",
-  "pre": "In DEV the 15th schedule can be run on demand: open NN:CGB:BillingRun for the period (create it with Billing Period = current YYYY-MM if the 6:55 PM escalation has not created it) and set z1D Action = STEP5, then STEP6, then STEP7, saving after each. Step 5 Complete.",
+  "pre": "Step 5 Complete.",
   "data": "Change UAT-906 Expenditure Credit 54102 -> 54103",
   "steps": [
    "Change the catalog code on UAT-906.",
@@ -1587,7 +1781,7 @@
   "task": "T21, T22, T46, T48",
   "pri": 1,
   "type": "Positive",
-  "pre": "In DEV the 15th schedule can be run on demand: open NN:CGB:BillingRun for the period (create it with Billing Period = current YYYY-MM if the 6:55 PM escalation has not created it) and set z1D Action = STEP5, then STEP6, then STEP7, saving after each. Steps 5 and 6 Complete. Subscriptions: Active, Pending Termination, On Hold, Terminated.",
+  "pre": "Steps 5 and 6 Complete. Subscriptions: Active, Pending Termination, On Hold, Terminated.",
   "data": "UT-E-01 (Active), UT-E-07 (Pending Termination), UT-E-05 (On Hold), a Terminated one",
   "steps": [
    "Run Step 7.",
@@ -1975,7 +2169,7 @@
  {
   "id": "UT-H-01",
   "area": "H",
-  "title": "Refund posts a reversed pair",
+  "title": "DWP refund posts a reversed pair",
   "req": "FR-SUB-008, FR-LED-003",
   "task": "T36",
   "pri": 1,
@@ -1992,7 +2186,9 @@
    "Customer account (ACCT-A) is credited 60.00; 1000028-F271110510-110510 is debited 60.00 with Task 01.",
    "Codes reverse the original charge; AuditLog entry for the refund."
   ],
-  "passc": "Every expected result is observed; no unexpected error, record or value."
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "revNote": "DWP refund path is unchanged by the 10/29 refund window. Retitled only.",
+  "rev": "upd"
  },
  {
   "id": "UT-H-02",
@@ -2015,7 +2211,7 @@
  {
   "id": "UT-H-03",
   "area": "H",
-  "title": "Refund controls",
+  "title": "DWP refund work order controls",
   "req": "FR-SUB-008",
   "task": "T36",
   "pri": 1,
@@ -2026,18 +2222,20 @@
    "Try each case."
   ],
   "exp": [
-   "(a) \"Refund work orders can only be created from the DWP Request a Refund service request.\"",
-   "(b) \"Enter a refund amount greater than zero.\"",
+   "(a) Not applicable: refund work orders come only from DWP (and, before 10/29, the console).",
+   "(b) Amount 0: the work order is cancelled at once with the reason in its description (DEF-068 backstop).",
    "(c) \"Refund PAO <value> is missing or not an Active account. Refunds cannot be issued to a closed (prior FY) account.\"",
-   "(d) \"This work order is a refund. The Refunds flag cannot be removed; cancel the work order instead.\"",
+   "(d) Not applicable: the Refunds flag is not on the Smart IT screens and cannot be removed on save.",
    "(e) \"The refund has no service SKU. Categorize the work order with the original service before completing it.\""
   ],
-  "passc": "Every expected result is observed; no unexpected error, record or value."
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "revNote": "Expected results brought in line with DEF-068 and the 10/21 decisions on (a) and (d).",
+  "rev": "upd"
  },
  {
   "id": "UT-H-04",
   "area": "H",
-  "title": "Refund must reference a charged ticket and not exceed the charge",
+  "title": "DWP refund must reference a charged ticket and not exceed the charge",
   "req": "FR-SUB-008",
   "task": "T36",
   "pri": 1,
@@ -2048,9 +2246,14 @@
    "Submit each refund."
   ],
   "exp": [
-   "Each is refused. KNOWN GAP: these checks are not built yet (T36); expected to fail and be logged as a defect."
+   "Over the charge: \"This refund of <x> would bring the refunds for <ticket> (SKU <sku>) to <y>, more than the original charge of <z>. Already refunded: <w>.\"",
+   "No charge on the Ledger: \"There is no charge on the Ledger for <ticket> (SKU <sku>), so it cannot be refunded.\"",
+   "A refund within what is left posts normally; refused completions post nothing.",
+   "Console refunds of the same charge also count (UT-H-19)."
   ],
-  "passc": "Every expected result is observed; no unexpected error, record or value."
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "revNote": "The cap is now built (DEF-069); the old 'known gap' expectation is replaced.",
+  "rev": "upd"
  },
  {
   "id": "UT-H-05",
@@ -2069,6 +2272,482 @@
    "The refund request is not available to non-billing users."
   ],
   "passc": "Every expected result is observed; no unexpected error, record or value."
+ },
+ {
+  "id": "UT-H-06",
+  "area": "H",
+  "title": "Refund window opens from an Exported Debit charge, pre-filled",
+  "req": "FR-SUB-008",
+  "task": "Refund window (10/29)",
+  "pri": 1,
+  "type": "Positive",
+  "pre": "Refund build imported (Refund_1 forms, _2 filters, _3 active links, Refund Reason seed in NN:Menu Items). Wait for the first hourly backfill after import (:10, and :40 for DWP refunds) so Refunded / Refundable are right. Signed in as UAT Billing Admin (Chargeback Config 800004).",
+  "data": "An Exported Debit Ledger row (e.g. LDG000000000104) and its REFUNDS block",
+  "steps": [
+   "Open the row in Ledger Admin View v2 and read the REFUNDS block.",
+   "Admin Console > Ledger tab: select the row and click Refund Request.",
+   "Repeat from Ledger v2 (Refund Request button)."
+  ],
+  "exp": [
+   "REFUNDS block shows Refunded, Reserved and Refundable now (Refundable = charge less posted refunds).",
+   "The Refund window (NN:CGB:RefundBatch, Draft) opens with customer, customer PTAEO, refund-to PTAEO (= the row's debit PTAEO), IT PTAEO (= the row's credit PTAEO) and the SKU / subscription filter filled.",
+   "No work order is created."
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": ""
+ },
+ {
+  "id": "UT-H-07",
+  "area": "H",
+  "title": "Rows that cannot be refunded are refused",
+  "req": "FR-SUB-008",
+  "task": "Refund window (10/29)",
+  "pri": 1,
+  "type": "Negative",
+  "pre": "Refund build imported (Refund_1 forms, _2 filters, _3 active links, Refund Reason seed in NN:Menu Items). Wait for the first hourly backfill after import (:10, and :40 for DWP refunds) so Refunded / Refundable are right. Signed in as UAT Billing Admin (Chargeback Config 800004).",
+  "data": "(a) Pending Debit row · (b) Credit row · (c) a refund (reversal) row · (d) an Inactive row · (e) a fully refunded Debit row",
+  "steps": [
+   "Select each row on the console Ledger tab and click Refund Request.",
+   "Repeat (a) and (b) from Ledger v2."
+  ],
+  "exp": [
+   "Console (a)/(b): \"Only an Exported Debit row can be refunded. Pending rows are corrected or deleted before export; for a Credit row select its Debit row.\"",
+   "Ledger v2: \"Only an Exported, Active Debit charge can be refunded. Pending rows are corrected or deleted before export.\"",
+   "(c) \"... cannot be refunded: it is a reversal (refund) row, not a customer charge.\" (d) \"... cannot be refunded: it is not Active.\"",
+   "(e) \"Nothing is left to refund on <LDG>: it has already been refunded in full (or is reserved by a refund waiting for approval).\"",
+   "No refund batch or Ledger row is written."
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": ""
+ },
+ {
+  "id": "UT-H-08",
+  "area": "H",
+  "title": "Refund several months at their full amount ($60 example)",
+  "req": "FR-SUB-008, FR-LED-003",
+  "task": "Refund window (10/29)",
+  "pri": 1,
+  "type": "Positive",
+  "pre": "Refund build imported (Refund_1 forms, _2 filters, _3 active links, Refund Reason seed in NN:Menu Items). Wait for the first hourly backfill after import (:10, and :40 for DWP refunds) so Refunded / Refundable are right. Signed in as UAT Billing Admin (Chargeback Config 800004).",
+  "data": "A $20 monthly subscription with 3 Exported months (see TD-09) · Reason Service not delivered",
+  "steps": [
+   "Refund Request on one of its Debit rows: the window opens filtered to that subscription. Click Show charges.",
+   "Select the 3 months: check Selected 3 and Selected total 60.00.",
+   "Click Refund full amount of selected; choose Reason Service not delivered; click Issue refund.",
+   "Open the new Ledger rows and the three original rows."
+  ],
+  "exp": [
+   "3 refund lines of 20.00; Refund total 60.00; status Issued with Issued date / by.",
+   "6 Pending Ledger rows (3 pairs): debit IT PTAEO, credit customer PTAEO, Source Reference Type Refund, Is Reversal Yes, Source Reference = each original Ledger ID, Pair ID REF-..., Billing Period = current period.",
+   "Each original row: Refunded 20.00, Refundable now 0.00, and a note naming the refund, amount, user and reason.",
+   "AuditLog rows for the batch; refund rows carry the original customer (visible to that customer)."
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": ""
+ },
+ {
+  "id": "UT-H-09",
+  "area": "H",
+  "title": "Refund a different amount per month ($5 + $5 + $15)",
+  "req": "FR-SUB-008",
+  "task": "Refund window (10/29)",
+  "pri": 1,
+  "type": "Positive",
+  "pre": "Refund build imported (Refund_1 forms, _2 filters, _3 active links, Refund Reason seed in NN:Menu Items). Wait for the first hourly backfill after import (:10, and :40 for DWP refunds) so Refunded / Refundable are right. Signed in as UAT Billing Admin (Chargeback Config 800004).",
+  "data": "Another customer's charge with 3 Exported months",
+  "steps": [
+   "Select 3 months, enter Amount each = 5 and click Add amount to each selected.",
+   "Select the third line, set Selected line amount = 15, click Update line.",
+   "Remove one line and add it back; then Issue refund."
+  ],
+  "exp": [
+   "Lines 5.00 / 5.00 / 15.00; Refund total 25.00; Lines 3.",
+   "Remove takes the line off and the total drops; adding it back restores it.",
+   "After Issue the originals show 5.00 / 5.00 / 15.00 refunded and 3 Pending pairs exist with those amounts."
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": ""
+ },
+ {
+  "id": "UT-H-10",
+  "area": "H",
+  "title": "Refund line checks",
+  "req": "FR-SUB-008",
+  "task": "Refund window (10/29)",
+  "pri": 1,
+  "type": "Negative",
+  "pre": "Refund build imported (Refund_1 forms, _2 filters, _3 active links, Refund Reason seed in NN:Menu Items). Wait for the first hourly backfill after import (:10, and :40 for DWP refunds) so Refunded / Refundable are right. Signed in as UAT Billing Admin (Chargeback Config 800004).",
+  "data": "(a) more than a month's Refundable · (b) same month twice · (c) amount 0 · (d) a charge on another PTAEO · (e) change a line after Send or Issue",
+  "steps": [
+   "Try each case on a Draft refund (case e on a Pending Approval or Issued refund)."
+  ],
+  "exp": [
+   "(a) \"A refund of <x> for <period> is more than the <y> left to refund on <LDG>.\"",
+   "(b) \"<LDG> (<period>) is already on this refund. Change that line instead.\"",
+   "(c) \"The refund amount must be more than 0.\"",
+   "(d) \"<LDG> is on another PTAEO (...), not this refund's customer PTAEO ... Start a separate refund for it.\"",
+   "(e) \"Lines can only be changed while the refund is a Draft.\" Nothing is saved in any case."
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": ""
+ },
+ {
+  "id": "UT-H-11",
+  "area": "H",
+  "title": "Generic refund line with no Ledger charge behind it",
+  "req": "FR-SUB-008",
+  "task": "Refund window (10/29)",
+  "pri": 1,
+  "type": "Positive",
+  "pre": "Refund build imported (Refund_1 forms, _2 filters, _3 active links, Refund Reason seed in NN:Menu Items). Wait for the first hourly backfill after import (:10, and :40 for DWP refunds) so Refunded / Refundable are right. Signed in as UAT Billing Admin (Chargeback Config 800004).",
+  "data": "Customer UAT Customer01 · customer PTAEO ACCT-A · SKU CGBDEFAULT · 12.50 · period credited 2026-09 · \"Credit for Sept outage\" · Reason Goodwill",
+  "steps": [
+   "Console Ledger tab with no row selected: Refund Request (blank refund).",
+   "Enter the customer login and customer PTAEO; Save draft.",
+   "In the generic line enter SKU CGBDEFAULT (codes fill), amount 12.50, period credited 2026-09, the description; Add generic line.",
+   "Choose Reason Goodwill and Issue refund."
+  ],
+  "exp": [
+   "Expenditure codes default from the PTAEO account / CGBDEFAULT and can be overridden.",
+   "Refundable now shows Generic for the line (no cap).",
+   "One Pending pair: debit IT PTAEO, credit ACCT-A, 12.50, Source Reference = the RBT batch, Charge For \"REFUND (generic) 2026-09 Credit for Sept outage\", Billing Pathway Manual Entry, Is Reversal Yes."
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": ""
+ },
+ {
+  "id": "UT-H-12",
+  "area": "H",
+  "title": "Generic line and refund header checks",
+  "req": "FR-SUB-008",
+  "task": "Refund window (10/29)",
+  "pri": 2,
+  "type": "Negative",
+  "pre": "Refund build imported (Refund_1 forms, _2 filters, _3 active links, Refund Reason seed in NN:Menu Items). Wait for the first hourly backfill after import (:10, and :40 for DWP refunds) so Refunded / Refundable are right. Signed in as UAT Billing Admin (Chargeback Config 800004).",
+  "data": "Blank refund",
+  "steps": [
+   "Try to add a generic line without SKU, amount, description or period credited (one at a time), and with SKU ZZZ999.",
+   "Try to issue with no customer / PTAEO, no reason, Reason Other without a note, and no lines.",
+   "Set refund-to PTAEO = ACCT-EXP; then set an inactive IT PTAEO.",
+   "With lines on the refund, change the customer PTAEO."
+  ],
+  "exp": [
+   "\"Generic line: enter a SKU.\" / \"... enter an amount more than 0.\" / \"... enter a description.\" / \"... enter the period credited as YYYY-MM.\" / \"SKU ZZZ999 is not an active catalog item.\"",
+   "\"Enter the customer login ID and the customer PTAEO.\" / \"Choose a reason.\" / \"Add a note when the reason is Other.\" / \"Add at least one refund line.\"",
+   "\"Refund-to PTAEO <x> is not an Active account. Choose an active account.\" / \"IT PTAEO <x> is not an Active account. Correct it before continuing.\"",
+   "\"Remove the refund lines before changing the customer or the customer PTAEO.\""
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": ""
+ },
+ {
+  "id": "UT-H-13",
+  "area": "H",
+  "title": "Refund to a different PTAEO when the original account is closed",
+  "req": "FR-SUB-008",
+  "task": "Refund window (10/29)",
+  "pri": 1,
+  "type": "Positive",
+  "pre": "Refund build imported (Refund_1 forms, _2 filters, _3 active links, Refund Reason seed in NN:Menu Items). Wait for the first hourly backfill after import (:10, and :40 for DWP refunds) so Refunded / Refundable are right. Signed in as UAT Billing Admin (Chargeback Config 800004).",
+  "data": "An Exported charge on a prior-FY / expired account · refund-to ACCT-A",
+  "steps": [
+   "Open a refund from that charge; note the message about the closed account.",
+   "Set Refund to PTAEO = ACCT-A and issue a partial refund."
+  ],
+  "exp": [
+   "The window says the original account is closed and requires a new refund-to PTAEO.",
+   "The customer-side (credit) row uses ACCT-A; the IT side keeps the original row's IT PTAEO and codes."
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": ""
+ },
+ {
+  "id": "UT-H-14",
+  "area": "H",
+  "title": "Approval: send, approve, then issue",
+  "req": "FR-SUB-008",
+  "task": "Refund approval (10/29)",
+  "pri": 1,
+  "type": "Positive",
+  "pre": "Refund build imported (Refund_1 forms, _2 filters, _3 active links, Refund Reason seed in NN:Menu Items). Wait for the first hourly backfill after import (:10, and :40 for DWP refunds) so Refunded / Refundable are right. Signed in as UAT Billing Admin (Chargeback Config 800004). Approver test person with a Helix login (TD-01).",
+  "data": "Refund with 2 months · approver = the approver test person",
+  "steps": [
+   "Add the approver login; Save draft.",
+   "Click Send for approval.",
+   "As the approver, open the link in the email; click Approve with a comment.",
+   "As UAT Billing Admin, open the refund and click Issue refund."
+  ],
+  "exp": [
+   "Issue refund is replaced by Send for approval once an approver is set.",
+   "After Send: status Pending Approval, lines locked, originals show the amounts as Reserved, approver gets the email.",
+   "Approve: \"Approved. The Billing Operations admin has been notified and can now issue the refund.\" Admin gets the decision email.",
+   "Issue: Reserved moves to Refunded; Ledger rows' notes include the approver and approval date."
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": ""
+ },
+ {
+  "id": "UT-H-15",
+  "area": "H",
+  "title": "Approval rules and Reject",
+  "req": "FR-SUB-008",
+  "task": "Refund approval (10/29)",
+  "pri": 1,
+  "type": "Negative",
+  "pre": "Refund build imported (Refund_1 forms, _2 filters, _3 active links, Refund Reason seed in NN:Menu Items). Wait for the first hourly backfill after import (:10, and :40 for DWP refunds) so Refunded / Refundable are right. Signed in as UAT Billing Admin (Chargeback Config 800004).",
+  "data": "Refunds with an approver",
+  "steps": [
+   "Try to remove the approver; name yourself; name an unknown login; change the approver after Send.",
+   "Click Issue refund while Pending Approval.",
+   "As a user who is not the named approver, try to approve.",
+   "As the approver, Reject with no comment, then with a comment; then try to issue the Rejected refund."
+  ],
+  "exp": [
+   "\"Once an approver is added it cannot be removed...\" / \"You cannot approve your own refund. Choose another approver.\" / \"No enabled person has the login ID <x>.\" / \"The approver can only be changed while the refund is a Draft.\"",
+   "\"This refund is still waiting for approval.\"",
+   "\"Only the named approver (<x>) can approve or reject this refund.\"",
+   "\"Add a comment to reject the refund.\" Then Rejected: Reserved back to 0, nothing written to the Ledger, admin notified; Issue refused \"This refund is Rejected and cannot be issued...\""
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": ""
+ },
+ {
+  "id": "UT-H-16",
+  "area": "H",
+  "title": "Cancel a refund",
+  "req": "FR-SUB-008",
+  "task": "Refund approval (10/29)",
+  "pri": 2,
+  "type": "Positive",
+  "pre": "Refund build imported (Refund_1 forms, _2 filters, _3 active links, Refund Reason seed in NN:Menu Items). Wait for the first hourly backfill after import (:10, and :40 for DWP refunds) so Refunded / Refundable are right. Signed in as UAT Billing Admin (Chargeback Config 800004).",
+  "data": "(a) a Draft refund · (b) a Pending Approval refund · (c) an Issued refund",
+  "steps": [
+   "Click Cancel batch on each."
+  ],
+  "exp": [
+   "(a) Cancelled; nothing written.",
+   "(b) Cancelled; Reserved released on the originals; the approver gets a 'withdrawn' email.",
+   "(c) \"This refund is Issued and cannot be cancelled. An issued refund is undone by deleting its Pending Ledger rows before export.\""
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": ""
+ },
+ {
+  "id": "UT-H-17",
+  "area": "H",
+  "title": "Approval reminder every 3 days",
+  "req": "FR-SUB-008",
+  "task": "Batch_E10 escalation",
+  "pri": 2,
+  "type": "Positive",
+  "pre": "Refund build imported (Refund_1 forms, _2 filters, _3 active links, Refund Reason seed in NN:Menu Items). Wait for the first hourly backfill after import (:10, and :40 for DWP refunds) so Refunded / Refundable are right. Signed in as UAT Billing Admin (Chargeback Config 800004).",
+  "data": "A Pending Approval refund",
+  "steps": [
+   "Set its Last Reminder Date 3 days back (or wait 3 days).",
+   "Check the approver's mailbox after the next 07:05 run."
+  ],
+  "exp": [
+   "The approver gets a reminder email; the refund is not cancelled automatically.",
+   "The admin's refund list shows Pending since."
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": ""
+ },
+ {
+  "id": "UT-H-18",
+  "area": "H",
+  "title": "Deleting a Pending refund pair gives the amount back",
+  "req": "FR-SUB-008, FR-LED-002",
+  "task": "Refund window (10/29)",
+  "pri": 1,
+  "type": "Positive",
+  "pre": "Refund build imported (Refund_1 forms, _2 filters, _3 active links, Refund Reason seed in NN:Menu Items). Wait for the first hourly backfill after import (:10, and :40 for DWP refunds) so Refunded / Refundable are right. Signed in as UAT Billing Admin (Chargeback Config 800004).",
+  "data": "One pair from UT-H-08 (still Pending)",
+  "steps": [
+   "Delete the refund Debit row (and its Credit twin) before export.",
+   "Open the original row and the refund line."
+  ],
+  "exp": [
+   "The original row's Refundable now goes back up by the amount (20.00).",
+   "The refund line shows Removed From Ledger; an AuditLog row records it.",
+   "Known limit: setting the row Inactive instead of deleting does not give the amount back."
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": ""
+ },
+ {
+  "id": "UT-H-19",
+  "area": "H",
+  "title": "DWP refunds count against the original charge row",
+  "req": "FR-SUB-008",
+  "task": "RFD_200/201, RFD_E20",
+  "pri": 1,
+  "type": "Positive",
+  "pre": "Refund build imported (Refund_1 forms, _2 filters, _3 active links, Refund Reason seed in NN:Menu Items). Wait for the first hourly backfill after import (:10, and :40 for DWP refunds) so Refunded / Refundable are right. Signed in as UAT Billing Admin (Chargeback Config 800004).",
+  "data": "DWP refund of part of an Exported charge, then a console refund of the rest, then one more DWP refund",
+  "steps": [
+   "Complete a DWP refund work order for part of the charge; after the :40 backfill open the original row.",
+   "Open a console refund on the same row: Refundable now = charge less the DWP refund.",
+   "Submit and try to complete a DWP refund larger than what is left."
+  ],
+  "exp": [
+   "The original row's Refunded includes the DWP refund.",
+   "The console refund can only take what is left.",
+   "The over-refund DWP work order is refused at completion; nothing posted.",
+   "Known limit: a DWP subscription refund (SUB... reference) is not tied to one month."
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": ""
+ },
+ {
+  "id": "UT-H-20",
+  "area": "H",
+  "title": "Link a DWP refund work order to a refund, and close it on Issue",
+  "req": "FR-SUB-008",
+  "task": "Refund WO link (10/30)",
+  "pri": 1,
+  "type": "Positive",
+  "pre": "Refund build imported (Refund_1 forms, _2 filters, _3 active links, Refund Reason seed in NN:Menu Items). Wait for the first hourly backfill after import (:10, and :40 for DWP refunds) so Refunded / Refundable are right. Signed in as UAT Billing Admin (Chargeback Config 800004). Batch_004-009c and Batch_125 imported (checkpoint 10/30).",
+  "data": "An open DWP refund work order (Refunds = Yes) for UAT Customer01",
+  "steps": [
+   "Blank refund: enter the work order number in Work order and Save draft.",
+   "Select the months the request covers and Issue refund.",
+   "Open the work order and search the Ledger for its number and for the refund."
+  ],
+  "exp": [
+   "Customer, customer PTAEO, IT PTAEO and SKU fill from the work order; the charges list is filtered to its subscription when it has one.",
+   "After Issue the work order is Completed with a resolution starting \"Refund issued\" naming the total, the refund-to PTAEO and the number of lines.",
+   "Only the refund's pairs are posted: the work order's own refund posting (REF:190) does not add a second pair (CGB Entry Written already set)."
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": ""
+ },
+ {
+  "id": "UT-H-21",
+  "area": "H",
+  "title": "Work order link checks",
+  "req": "FR-SUB-008",
+  "task": "Refund WO link (10/30)",
+  "pri": 1,
+  "type": "Negative",
+  "pre": "Refund build imported (Refund_1 forms, _2 filters, _3 active links, Refund Reason seed in NN:Menu Items). Wait for the first hourly backfill after import (:10, and :40 for DWP refunds) so Refunded / Refundable are right. Signed in as UAT Billing Admin (Chargeback Config 800004).",
+  "data": "(a) a non-refund or unknown WO · (b) a Completed / Cancelled refund WO · (c) a WO already on another refund · (d) a WO for another customer · (e) change the WO after Send / Issue",
+  "steps": [
+   "Enter each on a refund and save."
+  ],
+  "exp": [
+   "(a) \"Work order <x> was not found, or it is not a Rockefeller refund work order (Refunds = Yes).\"",
+   "(b) \"Work order <x> is already Completed, Rejected, Cancelled or Closed. Use an open refund work order.\"",
+   "(c) \"Work order <x> is already on refund <RBT...>. Open that refund instead.\"",
+   "(d) \"Work order <x> is for <login>, not this refund's customer (<login>). Start a new refund for that work order.\"",
+   "(e) \"The work order can only be changed while the refund is a Draft.\""
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": ""
+ },
+ {
+  "id": "UT-H-22",
+  "area": "H",
+  "title": "Refund a subscription from the Subscription panel",
+  "req": "FR-SUB-008",
+  "task": "SUBV2:RFD_100",
+  "pri": 2,
+  "type": "Positive",
+  "pre": "Refund build imported (Refund_1 forms, _2 filters, _3 active links, Refund Reason seed in NN:Menu Items). Wait for the first hourly backfill after import (:10, and :40 for DWP refunds) so Refunded / Refundable are right. Signed in as UAT Billing Admin (Chargeback Config 800004).",
+  "data": "A subscription with several Exported months",
+  "steps": [
+   "Console Subscription panel (and Subscription v2): select it and click Refund Request.",
+   "Use From period / To period to narrow the charges; then clear the subscription filter."
+  ],
+  "exp": [
+   "The window opens filtered to that subscription's charges.",
+   "The period filter limits the list; clearing the filter shows every service on that customer PTAEO."
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": ""
+ },
+ {
+  "id": "UT-H-23",
+  "area": "H",
+  "title": "Only Chargeback Config can raise or issue refunds; others see only their part",
+  "req": "FR-SUB-008, FR-SEC-001",
+  "task": "Refund window (10/29)",
+  "pri": 1,
+  "type": "Negative",
+  "pre": "Refund build imported (Refund_1 forms, _2 filters, _3 active links, Refund Reason seed in NN:Menu Items). Wait for the first hourly backfill after import (:10, and :40 for DWP refunds) so Refunded / Refundable are right. Signed in as UAT Billing Admin (Chargeback Config 800004). A Master-only login if available.",
+  "data": "UAT Technician · UAT Customer01 · approver test person · Master-only user",
+  "steps": [
+   "As each user try to open a refund from the console / Ledger v2 and search NN:CGB:RefundBatch.",
+   "As UAT Customer01 search the Ledger for the refund rows on their account."
+  ],
+  "exp": [
+   "Only Chargeback Config (800004) can open the window, edit lines, send and issue.",
+   "The approver sees only refunds where they are the named approver; technicians and others find none.",
+   "The customer sees their own refund Ledger rows (Assignee Groups = their login) and no refund batches."
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": ""
+ },
+ {
+  "id": "UT-H-24",
+  "area": "H",
+  "title": "Refund pairs go through the Oracle export like other rows",
+  "req": "FR-SUB-008, FR-BILL-005",
+  "task": "Refund window (10/29), T37",
+  "pri": 1,
+  "type": "Positive",
+  "pre": "Refund build imported (Refund_1 forms, _2 filters, _3 active links, Refund Reason seed in NN:Menu Items). Wait for the first hourly backfill after import (:10, and :40 for DWP refunds) so Refunded / Refundable are right. Signed in as UAT Billing Admin (Chargeback Config 800004).",
+  "data": "Pending refund pairs from UT-H-08 / UT-H-11 (include one CAP or OSU account if available)",
+  "steps": [
+   "Generate an Oracle export batch."
+  ],
+  "exp": [
+   "The refund pairs are exported; the pair check passes; File 2 totals balance.",
+   "Lines carry the reversed codes; CAP / OSU code rules apply to the customer side (Is Reversal = Yes puts it on the Credit row)."
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": ""
+ },
+ {
+  "id": "UT-H-25",
+  "area": "H",
+  "title": "The old console refund work-order path is retired",
+  "req": "FR-SUB-008",
+  "task": "Refund_100-161 disabled",
+  "pri": 2,
+  "type": "Negative",
+  "pre": "Refund build imported (Refund_1 forms, _2 filters, _3 active links, Refund Reason seed in NN:Menu Items). Wait for the first hourly backfill after import (:10, and :40 for DWP refunds) so Refunded / Refundable are right. Signed in as UAT Billing Admin (Chargeback Config 800004).",
+  "data": "Console, Ledger v2, Subscription v2",
+  "steps": [
+   "Click Refund Request on each with a valid row.",
+   "Look for a Ledger view or search for refunds (Source Reference Type = Refund)."
+  ],
+  "exp": [
+   "Each opens the Refund window; no work order is created and Smart IT does not open.",
+   "Refunds are found on the Ledger with Source Reference Type = Refund (replaces the old Refund Requests list, DEF-051)."
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": ""
  },
  {
   "id": "UT-I-01",
@@ -2282,9 +2961,11 @@
    "Create, complete and close a Work Order as the other-tenant user."
   ],
   "exp": [
-   "No chargeback fields shown, no subscription, no ledger rows."
+   "No chargeback fields shown on classic or Smart IT screens, no subscription, no ledger rows."
   ],
-  "passc": "Every expected result is observed; no unexpected error, record or value."
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "revNote": "Smart IT screens named explicitly (DEF-065 reopened).",
+  "rev": "upd"
  },
  {
   "id": "UT-J-05",
@@ -2323,6 +3004,96 @@
    "No subscription changes and no AuditLog entries from chargeback workflow."
   ],
   "passc": "Every expected result is observed; no unexpected error, record or value."
+ },
+ {
+  "id": "UT-J-07",
+  "area": "J",
+  "title": "Chargeback tab and Service SKU are hidden from other tenants on classic views",
+  "req": "Shared Helix tenancy",
+  "task": "DEF-065, HPD RFOnly link",
+  "pri": 1,
+  "type": "Negative",
+  "pre": "Other-tenant login (nfoy_sen, Sentinel).",
+  "data": "New Incident and new Work Order",
+  "steps": [
+   "As the other-tenant user open a new Incident (Best Practice View) and a new Work Order (Simplified and Default User View)."
+  ],
+  "exp": [
+   "No Chargeback tab, no Service SKU and no chargeback fields on any classic view.",
+   "Smart IT Work Order screens are covered by UT-J-04 (DEF-065 reopened for Smart IT)."
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": ""
+ },
+ {
+  "id": "UT-J-08",
+  "area": "J",
+  "title": "New chargeback records are stamped for customer access",
+  "req": "FR-SEC-001",
+  "task": "DEF-053 (990 filters)",
+  "pri": 1,
+  "type": "Positive",
+  "pre": "DEF-053 build imported.",
+  "data": "New Incident charge, new subscription and a refund for UAT Customer01",
+  "steps": [
+   "Resolve a billable Incident and complete a subscription Work Order for UAT Customer01; issue a refund on one of their charges.",
+   "Open the new Ledger rows and subscription (Assignee Groups).",
+   "Sign in as UAT Customer01 and search; sign in as UAT Customer02 and search."
+  ],
+  "exp": [
+   "Assignee Groups = 'uat_customer01' on every new row (charge, subscription, refund).",
+   "UAT Customer01 sees them; UAT Customer02 does not."
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": ""
+ },
+ {
+  "id": "UT-J-09",
+  "area": "J",
+  "title": "Licensed Rockefeller people get the Chargeback User group",
+  "req": "FR-SEC-001",
+  "task": "PPG (10/19)",
+  "pri": 2,
+  "type": "Positive",
+  "pre": "LIC map rows, NN:Menu Items Application Permission rows and Rockefeller_CGB_ChargebackUser_101926.def imported.",
+  "data": "One licensed (Fixed or Floating) and one Read Rockefeller person",
+  "steps": [
+   "Load both people through the People data load (CTM:LoadPeople) and promote.",
+   "Promote the licensed person again.",
+   "After the backfill escalation run, check a Bundled and a Read profile."
+  ],
+  "exp": [
+   "The licensed person gets one Chargeback User (800001) row and Group List is updated; the Read person gets none.",
+   "No duplicate row on re-promote.",
+   "Bundled profile has the row, Read profile does not. Disable the backfill escalation once the first pass is done."
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": ""
+ },
+ {
+  "id": "UT-J-10",
+  "area": "J",
+  "title": "Update Permission Groups dialog offers the Chargeback groups",
+  "req": "FR-SEC-001",
+  "task": "PPG (10/19)",
+  "pri": 2,
+  "type": "Positive",
+  "pre": "As UT-J-09. A non-admin People editor.",
+  "data": "Any Rockefeller person",
+  "steps": [
+   "Open the person's Update Permission Groups dialog and look under Chargeback.",
+   "Add Chargeback Approver, then delete it."
+  ],
+  "exp": [
+   "The four Chargeback groups are listed (User, Approver, Master, Config).",
+   "Add and Delete both work; no \"You are not allowed to add this permission\" error."
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": ""
  },
  {
   "id": "UT-K-01",
@@ -2392,14 +3163,18 @@
   "pri": 2,
   "type": "Positive",
   "pre": "UAT Billing Admin.",
-  "data": "Export Charge Report, PAO Expiration Report, Wireless Exception Report, Promote Rates, Increment F-Accts, Refund Requests",
+  "data": "Export Charge Report, PAO Expiration Report, Wireless Exception Report, Promote Rates, Increment F-Accts, Refund Request, Dashboard Reports",
   "steps": [
    "Click each button."
   ],
   "exp": [
-   "Each opens its form (Oracle Export, PAO Expiration Report, wireless exceptions, Rate Staging, FY Cutover Control, refund Work Orders)."
+   "Each opens its form (Oracle Export, PAO Expiration Report, wireless exceptions, Rate Staging, FY Cutover Control).",
+   "Refund Request opens the Refund window (since 10/29), not a work order.",
+   "Dashboard Reports opens Helix Dashboards (Chargeback dashboards still open under DEF-051)."
   ],
-  "passc": "Every expected result is observed; no unexpected error, record or value."
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "revNote": "Refund Request changed on 10/29: re-check this button.",
+  "rev": "upd"
  },
  {
   "id": "UT-K-05",
@@ -2420,5 +3195,409 @@
    "No warning after acknowledgement."
   ],
   "passc": "Every expected result is observed; no unexpected error, record or value."
+ },
+ {
+  "id": "UT-K-06",
+  "area": "K",
+  "title": "Ledger search finds rows by ID, SKU, period, customer, award manager and PTAEO",
+  "req": "FR-BILL-001, FR-LED-004",
+  "task": "Ledger search (10/21)",
+  "pri": 1,
+  "type": "Positive",
+  "pre": "Ledger search and View-by scope imported.",
+  "data": "Entry ID 107 · SKU 13850 · Billing Period 2026-08 / 2026 · Customer customer01 · Award Manager login nussen · Credit PTAEO 1000028",
+  "steps": [
+   "Console Ledger tab, View by All: search each box on its own, then Billing Period + Customer together.",
+   "Switch View by to Previous Month and search Customer customer01; then Billing Period 2026-10.",
+   "Search Award Manager with a refund row's customer's manager."
+  ],
+  "exp": [
+   "Entry ID 107 -> LDG000000000107 only; Billing Period 2026 -> the whole year; combinations narrow the result.",
+   "Search stays inside the View by (Previous Month + 2026-10 -> 0 rows).",
+   "A refund row appears under the customer's award manager, not IT's.",
+   "View Details, Modify and Refund Request still work on a searched row."
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": ""
+ },
+ {
+  "id": "UT-K-07",
+  "area": "K",
+  "title": "Ledger search controls",
+  "req": "FR-BILL-001",
+  "task": "Ledger search (10/21)",
+  "pri": 2,
+  "type": "Negative",
+  "pre": "As UT-K-06.",
+  "data": "Empty boxes · Fiscal Year with no year",
+  "steps": [
+   "Click Search with every box empty.",
+   "Choose View by Fiscal Year without a year and Search.",
+   "Search something, then change View by; search again and click Clear."
+  ],
+  "exp": [
+   "Empty: a message and the table is unchanged.",
+   "Fiscal Year: \"Choose a View by option first (for Fiscal Year, pick the year)...\"",
+   "Changing View by empties the boxes; Clear empties them and reloads the current View by."
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": ""
+ },
+ {
+  "id": "UT-K-08",
+  "area": "K",
+  "title": "Module searches with View by Active / All",
+  "req": "FR-BILL-001",
+  "task": "Module search (10/21)",
+  "pri": 2,
+  "type": "Positive",
+  "pre": "Module search imported.",
+  "data": "Subscription customer01 · Account nussen · Department Lab · Service 1385 · VM Pricing CPU · PAO Wallet customer01",
+  "steps": [
+   "On each module run the search under Active, then under All; click Clear.",
+   "Switch to another module and back."
+  ],
+  "exp": [
+   "Each search returns only matching rows inside the View by (e.g. Account Active + nussen = Active accounts only; All adds Expired).",
+   "Clear returns to that module's current View by; switching modules resets to Active with empty boxes.",
+   "Clicking inside a panel does not empty the boxes."
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": ""
+ },
+ {
+  "id": "UT-K-09",
+  "area": "K",
+  "title": "Subscription search by Subscription ID or Legacy (Cherwell) ID",
+  "req": "FR-BILL-001",
+  "task": "Console SubSearch (10/21)",
+  "pri": 2,
+  "type": "Positive",
+  "pre": "Legacy ID search and column imported.",
+  "data": "Active + 89 · All + 2746",
+  "steps": [
+   "Subscription module, View by Active, Sub / Legacy ID = 89.",
+   "View by All, Sub / Legacy ID = 2746."
+  ],
+  "exp": [
+   "The Subscription ID column shows SUB... IDs and a Legacy Sub ID column follows it.",
+   "Active + 89 returns SUB000000000089 and subscriptions whose Legacy Sub ID contains 89.",
+   "All + 2746 returns SUB000000000087 (On Hold, so not under Active)."
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": ""
+ },
+ {
+  "id": "UT-K-10",
+  "area": "K",
+  "title": "Missing-PTAEO tiles stay right after an import button",
+  "req": "FR-BILL-001",
+  "task": "DEF-066, Wireless tile",
+  "pri": 2,
+  "type": "Positive",
+  "pre": "DEF-066 fix imported. An import with at least one Validated staging row (e.g. the November feeds).",
+  "data": "Console tiles Hosting / Storage / Wireless CIs missing PTAEO",
+  "steps": [
+   "Note the three tiles; click an import button that leaves Validated rows.",
+   "Compare the tiles with direct counts on NN:CGB:CIBilling."
+  ],
+  "exp": [
+   "Tiles keep the real counts after the import message (not the import's validated count).",
+   "Wireless tile = Active wireless CI billing records without a PTAEO."
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": ""
+ },
+ {
+  "id": "UT-K-11",
+  "area": "K",
+  "title": "Console View Details opens the record in Admin View v2",
+  "req": "FR-BILL-001",
+  "task": "Console View Details (10/19-10/20)",
+  "pri": 2,
+  "type": "Positive",
+  "pre": "Admin View v2 forms imported.",
+  "data": "One row in each module",
+  "steps": [
+   "Select a row in Ledger, Subscription, Account, Department, Service, VM Pricing and PAO Wallet and click View Details."
+  ],
+  "exp": [
+   "Each opens the selected record in Admin View v2 in a new tab (Wallet by Customer + PTAEO).",
+   "With no row selected: \"Select a/an <item> in the list first.\""
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": ""
+ },
+ {
+  "id": "UT-K-12",
+  "area": "K",
+  "title": "A Chargeback Master-only user can use the console",
+  "req": "FR-SEC-001",
+  "task": "DEF-054",
+  "pri": 1,
+  "type": "Positive",
+  "pre": "A login in 800003 Master and not in 800004 Config (TD-01).",
+  "data": "Master-only user",
+  "steps": [
+   "Open the console; switch every module; open Billing Run and Resolve missing accounts; run a search; open View Details."
+  ],
+  "exp": [
+   "Every panel, button and table works; the Subscription Status column shows.",
+   "Refund window is not available to this user (Config only, UT-H-23)."
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": ""
+ },
+ {
+  "id": "UT-L-01",
+  "area": "L",
+  "title": "Sweep copies new RequestBridge rows into Chargeback staging once",
+  "req": "FR-INT-002",
+  "task": "DEF-061 staging",
+  "pri": 1,
+  "type": "Positive",
+  "pre": "Staging form, filters, active links and sweep escalations imported.",
+  "data": "New, error-free RequestBridge rows of each import type",
+  "steps": [
+   "Load rows into NN:RequestBridge_Interface and wait for the 15-minute sweep.",
+   "Open NN:CGB:ChargebackStaging_Interface and the source RequestBridge rows.",
+   "Wait for the next sweep."
+  ],
+  "exp": [
+   "One staging row per source row, with the named columns mapped (e.g. Wireless phone / amount / carrier; VMware name, CPU, RAM, storage, backup, machine ID).",
+   "Source rows are Completed / Promoted with \"Moved to STG...\".",
+   "The next sweep copies nothing again."
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": ""
+ },
+ {
+  "id": "UT-L-02",
+  "area": "L",
+  "title": "Validate marks rows Validated or Error and writes nothing",
+  "req": "FR-INT-002",
+  "task": "DEF-061 staging",
+  "pri": 1,
+  "type": "Positive",
+  "pre": "As UT-L-01.",
+  "data": "Staging rows of one import type, some valid, some not",
+  "steps": [
+   "Click the import's console button (or Validate this import on the staging form)."
+  ],
+  "exp": [
+   "Clean rows are Validated; others are Error with the reason in Error Message and the Processing Log.",
+   "The console message gives the Validated, Error and still-New counts and opens the unposted rows.",
+   "No Ledger, Subscription, Account or CI Billing record changes."
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": ""
+ },
+ {
+  "id": "UT-L-03",
+  "area": "L",
+  "title": "Post writes only Validated rows",
+  "req": "FR-INT-002",
+  "task": "DEF-061 staging",
+  "pri": 1,
+  "type": "Positive",
+  "pre": "Validated rows from UT-L-02.",
+  "data": "Validated Wireless, R/UFS, VMware, PAO or R Stuff rows",
+  "steps": [
+   "Click Post validated rows on the staging form (or Step 4 for R/UFS and VMware)."
+  ],
+  "exp": [
+   "Each Validated row becomes Posted with Target Record ID and Posted Date.",
+   "The target is written once (Wireless pair, subscription usage / config, account, CI billing)."
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": ""
+ },
+ {
+  "id": "UT-L-04",
+  "area": "L",
+  "title": "Staging guards",
+  "req": "FR-INT-002",
+  "task": "DEF-061 staging",
+  "pri": 1,
+  "type": "Negative",
+  "pre": "As UT-L-03.",
+  "data": "A New row · a Posted row · a Cancelled row · a duplicate R/UFS subscription in one file · a duplicate P-A-O in one PAO file",
+  "steps": [
+   "POST a New row; VALIDATE a Posted and a Cancelled row; post the duplicate R/UFS and PAO files."
+  ],
+  "exp": [
+   "POST on New and VALIDATE on Posted / Cancelled do nothing.",
+   "R/UFS: only the earliest row applies; later rows are Error.",
+   "PAO: one Account is created for a repeated Project-Award-Org."
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": ""
+ },
+ {
+  "id": "UT-L-05",
+  "area": "L",
+  "title": "A failed post ends in Error, not Posted",
+  "req": "FR-INT-002",
+  "task": "DEF-061 error handlers",
+  "pri": 1,
+  "type": "Negative",
+  "pre": "Rockefeller_CGB_DEF061_StagingErrorHandlers_102026.def imported (confirm).",
+  "data": "An older-period R/UFS row (like STG000000000412)",
+  "steps": [
+   "Validate and post it."
+  ],
+  "exp": [
+   "The subscription refuses it and the staging row ends Error (not Posted, Error = Yes), Target Record ID and Posted Date empty, log '<type> post failed'."
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": ""
+ },
+ {
+  "id": "UT-L-06",
+  "area": "L",
+  "title": "Fix an Error row and post it",
+  "req": "FR-INT-002",
+  "task": "DEF-061 staging",
+  "pri": 2,
+  "type": "Positive",
+  "pre": "An Error row whose cause can be fixed (e.g. a wireless CI given a PTAEO).",
+  "data": "Error row",
+  "steps": [
+   "Fix the cause (or the row); Validate this import; Post validated rows.",
+   "Set another row to Cancelled and post."
+  ],
+  "exp": [
+   "The fixed row goes Error -> Validated -> Posted.",
+   "The Cancelled row is never posted."
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": ""
+ },
+ {
+  "id": "UT-L-07",
+  "area": "L",
+  "title": "Staging record shows only its own import type's section",
+  "req": "FR-INT-002",
+  "task": "Staging v2 (10/21)",
+  "pri": 2,
+  "type": "Positive",
+  "pre": "Staging Admin View v2 imported.",
+  "data": "One staging row of each import type",
+  "steps": [
+   "Open each row from its console button."
+  ],
+  "exp": [
+   "Admin View v2 opens with the six tiles and only the section for that row's import type."
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": ""
+ },
+ {
+  "id": "UT-M-01",
+  "area": "M",
+  "title": "Subscription Admin View v2",
+  "req": "FR-SUB-005",
+  "task": "Forms v2 (10/20)",
+  "pri": 2,
+  "type": "Positive",
+  "pre": "Forms v2 imported.",
+  "data": "An Active subscription · an On Hold one · a Pending Termination one · one whose PTAEO expires within 15 days",
+  "steps": [
+   "Open each in Subscription Admin View v2.",
+   "Use Place On Hold on the Active one and confirm with a reason."
+  ],
+  "exp": [
+   "v2 is the default view; tiles fill; Status is read-only.",
+   "Buttons by status: Active -> Hold + Terminate; On Hold -> Release + Terminate; Pending Termination -> none.",
+   "PTAEO Expiration tile is red within 15 days.",
+   "After the dialog, Status and the Status Change Log refresh; the ledger and audit tables list the subscription's rows."
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": ""
+ },
+ {
+  "id": "UT-M-02",
+  "area": "M",
+  "title": "Ledger Admin View v2 locks exported rows",
+  "req": "FR-LED-002",
+  "task": "Forms v2 (10/20), HideUnused (10/21)",
+  "pri": 1,
+  "type": "Positive",
+  "pre": "As UT-M-01.",
+  "data": "An Exported row · a Pending 0.00 row · a refund row",
+  "steps": [
+   "Open each in Ledger Admin View v2; try to change a field on the Exported row.",
+   "Use the pair table's Open selected row and Open subscription."
+  ],
+  "exp": [
+   "Exported row: fields read-only with \"This row has been exported and is read-only.\"; Notes stay editable.",
+   "Pending 0.00 row: Charge tile red; fields editable.",
+   "Is Reversal is read-only on every row; Subscription SKU Info is not shown.",
+   "Pair table lists both rows; Open buttons open the twin and the subscription in v2; the REFUNDS block shows on Debit rows."
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": ""
+ },
+ {
+  "id": "UT-M-03",
+  "area": "M",
+  "title": "Account, Department, Service, VM Pricing and Wallet Admin View v2",
+  "req": "FR-BILL-001",
+  "task": "Forms v2b (10/20)",
+  "pri": 2,
+  "type": "Positive",
+  "pre": "Forms v2b imported.",
+  "data": "One record of each; an account expiring within 15 days",
+  "steps": [
+   "Open each record in Admin View v2.",
+   "On a VM Pricing component change a rate and save (then change it back).",
+   "On a Wallet row click Open the account record."
+  ],
+  "exp": [
+   "Tiles, cards and related tables fill (subscriptions on the account, department, SKU; the customer's other wallet rows).",
+   "Account Expiration Date tile is red within 15 days.",
+   "The rate change writes an audit row and appears in Recent Activity.",
+   "Open the account record opens the Account in v2."
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": ""
+ },
+ {
+  "id": "UT-M-04",
+  "area": "M",
+  "title": "Billing Run, staging and console dialogs open in Admin View v2",
+  "req": "FR-BILL-002",
+  "task": "Forms v2c (10/21)",
+  "pri": 2,
+  "type": "Positive",
+  "pre": "Forms v2c imported.",
+  "data": "Billing Run · Sub status change · FY cutover · PAO Expiration · Wireless exceptions · Oracle export · Rate staging · Missing-PTAEO",
+  "steps": [
+   "Open each from its console button."
+  ],
+  "exp": [
+   "Each opens in Admin View v2 with its tiles and cards; actions work as on the old view.",
+   "The old Admin View can still be chosen."
+  ],
+  "passc": "Every expected result is observed; no unexpected error, record or value.",
+  "rev": "new",
+  "revNote": ""
  }
 ]
