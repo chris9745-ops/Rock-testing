@@ -1,0 +1,689 @@
+<title>Chargeback UAT Tracker v2</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: ledger-style workbook. Sticky header with tabs; dashboard first, then case register, defects, activity, test data.
+   One file serves two hosts: the Claude artifact (live shared store, editable) and rock-testing.netlify.app/v2 (read-only, data.json). */
+:root{
+  --bg:#f5f7f6; --surface:#ffffff; --sunk:#eef2f0; --line:#d8e0dc; --fg:#17211d; --muted:#5b6b64;
+  --accent:#1f6f5c; --accent-ink:#ffffff; --accent-soft:#dcefe8;
+  --pass:#1e7a46; --pass-soft:#dff3e6; --fail:#b42318; --fail-soft:#fde4e1;
+  --block:#a15c07; --block-soft:#fdf0d5; --none:#7b8a84; --none-soft:#e8ecea;
+  --f-display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --f-body:"Public Sans","Segoe UI",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1513; --surface:#161e1b; --sunk:#1c2622; --line:#2a3631; --fg:#e4ece8; --muted:#97a8a0;
+  --accent:#4fb898; --accent-ink:#06120e; --accent-soft:#1d3a31;
+  --pass:#5cc98a; --pass-soft:#173326; --fail:#f2766a; --fail-soft:#3b1b18;
+  --block:#e8a849; --block-soft:#3a2b12; --none:#8d9c96; --none-soft:#232d29; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1513; --surface:#161e1b; --sunk:#1c2622; --line:#2a3631; --fg:#e4ece8; --muted:#97a8a0;
+  --accent:#4fb898; --accent-ink:#06120e; --accent-soft:#1d3a31;
+  --pass:#5cc98a; --pass-soft:#173326; --fail:#f2766a; --fail-soft:#3b1b18;
+  --block:#e8a849; --block-soft:#3a2b12; --none:#8d9c96; --none-soft:#232d29; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 var(--f-body)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+header.top .wrap{display:flex;flex-wrap:wrap;align-items:flex-end;gap:8px 24px;padding-block:14px 0}
+.brand{flex:1 1 320px;min-width:0;padding-bottom:10px}
+.brand h1{font:700 1.35rem/1.15 var(--f-display);margin:0;letter-spacing:-.01em;text-wrap:balance}
+.brand h1 .v{font:600 .72rem var(--f-mono);color:var(--accent-ink);background:var(--accent);padding:2px 6px;border-radius:4px;vertical-align:3px;margin-left:6px}
+.brand p{margin:2px 0 0;color:var(--muted);font-size:.85rem}
+.hdr-r{display:flex;flex-direction:column;align-items:flex-end;gap:4px;padding-bottom:10px;font-size:.8rem}
+.chip{display:inline-flex;align-items:center;gap:6px;font:500 .72rem/1 var(--f-mono);text-transform:uppercase;letter-spacing:.06em;padding:5px 8px;border-radius:999px;background:var(--sunk);color:var(--muted)}
+.chip .dot{width:7px;height:7px;border-radius:50%;background:var(--none)}
+.chip.live .dot{background:var(--pass)} .chip.off .dot{background:var(--fail)} .chip.static .dot{background:var(--accent)}
+nav.tabs{display:flex;gap:2px;overflow-x:auto;width:100%}
+nav.tabs button{font:600 .9rem var(--f-display);background:none;border:0;border-bottom:3px solid transparent;color:var(--muted);padding:10px 14px;cursor:pointer;white-space:nowrap}
+nav.tabs button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--accent)}
+:is(button,select,input,textarea,summary,a):focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+main .wrap{padding-block:22px 60px;display:flex;flex-direction:column;gap:22px}
+h2{font:700 1.1rem var(--f-display);margin:0}
+h3{font:600 .95rem var(--f-display);margin:0}
+.muted{color:var(--muted)}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.banner{border:1px solid var(--block);background:var(--block-soft);padding:10px 14px;border-radius:8px;font-size:.9rem}
+.banner.info{border-color:var(--accent);background:var(--accent-soft)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:2px}
+.kpi .lbl{font:500 .7rem var(--f-mono);text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+.kpi .val{font:700 1.7rem/1.1 var(--f-display);font-variant-numeric:tabular-nums}
+.kpi .sub{font-size:.8rem;color:var(--muted)}
+.kpi.pass .val{color:var(--pass)} .kpi.fail .val{color:var(--fail)} .kpi.block .val{color:var(--block)}
+.bar{display:flex;height:12px;border-radius:3px;overflow:hidden;background:var(--none-soft)}
+.bar span{display:block;height:100%}
+.bar .p{background:var(--pass)} .bar .f{background:var(--fail)} .bar .b{background:var(--block)} .bar .i{background:var(--accent)}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:.8rem;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.grid2{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:16px}
+@media (max-width:860px){.grid2{grid-template-columns:minmax(0,1fr)}}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th{font:500 .7rem var(--f-mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:8px;border-bottom:1px solid var(--line);vertical-align:middle}
+td.n,th.n{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+tr:last-child td{border-bottom:0}
+.areabar{min-width:120px}
+.exit ul{list-style:none;margin:0;padding:0}
+.exit li{display:flex;gap:10px;align-items:flex-start;padding:6px 0;border-bottom:1px dashed var(--line);font-size:.9rem}
+.exit li:last-child{border-bottom:0}
+.mark{flex:none;font:600 .7rem var(--f-mono);padding:3px 6px;border-radius:4px;min-width:42px;text-align:center}
+.mark.ok{background:var(--pass-soft);color:var(--pass)} .mark.no{background:var(--fail-soft);color:var(--fail)}
+.pill{display:inline-block;font:600 .72rem/1 var(--f-mono);padding:5px 8px;border-radius:999px;white-space:nowrap}
+.pill.Passed{background:var(--pass-soft);color:var(--pass)} .pill.Failed{background:var(--fail-soft);color:var(--fail)}
+.pill.Blocked{background:var(--block-soft);color:var(--block)} .pill.Notrun{background:var(--none-soft);color:var(--muted)}
+.pill.InProgress{background:var(--accent-soft);color:var(--accent)}
+.pill.d-open{background:var(--fail-soft);color:var(--fail)} .pill.d-fixed{background:var(--accent-soft);color:var(--accent)} .pill.d-closed{background:var(--pass-soft);color:var(--pass)}
+.tag{font:500 .7rem var(--f-mono);color:var(--muted);white-space:nowrap}
+.tag.p1{color:var(--accent);font-weight:600}
+.tag.rev{color:var(--accent-ink);background:var(--accent);padding:2px 5px;border-radius:4px;font-weight:600}
+.tag.rev.upd{background:var(--block)}
+.tag.pu{color:var(--pass)}
+.notes ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px;font-size:.9rem}
+.sev{font:600 .72rem var(--f-mono)} .sev.Critical{color:var(--fail)} .sev.High{color:var(--block)}
+.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+select,input,textarea{font:inherit;font-size:.9rem;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:7px 9px;max-width:100%}
+textarea{width:100%;min-height:72px;resize:vertical}
+input[type=search]{flex:1 1 200px;min-width:0}
+a{color:var(--accent);text-underline-offset:2px}
+.btn{font:600 .88rem var(--f-display);border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);border-radius:6px;padding:8px 14px;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn.sm{padding:5px 10px;font-size:.8rem}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.count{font-size:.85rem;color:var(--muted)}
+.area-h{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;padding:14px 2px 6px;border-bottom:2px solid var(--fg)}
+.area-h .code{font:700 1rem var(--f-mono);color:var(--accent)}
+.area-h p{margin:0;flex-basis:100%;color:var(--muted);font-size:.85rem}
+.note{border-left:3px solid var(--accent);background:var(--accent-soft);padding:8px 12px;font-size:.86rem;border-radius:0 6px 6px 0}
+details.case{background:var(--surface);border:1px solid var(--line);border-top:0}
+details.case summary{list-style:none;display:grid;grid-template-columns:96px minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:10px 12px;cursor:pointer}
+details.case summary::-webkit-details-marker{display:none}
+details.case[open] summary{background:var(--sunk)}
+.cid{font:500 .82rem var(--f-mono)}
+.ctitle{min-width:0}
+@media (max-width:640px){details.case summary{grid-template-columns:80px minmax(0,1fr) auto}.tags{display:none}}
+.body{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:18px;padding:14px 14px 18px;border-top:1px solid var(--line)}
+@media (max-width:860px){.body{grid-template-columns:minmax(0,1fr)}}
+.spec dl{display:grid;grid-template-columns:110px minmax(0,1fr);gap:4px 10px;margin:0 0 10px;font-size:.88rem}
+.spec dt,.lbl2{font:500 .7rem var(--f-mono);text-transform:uppercase;letter-spacing:.05em;color:var(--muted);padding-top:3px}
+.spec dd{margin:0}
+.spec h4,.side h4{font:600 .78rem var(--f-mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:12px 0 4px}
+.spec ol,.spec ul{margin:0;padding-left:20px;font-size:.9rem;display:flex;flex-direction:column;gap:3px}
+.side{display:flex;flex-direction:column;gap:12px;align-self:start;min-width:0}
+.record{background:var(--sunk);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:9px}
+.record label,.form label{font:500 .7rem var(--f-mono);text-transform:uppercase;letter-spacing:.05em;color:var(--muted);display:flex;flex-direction:column;gap:4px}
+.record input,.record textarea,.record select,.form input,.form select,.form textarea{font-family:var(--f-body);text-transform:none;letter-spacing:0;width:100%}
+.record h3{font-size:.85rem}
+.ro{font-size:.88rem;white-space:pre-wrap;overflow-wrap:anywhere;margin:0}
+.seg{display:flex;flex-wrap:wrap;gap:4px}
+.seg button{font:600 .78rem var(--f-mono);border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:5px;padding:6px 9px;cursor:pointer}
+.seg button[aria-pressed="true"].Passed{background:var(--pass);border-color:var(--pass);color:var(--surface)}
+.seg button[aria-pressed="true"].Failed{background:var(--fail);border-color:var(--fail);color:var(--surface)}
+.seg button[aria-pressed="true"].Blocked{background:var(--block);border-color:var(--block);color:var(--surface)}
+.seg button[aria-pressed="true"].Notrun{background:var(--none);border-color:var(--none);color:var(--surface)}
+.seg button[aria-pressed="true"].InProgress{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.saved{font-size:.8rem;color:var(--muted);min-height:1.2em}
+.hist{border-top:1px dashed var(--line);padding-top:8px;display:flex;flex-direction:column;gap:8px}
+.hist .run{font-size:.84rem;display:flex;flex-direction:column;gap:2px}
+.hist .run .h{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.form .wide{grid-column:1/-1}
+.drow td{background:var(--sunk)}
+.card h3{display:flex;gap:8px;align-items:baseline}
+.card h3 .mono{color:var(--accent);font-size:.82rem}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+@media (max-width:420px){.cards{grid-template-columns:minmax(0,1fr)}}
+.card table td:first-child{font-weight:600;white-space:nowrap;padding-right:12px;vertical-align:top}
+.card table td{vertical-align:top;font-size:.85rem}
+.feed{list-style:none;margin:0;padding:0}
+.feed li{display:grid;grid-template-columns:150px minmax(0,1fr);gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.feed li:last-child{border-bottom:0}
+.feed time{font:400 .78rem var(--f-mono);color:var(--muted)}
+.feed .t{font-weight:600;font-size:.9rem}
+.feed .x{color:var(--muted);font-size:.85rem;overflow-wrap:anywhere;white-space:pre-wrap}
+@media (max-width:640px){.feed li{grid-template-columns:minmax(0,1fr);gap:2px}}
+.empty{padding:28px;text-align:center;color:var(--muted)}
+[hidden]{display:none!important}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <h1>Chargeback UAT Tracker<span class="v">v2</span></h1>
+      <p><span id="hdrClient">The Rockefeller University</span> · <span id="hdrScope">Helix chargeback unit tests</span> · round <b id="hdrRound">…</b> · <span class="mono" id="hdrCount"></span></p>
+    </div>
+    <div class="hdr-r">
+      <span class="chip" id="store"><span class="dot"></span><span id="storeTxt">Connecting</span></span>
+      <a id="sharedLink" href="#" target="_blank" rel="noopener" hidden>Shared view</a>
+    </div>
+    <nav class="tabs" role="tablist">
+      <button role="tab" aria-selected="true" data-tab="dash">Dashboard</button>
+      <button role="tab" aria-selected="false" data-tab="cases">Test cases</button>
+      <button role="tab" aria-selected="false" data-tab="defects">Defects</button>
+      <button role="tab" aria-selected="false" data-tab="activity">Activity</button>
+      <button role="tab" aria-selected="false" data-tab="data">Test data</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+<div class="wrap">
+  <div class="banner" id="offline" hidden>Changes can't be saved in this view. You can read everything, but results, cases and defects are not stored.</div>
+  <div class="banner info" id="staticNote" hidden></div>
+
+  <section id="p-dash" class="pane">
+    <div style="display:flex;flex-direction:column;gap:18px">
+      <div class="panel notes" id="notes"><h2>Loading the tracker</h2><p class="muted" style="margin:0">Cases, results and defects appear here as soon as the shared store answers.</p></div>
+      <div class="kpis" id="kpis"></div>
+      <div class="panel">
+        <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;align-items:baseline">
+          <h2>Overall progress</h2>
+          <div class="legend"><span><i style="background:var(--pass)"></i>Passed</span><span><i style="background:var(--accent)"></i>In progress</span><span><i style="background:var(--fail)"></i>Failed</span><span><i style="background:var(--block)"></i>Blocked</span><span><i style="background:var(--none-soft);border:1px solid var(--line)"></i>Not run</span></div>
+        </div>
+        <div class="bar" id="overallBar" style="height:16px"></div>
+      </div>
+      <div class="grid2">
+        <div class="panel">
+          <h2>Results by test area</h2>
+          <div class="tbl"><table id="areaTbl"></table></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+          <div class="panel exit"><h2>Exit criteria</h2><ul id="exitList"></ul></div>
+          <div class="panel">
+            <h2>Defects by severity</h2>
+            <div class="tbl"><table id="sevTbl"></table></div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap" id="dlRow" hidden>
+              <button class="btn ghost" id="dlResults" type="button">Download results (.csv)</button>
+              <button class="btn ghost" id="dlDefects" type="button">Download defects (.csv)</button>
+            </div>
+            <div class="saved" id="dlMsg"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="p-cases" class="pane" hidden>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="filters">
+        <select id="fArea" aria-label="Area"><option value="">All areas</option></select>
+        <select id="fStatus" aria-label="Status"><option value="">All statuses</option><option>Passed</option><option>Failed</option><option>Blocked</option><option>In Progress</option><option>Not run</option></select>
+        <select id="fPU" aria-label="Post-upgrade"><option value="">Any post-upgrade state</option><option value="done">Post-upgrade checked</option><option value="todo">Post-upgrade not checked</option></select>
+        <select id="fRev" aria-label="Revision"><option value="">All cases</option><option value="any">New or updated</option><option value="new">New</option><option value="upd">Updated</option></select>
+        <select id="fPri" aria-label="Priority"><option value="">P1 and P2</option><option value="1">P1 only</option><option value="2">P2 only</option></select>
+        <input type="search" id="fQ" placeholder="Search ID, title, requirement, result" aria-label="Search">
+        <button class="btn sm" id="addCaseBtn" type="button" hidden>Add case</button>
+      </div>
+      <div class="panel" id="newCase" hidden></div>
+      <div class="count" id="caseCount"></div>
+      <div id="caseList"></div>
+    </div>
+  </section>
+
+  <section id="p-defects" class="pane" hidden>
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="panel" id="dPanel" hidden>
+        <h2>Log a defect</h2>
+        <form class="form" id="dForm">
+          <label class="wide">Title<input id="dTitle" required placeholder="What went wrong, in one line"></label>
+          <label>Test case<select id="dCase" required></select></label>
+          <label>Severity<select id="dSev"><option>Critical</option><option selected>High</option><option>Medium</option><option>Low</option></select></label>
+          <label>Owner<input id="dOwner" placeholder="Who fixes it"></label>
+          <label>Target / fix<input id="dTarget" placeholder="Date or DEF file name"></label>
+          <label class="wide">Details and steps to reproduce<textarea id="dDesc" placeholder="Observed vs expected, record IDs, message text"></textarea></label>
+          <label class="wide">Workaround / work notes<input id="dWork"></label>
+          <div class="wide" style="display:flex;gap:10px;align-items:center"><button class="btn" id="dSave" type="submit">Add defect</button><span class="saved" id="dMsg"></span></div>
+        </form>
+      </div>
+      <div class="panel">
+        <div class="filters">
+          <h2 style="margin-right:auto">Defect log</h2>
+          <select id="dfOpen" aria-label="Defect state"><option value="open">Open and in fix</option><option value="">All defects</option><option value="closed">Closed and verified</option></select>
+          <input type="search" id="dfQ" placeholder="Search defects" aria-label="Search defects">
+        </div>
+        <span class="count" id="defCount"></span>
+        <div class="tbl"><table id="defTbl"></table></div>
+      </div>
+      <div class="panel"><h3>Severity definitions</h3><div class="tbl"><table id="sevDef"></table></div></div>
+    </div>
+  </section>
+
+  <section id="p-activity" class="pane" hidden>
+    <div class="panel">
+      <div class="filters"><h2 style="margin-right:auto">Activity</h2><input type="search" id="aQ" placeholder="Search activity" aria-label="Search activity"></div>
+      <ul class="feed" id="feed"></ul>
+    </div>
+  </section>
+
+  <section id="p-data" class="pane" hidden>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <p class="muted" style="margin:0;max-width:70ch">Load this data in DEV before testing starts. Test cases name these records (ACCT-A, UAT Customer01, UAT-901 and so on) in their Data inputs.</p>
+      <div class="cards" id="cards"></div>
+    </div>
+  </section>
+</div>
+</main>
+
+<script>
+const STATUSES = ["Passed","Failed","Blocked","In Progress","Not run"];
+const DSTAT = ["Open","Reopened","In progress","In test","Fix built - import","Fixed - retest","Fixed - partly verified","Fixed - verified","Parked","Handed off - Chris","Open - outside chargeback workflow","Closed"];
+const S = { mode:"loading", meta:{}, areas:[], cases:[], cards:[], results:{}, defects:[], activity:[], generated:null };
+let db = null, downloads = null;
+const openIds = new Set(), editIds = new Set(), openDefs = new Set();
+
+const $ = s => document.querySelector(s);
+const el = (tag, attrs={}, ...kids) => { const e=document.createElement(tag); for(const[k,v] of Object.entries(attrs)){ if(v===undefined||v===null||v===false) continue; if(k==="class") e.className=v; else if(k==="text") e.textContent=v; else if(k.startsWith("on")) e.addEventListener(k.slice(2),v); else e.setAttribute(k,v===true?"":v);} for(const k of kids.flat()){ if(k==null||k===false) continue; e.append(k.nodeType?k:document.createTextNode(String(k))); } return e; };
+const canWrite = () => S.mode==="live";
+const statusOf = id => (S.results[id] && S.results[id].status) || "Not run";
+const puOf = id => (S.results[id] && S.results[id].postUpgrade && S.results[id].postUpgrade.status) || "";
+const cls = s => (s||"").replace(" ","");
+const today = () => { const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); };
+const areaName = a => (S.areas.find(x=>x.code===a)||{name:a}).name;
+const dGroup = s => /^closed/i.test(s||"") || /verified$/i.test(s||"") && !/partly/i.test(s||"") ? "closed" : /^(Fix|In test)/i.test(s||"") ? "fixed" : "open";
+const fmt = ms => ms ? new Date(ms).toLocaleString([], {month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}) : "";
+const lines = t => (t||"").split("\n").map(s=>s.trim()).filter(Boolean);
+const tester = { get(){ try{ return localStorage.getItem("uatTester")||""; }catch(e){ return ""; } }, set(v){ try{ localStorage.setItem("uatTester",v); }catch(e){} } };
+const byOrder = (a,b) => (a.order??1e9)-(b.order??1e9) || String(a.id||a.code).localeCompare(String(b.id||b.code),undefined,{numeric:true});
+
+/* ---------- tabs ---------- */
+const TABS = ["dash","cases","defects","activity","data"];
+function showTab(name){
+  if(!TABS.includes(name)) name="dash";
+  document.querySelectorAll("nav.tabs button").forEach(b=>b.setAttribute("aria-selected", b.dataset.tab===name));
+  document.querySelectorAll(".pane").forEach(p=>p.hidden = p.id!=="p-"+name);
+  try{ localStorage.setItem("uatTab2", name); }catch(e){}
+}
+document.querySelectorAll("nav.tabs button").forEach(b=>b.addEventListener("click",()=>{ showTab(b.dataset.tab); try{ history.replaceState(null,"","#"+b.dataset.tab); }catch(e){} }));
+try{ const t=(location.hash||"").slice(1)||localStorage.getItem("uatTab2"); if(TABS.includes(t)) showTab(t); }catch(e){}
+addEventListener("hashchange",()=>{ const t=location.hash.slice(1); if(TABS.includes(t)) showTab(t); });
+
+/* ---------- writes ---------- */
+async function logActivity(kind, ref, text){
+  if(!db) return;
+  try{ await db.collection("activity").add({at:Date.now(), who:tester.get()||"Tracker user", kind, ref, text}); }catch(e){}
+}
+
+/* ---------- render scheduling ---------- */
+/* Snapshots only redraw what changed, and never rebuild a form someone is typing in. */
+let raf = 0; const dirty = new Set();
+function renderAll(part){ (part?[part]:["full"]).forEach(p=>dirty.add(p)); if(raf) return; raf = requestAnimationFrame(()=>{ raf=0; const d=new Set(dirty); dirty.clear();
+  const full=d.has("full");
+  renderHeader(); renderDash();
+  if(full||d.has("cases")) renderCases(); else if(d.has("results")) refreshCaseRows();
+  if(full||d.has("defects")||d.has("cases")) { if(!$("#defTbl").contains(document.activeElement)) renderDefects(); }
+  if(full||d.has("activity")) renderActivity();
+  if(full||d.has("testdata")) renderData(); }); }
+const shownStamp = {};
+function refreshCaseRows(){
+  document.querySelectorAll("details.case").forEach(d=>{
+    const id=d.dataset.id, s=statusOf(id), p=d.querySelector("summary .pill"); p.className="pill "+cls(s); p.textContent=s;
+    const r=S.results[id]||{}, stamp=String(r.updatedAt||"")+"|"+((r.postUpgrade||{}).updatedAt||"");
+    const body=d.querySelector(".body");
+    if(d.open && body && shownStamp[id]!==stamp && !body.contains(document.activeElement) && !editIds.has(id)){
+      const c=S.cases.find(x=>x.id===id); if(c){ shownStamp[id]=stamp; body.replaceWith(el("div",{class:"body"}, specView(c), resultSide(c))); }
+    }
+  });
+}
+
+function renderHeader(){
+  const m=S.meta;
+  $("#hdrClient").textContent = m.client||"The Rockefeller University";
+  $("#hdrScope").textContent = m.scope||"Helix chargeback unit tests";
+  $("#hdrRound").textContent = m.round||"not set";
+  $("#hdrCount").textContent = S.cases.length ? S.cases.length+" cases · "+S.cases.filter(c=>c.pri===1).length+" Priority 1" : "";
+  const sl=$("#sharedLink");
+  if(m.sharedUrl && S.mode!=="static"){ sl.href=m.sharedUrl; sl.hidden=false; } else sl.hidden=true;
+}
+
+/* ---------- dashboard ---------- */
+function counts(list){ const c={Passed:0,Failed:0,Blocked:0,"In Progress":0,"Not run":0}; list.forEach(x=>{ const s=statusOf(x.id); c[s in c ? s : "Not run"]++; }); return c; }
+function barInto(node, c, total){
+  node.replaceChildren();
+  if(!total) return;
+  [["p","Passed"],["f","Failed"],["b","Blocked"],["i","In Progress"]].forEach(([k,s])=>{ if(c[s]) node.append(el("span",{class:k,style:"width:"+(100*c[s]/total)+"%",title:s+": "+c[s]})); });
+}
+function renderDash(){
+  const box=$("#notes");
+  if(!S.cases.length){ return; }
+  const notes = Array.isArray(S.meta.notes)?S.meta.notes:[];
+  box.replaceChildren(el("h2",{text:"What's new"}), el("ul",{}, notes.map(n=>el("li",{}, n.title?el("b",{text:n.title+": "}):null, n.text||""))));
+  if(!notes.length) box.hidden=true; else box.hidden=false;
+
+  const c=counts(S.cases), total=S.cases.length, exec=total-c["Not run"];
+  const p1=S.cases.filter(x=>x.pri===1), p1c=counts(p1), p2=S.cases.filter(x=>x.pri!==1), p2c=counts(p2);
+  const open=S.defects.filter(d=>dGroup(d.status)!=="closed");
+  const openCH=open.filter(d=>d.sev==="Critical"||d.sev==="High").length;
+  const pu=S.cases.filter(x=>puOf(x.id)).length, puPass=S.cases.filter(x=>puOf(x.id)==="Passed").length;
+  const k=$("#kpis"); k.replaceChildren();
+  const kpi=(lbl,val,sub,extra="")=>k.append(el("div",{class:"kpi "+extra}, el("span",{class:"lbl",text:lbl}), el("span",{class:"val",text:String(val)}), el("span",{class:"sub",text:sub})));
+  kpi("Executed",exec,"of "+total+" cases ("+Math.round(100*exec/total)+"%)");
+  kpi("Passed",c.Passed,Math.round(100*c.Passed/total)+"% of all cases","pass");
+  kpi("Failed",c.Failed,"need a defect ID","fail");
+  kpi("Blocked",c.Blocked,(c["In Progress"]?c["In Progress"]+" more in progress · ":"")+"cannot run yet","block");
+  kpi("P1 pass rate",(p1.length?Math.round(100*p1c.Passed/p1.length):0)+"%",p1c.Passed+" of "+p1.length+" Priority 1");
+  kpi("Open Critical / High",openCH,open.length+" defects not closed",openCH?"fail":"");
+  kpi("Post-upgrade",pu,pu?puPass+" passed after the upgrade":"no cases re-checked yet");
+  barInto($("#overallBar"),c,total);
+
+  const t=$("#areaTbl"); t.replaceChildren();
+  t.append(el("thead",{}, el("tr",{}, el("th",{text:"Area"}), el("th",{class:"n",text:"Cases"}), el("th",{class:"n",text:"Pass"}), el("th",{class:"n",text:"Fail"}), el("th",{class:"n",text:"Blk"}), el("th",{class:"n",text:"In prog"}), el("th",{class:"n",text:"Not run"}), el("th",{class:"n",text:"Post-upg"}), el("th",{text:"Progress"}))));
+  const tb=el("tbody");
+  S.areas.forEach(a=>{
+    const list=S.cases.filter(x=>x.area===a.code); if(!list.length) return;
+    const ac=counts(list), b=el("div",{class:"bar"}); barInto(b,ac,list.length);
+    const link=el("a",{href:"#cases",onclick:e=>{e.preventDefault(); $("#fArea").value=a.code; renderCases(); showTab("cases");}}, a.code+". "+a.name);
+    tb.append(el("tr",{}, el("td",{},link), el("td",{class:"n",text:list.length}), el("td",{class:"n",text:ac.Passed}), el("td",{class:"n",text:ac.Failed}), el("td",{class:"n",text:ac.Blocked}), el("td",{class:"n",text:ac["In Progress"]}), el("td",{class:"n",text:ac["Not run"]}), el("td",{class:"n",text:list.filter(x=>puOf(x.id)).length}), el("td",{class:"areabar"},b)));
+  });
+  t.append(tb);
+
+  const failedNoDefect=S.cases.filter(x=>statusOf(x.id)==="Failed" && !((S.results[x.id]||{}).defect||"").trim()).length;
+  const crit=[
+    [p1c["Not run"]===0,"Every Priority 1 case executed",p1c["Not run"]+" P1 not run"],
+    [p1c.Passed===p1.length,"Every Priority 1 case passed",(p1.length-p1c.Passed)+" P1 not passed"],
+    [openCH===0,"No open Critical or High defects",openCH+" open"],
+    [p2c["Not run"]===0,"Every Priority 2 case executed",p2c["Not run"]+" P2 not run"],
+    [failedNoDefect===0,"Every failed case has a defect ID",failedNoDefect+" without defect"],
+  ];
+  const ul=$("#exitList"); ul.replaceChildren();
+  crit.forEach(([ok,txt,detail])=>ul.append(el("li",{}, el("span",{class:"mark "+(ok?"ok":"no"),text:ok?"MET":"OPEN"}), el("span",{}, txt, ok?null:el("span",{class:"muted"}," · "+detail)))));
+
+  const sevs=(S.meta.severity||[]).map(x=>x.sev); if(!sevs.length) sevs.push("Critical","High","Medium","Low");
+  const st=$("#sevTbl"); st.replaceChildren();
+  st.append(el("thead",{}, el("tr",{}, el("th",{text:"Severity"}), el("th",{class:"n",text:"Open"}), el("th",{class:"n",text:"In fix / retest"}), el("th",{class:"n",text:"Closed"}))));
+  const sb=el("tbody");
+  sevs.forEach(s=>{ const ds=S.defects.filter(d=>d.sev===s); sb.append(el("tr",{}, el("td",{}, el("span",{class:"sev "+s,text:s})), el("td",{class:"n",text:ds.filter(d=>dGroup(d.status)==="open").length}), el("td",{class:"n",text:ds.filter(d=>dGroup(d.status)==="fixed").length}), el("td",{class:"n",text:ds.filter(d=>dGroup(d.status)==="closed").length}))); });
+  st.append(sb);
+}
+
+/* ---------- cases ---------- */
+["#fRev","#fArea","#fStatus","#fPri","#fPU"].forEach(s=>$(s).addEventListener("change",renderCases));
+$("#fQ").addEventListener("input",renderCases);
+let areasFilled = "";
+function fillAreaFilter(){
+  const sig=S.areas.map(a=>a.code+a.name).join("|"); if(sig===areasFilled) return; areasFilled=sig;
+  const keep=$("#fArea").value; $("#fArea").replaceChildren(el("option",{value:""},"All areas"), ...S.areas.map(a=>el("option",{value:a.code},a.code+". "+a.name))); $("#fArea").value=keep;
+}
+
+function specView(c){
+  return el("div",{class:"spec"},
+    c.revNote ? el("div",{class:"note",style:"margin-bottom:10px",text:(c.rev==="new"?"New. ":c.rev==="upd"?"Updated. ":"")+c.revNote}) : null,
+    el("dl",{}, el("dt",{text:"Requirement"}), el("dd",{text:c.req||""}), el("dt",{text:"Build task"}), el("dd",{class:"mono",text:c.task||""}), el("dt",{text:"Pre-conditions"}), el("dd",{text:c.pre||""}), el("dt",{text:"Data inputs"}), el("dd",{text:c.data||""})),
+    el("h4",{text:"Steps"}), el("ol",{}, (c.steps||[]).map(s=>el("li",{text:s}))),
+    el("h4",{text:"Expected results"}), el("ul",{}, (c.exp||[]).map(s=>el("li",{text:s}))),
+    el("h4",{text:"Pass criteria"}), el("p",{style:"margin:0;font-size:.9rem",text:c.passc||""}),
+    canWrite() ? el("div",{style:"margin-top:12px"}, el("button",{class:"btn ghost sm",type:"button",onclick:()=>{ editIds.add(c.id); renderCases(); }},"Edit case")) : null);
+}
+
+function caseForm(c, isNew, onDone){
+  const f = {};
+  const inp=(k,lbl,val,opts={})=>{ const i=opts.ta?el("textarea",{id:"ce-"+k+"-"+(c.id||"new")}):el("input",{id:"ce-"+k+"-"+(c.id||"new"),placeholder:opts.ph||""}); i.value=val??""; f[k]=i; return el("label",{class:opts.wide?"wide":null},lbl,i); };
+  const area=el("select",{id:"ce-area-"+(c.id||"new")}, S.areas.map(a=>el("option",{value:a.code},a.code+". "+a.name))); area.value=c.area||(S.areas[0]||{}).code||""; f.area=area;
+  const pri=el("select",{id:"ce-pri-"+(c.id||"new")}, el("option",{value:"1"},"P1"), el("option",{value:"2"},"P2")); pri.value=String(c.pri||1); f.pri=pri;
+  const type=el("select",{id:"ce-type-"+(c.id||"new")}, el("option",{},"Positive"), el("option",{},"Negative")); type.value=c.type||"Positive"; f.type=type;
+  const rev=el("select",{id:"ce-rev-"+(c.id||"new")}, el("option",{value:""},"No flag"), el("option",{value:"new"},"New"), el("option",{value:"upd"},"Updated")); rev.value=isNew?"new":(c.rev||""); f.rev=rev;
+  const msg=el("span",{class:"saved"});
+  const nextId=()=>{ const a=area.value; const n=S.cases.filter(x=>x.area===a).map(x=>parseInt((x.id.match(/(\d+)$/)||[])[1]||0)).reduce((m,v)=>Math.max(m,v),0)+1; return "UT-"+a+"-"+String(n).padStart(2,"0"); };
+  const idIn=el("input",{id:"ce-id-new"}); if(isNew){ idIn.value=nextId(); area.addEventListener("change",()=>idIn.value=nextId()); }
+  const save=el("button",{class:"btn",type:"submit"}, isNew?"Add case":"Save case");
+  const form=el("form",{class:"form"},
+    isNew?el("label",{},"Case ID",idIn):null,
+    el("label",{},"Area",area), el("label",{},"Priority",pri), el("label",{},"Type",type), el("label",{},"Flag",rev),
+    inp("title","Title",c.title,{wide:true}), inp("req","Requirement",c.req), inp("task","Build task",c.task),
+    inp("pre","Pre-conditions",c.pre,{wide:true}), inp("data","Data inputs",c.data,{wide:true}),
+    inp("steps","Steps (one per line)",(c.steps||[]).join("\n"),{wide:true,ta:true}),
+    inp("exp","Expected results (one per line)",(c.exp||[]).join("\n"),{wide:true,ta:true}),
+    inp("passc","Pass criteria",c.passc||"Every expected result is observed; no unexpected error, record or value.",{wide:true}),
+    inp("revNote","Change note (shown on the case)",c.revNote,{wide:true}),
+    el("div",{class:"wide",style:"display:flex;gap:10px;align-items:center;flex-wrap:wrap"}, save, el("button",{class:"btn ghost",type:"button",onclick:onDone},"Cancel"), msg));
+  form.addEventListener("submit", async e=>{
+    e.preventDefault();
+    const id = isNew ? idIn.value.trim().toUpperCase() : c.id;
+    if(!/^[A-Z0-9][A-Z0-9-]{1,40}$/.test(id)){ msg.textContent="Use an ID like UT-L-08."; return; }
+    if(isNew && S.cases.some(x=>x.id===id)){ msg.textContent=id+" already exists."; return; }
+    if(!f.title.value.trim()){ msg.textContent="Enter a title."; return; }
+    const body={...(isNew?{}:c), id, area:area.value, pri:+pri.value, type:type.value, rev:rev.value, title:f.title.value.trim(), req:f.req.value.trim(), task:f.task.value.trim(), pre:f.pre.value.trim(), data:f.data.value.trim(), steps:lines(f.steps.value), exp:lines(f.exp.value), passc:f.passc.value.trim(), revNote:f.revNote.value.trim(), updatedAt:Date.now()};
+    if(isNew){ const sib=S.cases.filter(x=>x.area<=area.value); body.order=(sib.length?Math.max(...sib.map(x=>x.order||0)):0)+0.5; }
+    delete body._v;
+    save.disabled=true; msg.textContent="Saving";
+    try{ await db.doc("cases/"+id).set(body); msg.textContent="Saved"; logActivity("case",id,(isNew?"Added case: ":"Edited case: ")+body.title); onDone(); }
+    catch(err){ msg.textContent="Not saved ("+(err&&err.code||"error")+"). Try again."; save.disabled=false; }
+  });
+  return form;
+}
+
+function resultSide(c){
+  const r=S.results[c.id]||{};
+  const side=el("div",{class:"side"});
+  if(!canWrite()){
+    side.append(el("div",{class:"record"},
+      el("div",{style:"display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap"}, el("h3",{text:"Result"}), el("span",{class:"pill "+cls(statusOf(c.id)),text:statusOf(c.id)})),
+      el("p",{class:"ro",text:r.actual||"Not run yet."}),
+      (r.tester||r.date||r.round)?el("p",{class:"ro muted",text:[r.round,r.tester,r.date].filter(Boolean).join(" · ")}):null,
+      r.defect?el("p",{class:"ro"},el("span",{class:"lbl2",text:"Defect "}),r.defect):null,
+      r.evidence?el("p",{class:"ro"},el("span",{class:"lbl2",text:"Evidence "}),r.evidence):null));
+  } else {
+    let status=r.status||"Not run";
+    const seg=el("div",{class:"seg",role:"group","aria-label":"Result"});
+    STATUSES.forEach(s=>seg.append(el("button",{type:"button",class:cls(s),"aria-pressed":String(s===status),onclick:()=>{ status=s; seg.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",String(b.textContent===s))); }}, s)));
+    const id=c.id;
+    const actual=el("textarea",{id:"act-"+id,placeholder:"What you observed (values, messages, record IDs)"}); actual.value=r.actual||"";
+    const tst=el("input",{id:"tst-"+id,placeholder:"Name"}); tst.value=r.tester||tester.get();
+    const date=el("input",{id:"dt-"+id,type:"date"}); date.value=r.date||today();
+    const round=el("input",{id:"rd-"+id,placeholder:"e.g. Retest 11/19"}); round.value=S.meta.round||r.round||"";
+    const defect=el("input",{id:"def-"+id,placeholder:"e.g. DEF-072"}); defect.value=r.defect||"";
+    const evidence=el("input",{id:"ev-"+id,placeholder:"Screenshot, ticket or batch number"}); evidence.value=r.evidence||"";
+    const msg=el("span",{class:"saved"}, r.updatedAt?"Last saved "+fmt(r.updatedAt):"");
+    const save=el("button",{class:"btn",type:"button"},"Save result");
+    save.addEventListener("click", async ()=>{
+      if(status==="Failed" && !defect.value.trim()){ msg.textContent="A failed case needs a defect ID. Log it on the Defects tab, then enter it here."; return; }
+      const prev=S.results[id]||{};
+      const hist=Array.isArray(prev.history)?prev.history.slice():[];
+      const fields={status, actual:actual.value, tester:tst.value.trim(), date:date.value, round:round.value.trim(), defect:defect.value.trim(), evidence:evidence.value};
+      const changed=prev.status && prev.status!=="Not run" && (prev.status!==fields.status || prev.date!==fields.date || (prev.round||"")!==fields.round);
+      if(changed) hist.unshift({status:prev.status, actual:prev.actual||"", tester:prev.tester||"", date:prev.date||"", round:prev.round||"", defect:prev.defect||"", evidence:prev.evidence||"", updatedAt:prev.updatedAt||null});
+      const body={...fields, history:hist, updatedAt:Date.now()}; if(prev.postUpgrade) body.postUpgrade=prev.postUpgrade;
+      tester.set(fields.tester);
+      save.disabled=true; msg.textContent="Saving";
+      try{ await db.doc("results/"+id).set(body); msg.textContent="Saved"; logActivity("result",id,(prev.status&&prev.status!==status?prev.status+" → ":"")+status+(fields.round?" ("+fields.round+")":"")+". "+(fields.actual||"").slice(0,400)); }
+      catch(e){ msg.textContent=e&&e.code==="quota_exceeded"?"Storage is full. Ask the tracker owner to clear old records.":"Not saved ("+(e&&e.code||"error")+"). Try again."; }
+      save.disabled=false;
+    });
+    side.append(el("div",{class:"record"},
+      el("label",{},"Result",seg),
+      el("label",{for:"act-"+id},"Actual result",actual),
+      el("div",{class:"row2"}, el("label",{for:"tst-"+id},"Tester",tst), el("label",{for:"dt-"+id},"Date",date)),
+      el("div",{class:"row2"}, el("label",{for:"rd-"+id},"Round",round), el("label",{for:"def-"+id},"Defect ID",defect)),
+      el("label",{for:"ev-"+id},"Evidence",evidence),
+      el("div",{style:"display:flex;gap:10px;align-items:center;flex-wrap:wrap"}, save, msg)));
+  }
+  // post-upgrade
+  const pu=r.postUpgrade||{};
+  if(canWrite()){
+    const ps=el("select",{id:"pu-"+c.id}, el("option",{value:""},"Not checked"), STATUSES.filter(s=>s!=="Not run").map(s=>el("option",{},s))); ps.value=pu.status||"";
+    const pd=el("input",{id:"pud-"+c.id,type:"date"}); pd.value=pu.date||today();
+    const pn=el("input",{id:"pun-"+c.id,placeholder:"What you checked after the upgrade"}); pn.value=pu.note||"";
+    const pm=el("span",{class:"saved"});
+    const pb=el("button",{class:"btn ghost sm",type:"button"},"Save post-upgrade");
+    pb.addEventListener("click", async ()=>{
+      const v={status:ps.value, date:pd.value, note:pn.value.trim(), tester:tester.get(), updatedAt:Date.now()};
+      pb.disabled=true; pm.textContent="Saving";
+      try{ if(S.results[c.id]) await db.doc("results/"+c.id).update({postUpgrade:v}); else await db.doc("results/"+c.id).set({status:"Not run",postUpgrade:v,history:[],updatedAt:Date.now()});
+        pm.textContent="Saved"; logActivity("post-upgrade",c.id,"Post-upgrade: "+(v.status||"cleared")+(v.note?". "+v.note:"")); }
+      catch(e){ pm.textContent="Not saved ("+(e&&e.code||"error")+")."; }
+      pb.disabled=false;
+    });
+    side.append(el("div",{class:"record"}, el("h3",{text:"Post-upgrade check"}), el("div",{class:"row2"}, el("label",{for:"pu-"+c.id},"Status",ps), el("label",{for:"pud-"+c.id},"Date",pd)), el("label",{for:"pun-"+c.id},"Note",pn), el("div",{style:"display:flex;gap:10px;align-items:center"},pb,pm)));
+  } else if(pu.status){
+    side.append(el("div",{class:"record"}, el("div",{style:"display:flex;justify-content:space-between;gap:8px"}, el("h3",{text:"Post-upgrade check"}), el("span",{class:"pill "+cls(pu.status),text:pu.status})), el("p",{class:"ro",text:[pu.date,pu.note].filter(Boolean).join(" · ")})));
+  }
+  // history
+  const hist=Array.isArray(r.history)?r.history:[];
+  if(hist.length){
+    side.append(el("div",{class:"hist"}, el("h4",{style:"margin:0",text:"Previous runs ("+hist.length+")"}),
+      hist.map(h=>el("div",{class:"run"}, el("div",{class:"h"}, el("span",{class:"pill "+cls(h.status),text:h.status}), el("span",{class:"tag",text:[h.round,h.date,h.tester].filter(Boolean).join(" · ")}), h.defect?el("span",{class:"tag",text:h.defect}):null), el("p",{class:"ro muted",text:h.actual||""})))));
+  }
+  return side;
+}
+
+function renderCases(){
+  fillAreaFilter();
+  const fr=$("#fRev").value, fa=$("#fArea").value, fs=$("#fStatus").value, fp=$("#fPri").value, fpu=$("#fPU").value, q=$("#fQ").value.trim().toLowerCase();
+  $("#addCaseBtn").hidden=!canWrite();
+  const list=S.cases.filter(c=>(!fr||(fr==="any"?!!c.rev:c.rev===fr))&&(!fa||c.area===fa)&&(!fs||statusOf(c.id)===fs)&&(!fp||String(c.pri)===fp)&&(!fpu||(fpu==="done"?!!puOf(c.id):!puOf(c.id)))&&(!q||(c.id+" "+c.title+" "+(c.req||"")+" "+(c.task||"")+" "+((S.results[c.id]||{}).actual||"")).toLowerCase().includes(q)));
+  $("#caseCount").textContent=S.cases.length?list.length+" of "+S.cases.length+" cases shown":"";
+  const box=$("#caseList"); box.replaceChildren();
+  if(!S.cases.length){ box.append(el("div",{class:"empty",text:S.mode==="loading"?"Loading test cases…":"No test cases yet."})); return; }
+  S.areas.forEach(a=>{
+    const items=list.filter(c=>c.area===a.code); if(!items.length) return;
+    box.append(el("div",{class:"area-h"}, el("span",{class:"code",text:a.code}), el("h2",{text:a.name}), el("p",{text:a.desc||""})));
+    if(a.note) box.append(el("div",{class:"note",style:"margin:8px 0",text:a.note}));
+    items.forEach(c=>{
+      const s=statusOf(c.id), pu=puOf(c.id);
+      const d=el("details",{class:"case"}); d.dataset.id=c.id;
+      d.append(el("summary",{}, el("span",{class:"cid",text:c.id}), el("span",{class:"ctitle",text:c.title}),
+        el("span",{class:"tags"}, c.rev?el("span",{class:"tag rev "+c.rev,text:c.rev==="new"?"NEW":"UPD"}):null, " ", el("span",{class:"tag"+(c.pri===1?" p1":""),text:"P"+c.pri}), " ", el("span",{class:"tag",text:c.type==="Negative"?"NEG":"POS"}), pu?[" ",el("span",{class:"tag pu",text:"PU "+pu})]:null),
+        el("span",{class:"pill "+cls(s),text:s})));
+      const fill=()=>{ const rr=S.results[c.id]||{}; shownStamp[c.id]=String(rr.updatedAt||"")+"|"+((rr.postUpgrade||{}).updatedAt||""); const body=editIds.has(c.id)&&canWrite() ? el("div",{class:"body",style:"display:block"}, caseForm(c,false,()=>{ editIds.delete(c.id); renderCases(); })) : el("div",{class:"body"}, specView(c), resultSide(c)); d.append(body); };
+      if(openIds.has(c.id)){ d.open=true; fill(); }
+      d.addEventListener("toggle",()=>{ if(d.open){ openIds.add(c.id); if(!d.querySelector(".body")) fill(); } else { openIds.delete(c.id); editIds.delete(c.id); const b=d.querySelector(".body"); if(b) b.remove(); } });
+      box.append(d);
+    });
+  });
+}
+$("#addCaseBtn").addEventListener("click",()=>{ const p=$("#newCase"); if(!p.hidden){ p.hidden=true; return; } p.replaceChildren(el("h2",{text:"Add a test case"}), caseForm({}, true, ()=>{ p.hidden=true; })); p.hidden=false; });
+
+/* ---------- defects ---------- */
+let caseOptsSig="";
+function fillCaseSelect(){
+  const sig=S.cases.map(c=>c.id).join(","); if(sig===caseOptsSig) return; caseOptsSig=sig;
+  $("#dCase").replaceChildren(...S.cases.map(c=>el("option",{value:c.id},c.id+" · "+c.title.slice(0,60))));
+}
+["#dfOpen"].forEach(s=>$(s).addEventListener("change",renderDefects)); $("#dfQ").addEventListener("input",renderDefects);
+function dPill(s){ return el("span",{class:"pill d-"+dGroup(s),text:s||"Open"}); }
+function defectEditor(d){
+  const f={}; const id=d._id;
+  const mk=(k,lbl,opts={})=>{ const i=opts.ta?el("textarea",{id:"de-"+k+"-"+id}):opts.sel?el("select",{id:"de-"+k+"-"+id},opts.sel.map(o=>el("option",{},o))):el("input",{id:"de-"+k+"-"+id}); i.value=d[k]??""; f[k]=i; return el("label",{class:opts.wide?"wide":null},lbl,i); };
+  const statuses=[...DSTAT, ...(DSTAT.includes(d.status)?[]:[d.status])];
+  const msg=el("span",{class:"saved"}); const save=el("button",{class:"btn",type:"submit"},"Save defect");
+  const form=el("form",{class:"form"}, mk("title","Title",{wide:true}), mk("status","Status",{sel:statuses}), mk("sev","Severity",{sel:["Critical","High","Medium","Low"]}), mk("caseId","Test case"), mk("owner","Owner"), mk("target","Target / fix",{wide:true}), mk("desc","Details",{ta:true,wide:true}), mk("work","Work notes / resolution",{ta:true,wide:true}),
+    el("div",{class:"wide",style:"display:flex;gap:10px;align-items:center"}, save, msg));
+  form.addEventListener("submit", async e=>{
+    e.preventDefault();
+    const patch={}; Object.keys(f).forEach(k=>{ const v=f[k].value; if((d[k]??"")!==v) patch[k]=k==="caseId"?v.trim().toUpperCase():v; });
+    if(!Object.keys(patch).length){ msg.textContent="Nothing changed."; return; }
+    patch.updatedAt=Date.now(); save.disabled=true; msg.textContent="Saving";
+    try{ await db.doc("defects/"+id).update(patch); msg.textContent="Saved"; logActivity("defect",d.ref,"Updated "+Object.keys(patch).filter(k=>k!=="updatedAt").join(", ")+(patch.status?" → "+patch.status:"")); }
+    catch(err){ msg.textContent="Not saved ("+(err&&err.code||"error")+")."; }
+    save.disabled=false;
+  });
+  return form;
+}
+function renderDefects(){
+  fillCaseSelect();
+  $("#dPanel").hidden=!canWrite();
+  const fo=$("#dfOpen").value, q=$("#dfQ").value.trim().toLowerCase();
+  const list=S.defects.filter(d=>(!fo||(fo==="open"?dGroup(d.status)!=="closed":dGroup(d.status)==="closed"))&&(!q||[d.ref,d.title,d.desc,d.work,d.caseId,d.owner].join(" ").toLowerCase().includes(q))).sort((a,b)=>(a.num||0)-(b.num||0));
+  $("#defCount").textContent=S.defects.length+" logged · "+S.defects.filter(d=>dGroup(d.status)!=="closed").length+" not closed · "+list.length+" shown";
+  const t=$("#defTbl"); t.replaceChildren();
+  t.append(el("thead",{}, el("tr",{}, ["ID","Severity","Title","Case","Owner","Status"].map(h=>el("th",{text:h})))));
+  const tb=el("tbody");
+  if(!list.length) tb.append(el("tr",{}, el("td",{colspan:"6",class:"muted",text:S.defects.length?"No defects match.":"No defects logged yet. Use the form above when a case fails."})));
+  list.forEach(d=>{
+    const open=openDefs.has(d._id);
+    const tog=el("button",{class:"btn ghost sm",type:"button","aria-expanded":String(open),onclick:()=>{ open?openDefs.delete(d._id):openDefs.add(d._id); renderDefects(); }}, d.ref||d._id);
+    tb.append(el("tr",{}, el("td",{class:"mono"},tog), el("td",{}, el("span",{class:"sev "+d.sev,text:d.sev})), el("td",{}, el("div",{style:"font-weight:600",text:d.title})), el("td",{class:"mono",text:d.caseId||""}), el("td",{text:d.owner||""}), el("td",{},dPill(d.status))));
+    if(open) tb.append(el("tr",{class:"drow"}, el("td",{colspan:"6"}, canWrite()?defectEditor(d):el("div",{style:"display:flex;flex-direction:column;gap:6px"},
+      el("div",{}, el("span",{class:"lbl2",text:"Details "}), el("p",{class:"ro",text:d.desc||""})),
+      d.work?el("div",{}, el("span",{class:"lbl2",text:"Work notes "}), el("p",{class:"ro",text:d.work})):null,
+      d.target?el("div",{}, el("span",{class:"lbl2",text:"Fix "}), el("p",{class:"ro",text:d.target})):null,
+      el("span",{class:"muted",style:"font-size:.8rem",text:"Updated "+fmt(d.updatedAt||d.createdAt)})))));
+  });
+  t.append(tb);
+  const sd=$("#sevDef"); sd.replaceChildren(el("tbody",{}, (S.meta.severity||[]).map(x=>el("tr",{}, el("td",{}, el("span",{class:"sev "+x.sev,text:x.sev})), el("td",{text:x.def})))));
+}
+$("#dForm").addEventListener("submit", async e=>{
+  e.preventDefault(); if(!db) return;
+  const num=S.defects.reduce((m,d)=>Math.max(m,d.num||0),0)+1, ref="DEF-"+String(num).padStart(3,"0");
+  const body={num, ref, title:$("#dTitle").value.trim(), caseId:$("#dCase").value, sev:$("#dSev").value, status:"Open", owner:$("#dOwner").value.trim(), target:$("#dTarget").value.trim(), desc:$("#dDesc").value.trim(), work:$("#dWork").value.trim(), createdAt:Date.now(), updatedAt:Date.now()};
+  if(!body.title){ $("#dMsg").textContent="Enter a title."; return; }
+  $("#dSave").disabled=true;
+  try{ await db.doc("defects/def-"+String(num).padStart(3,"0")).set(body); $("#dMsg").textContent=ref+" added. Enter it as the Defect ID on "+body.caseId+"."; $("#dForm").reset(); logActivity("defect",ref,"Logged "+body.sev+" defect on "+body.caseId+": "+body.title); }
+  catch(err){ $("#dMsg").textContent="Not saved ("+(err&&err.code||"error")+"). Try again."; }
+  $("#dSave").disabled=false;
+});
+
+/* ---------- activity ---------- */
+$("#aQ").addEventListener("input",renderActivity);
+function renderActivity(){
+  const q=$("#aQ").value.trim().toLowerCase();
+  const list=S.activity.filter(a=>!q||[a.who,a.kind,a.ref,a.text].join(" ").toLowerCase().includes(q)).sort((a,b)=>(b.at||0)-(a.at||0)).slice(0,300);
+  const ul=$("#feed"); ul.replaceChildren();
+  if(!list.length){ ul.append(el("li",{class:"empty",style:"display:block",text:S.activity.length?"Nothing matches.":"Changes made here, and updates applied by Claude, are listed here."})); return; }
+  list.forEach(a=>ul.append(el("li",{}, el("time",{text:fmt(a.at)}), el("div",{}, el("div",{class:"t"}, a.ref?el("span",{class:"mono",text:a.ref+" "}):null, el("span",{class:"tag",text:(a.kind||"")+" · "+(a.who||"")})), el("div",{class:"x",text:a.text||""})))));
+}
+
+/* ---------- test data ---------- */
+function renderData(){
+  const box=$("#cards"); box.replaceChildren();
+  S.cards.forEach(c=>{ const tb=el("tbody",{}, (c.rows||[]).map(r=>el("tr",{}, el("td",{text:r.k}), el("td",{text:r.v})))); box.append(el("div",{class:"panel card"}, el("h3",{}, el("span",{class:"mono",text:c.id}), c.title), el("div",{class:"tbl"}, el("table",{},tb)))); });
+}
+
+/* ---------- CSV ---------- */
+const csvCell=v=>{ v=v==null?"":String(v); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; };
+const csv=rows=>rows.map(r=>r.map(csvCell).join(",")).join("\r\n");
+async function offer(name,text){ try{ await downloads.save({filename:name,data:text}); $("#dlMsg").textContent="Saved "+name; }catch(e){ $("#dlMsg").textContent=e&&e.code==="declined"?"":"Download not available here."; } }
+$("#dlResults").addEventListener("click",()=>{
+  const rows=[["Case ID","Area","Title","Requirement","Build task","Priority","Type","Status","Round","Actual result","Tester","Date","Defect ID","Evidence","Post-upgrade","Post-upgrade date","Post-upgrade note","Previous runs"]];
+  S.cases.forEach(c=>{ const r=S.results[c.id]||{}, pu=r.postUpgrade||{}; rows.push([c.id,c.area+". "+areaName(c.area),c.title,c.req,c.task,"P"+c.pri,c.type,statusOf(c.id),r.round,r.actual,r.tester,r.date,r.defect,r.evidence,pu.status,pu.date,pu.note,(r.history||[]).map(h=>[h.round,h.date,h.status].filter(Boolean).join(" ")).join("; ")]); });
+  offer("Rockefeller_Chargeback_UAT_Results_"+today()+".csv",csv(rows));
+});
+$("#dlDefects").addEventListener("click",()=>{
+  const rows=[["Defect ID","Severity","Status","Title","Test case","Owner","Target / fix","Work notes","Details"]];
+  [...S.defects].sort((a,b)=>(a.num||0)-(b.num||0)).forEach(d=>rows.push([d.ref,d.sev,d.status,d.title,d.caseId,d.owner,d.target,d.work,d.desc]));
+  offer("Rockefeller_Chargeback_UAT_Defects_"+today()+".csv",csv(rows));
+});
+
+/* ---------- boot ---------- */
+function setStore(state,txt){ $("#store").className="chip "+state; $("#storeTxt").textContent=txt; }
+renderAll();
+
+async function bootStatic(){
+  try{
+    const r=await fetch("data.json?t="+Date.now(),{cache:"no-store"}); if(!r.ok) throw 0;
+    const d=await r.json();
+    Object.assign(S,{mode:"static", meta:d.meta||{}, areas:(d.areas||[]).sort(byOrder), cases:(d.cases||[]).sort(byOrder), cards:(d.testdata||[]).sort(byOrder), results:d.results||{}, defects:d.defects||[], activity:d.activity||[], generated:d.generated});
+    setStore("static","Shared view");
+    const n=$("#staticNote"); n.textContent="Read-only shared view. Data as of "+fmt(d.generated)+". Results are recorded in the working tracker and published here after each update."; n.hidden=false;
+    renderAll(); return true;
+  }catch(e){ return false; }
+}
+
+(async ()=>{
+  const c=window.claude;
+  if(!c||!c.use){ if(!await bootStatic()){ S.mode="off"; setStore("off","Not available"); $("#offline").hidden=false; renderAll(); } setInterval(()=>{ if(S.mode==="static") bootStatic(); },60000); return; }
+  downloads=await c.use("downloads"); if(downloads) $("#dlRow").hidden=false;
+  db=await c.use("db");
+  if(!db){ S.mode="off"; setStore("off","Read only"); $("#offline").hidden=false; renderAll(); return; }
+  S.mode="live"; setStore("live","Live · shared");
+  const timer=setTimeout(()=>{ if(!S.cases.length) setStore("off","Slow to load"); },10000);
+  const err=()=>setStore("off","Disconnected");
+  const sub=(col,fn,part)=>db.collection(col).onSnapshot(snap=>{ fn(snap); renderAll(part); },err);
+  const asList=snap=>snap.docs.map(d=>Object.assign({_id:d.id},d.data()));
+  sub("meta",snap=>{ const m=snap.docs.find(d=>d.id==="tracker"); S.meta=m?m.data():{}; },"meta");
+  sub("areas",snap=>{ S.areas=asList(snap).sort(byOrder); },"cases");
+  sub("cases",snap=>{ clearTimeout(timer); if(S.mode==="live") setStore("live","Live · shared"); S.cases=asList(snap).sort(byOrder); },"cases");
+  sub("testdata",snap=>{ S.cards=asList(snap).sort(byOrder); },"testdata");
+  sub("results",snap=>{ const r={}; snap.docs.forEach(d=>r[d.id]=d.data()); S.results=r; },"results");
+  sub("defects",snap=>{ S.defects=asList(snap); },"defects");
+  sub("activity",snap=>{ S.activity=asList(snap); },"activity");
+})();
+</script>
